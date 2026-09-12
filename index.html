@@ -273,6 +273,10 @@
   .admin-table th{text-align:left;padding:10px 12px;background:#F1EEFA;color:var(--purple-dark);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.3px;}
   .admin-table td{padding:10px 12px;border-bottom:1px solid var(--line);}
   .admin-table tr:hover td{background:#FBFAFF;}
+  .admin-chart{display:flex;align-items:flex-end;gap:3px;height:70px;background:#FAFAFC;border-radius:10px;padding:6px 6px 0;overflow-x:auto;}
+  .admin-bar-wrap{flex:1;min-width:6px;display:flex;align-items:flex-end;height:100%;cursor:default;}
+  .admin-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:opacity .15s;}
+  .admin-bar-wrap:hover .admin-bar{opacity:0.7;}
 
   /* ---------- QUESTION DIAGRAMS ---------- */
   .q-diagram{background:#FBFAFF;border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;}
@@ -494,7 +498,9 @@ const SUBJECTS = [
           Q("Mrs Otoo spends 1/5 of her monthly salary on rent, 1/2 on food, 1/4 on clothes, and still has $195.00 left. How much does she earn in a month?",["$3,900","$3,120","$1,950","$2,600"],0,"Fractions spent: 1/5+1/2+1/4=19/20, leaving 1/20 of salary = $195, so salary = 195×20 = $3,900.","Medium",VP),
           Q("In a town, electricity costs $1.00 per unit for the first 50 units, $7.00 per unit for the next 30 units, and $5.00 per unit for each additional unit. Calculate the cost of using 420 units in a month.",["$1,960","$2,100","$1,700","$2,740"],0,"First 50 units: $50. Next 30 units: $210. Remaining 340 units at $5: $1,700. Total = 50+210+1,700 = $1,960.","Hard",VP),
           Q("A sum of $1,250 was invested at a simple interest rate of 12.5% per annum. After some years, it grew to $2,031.25. Find the number of years invested.",["3 years","4 years","4.5 years","5 years"],3,"Interest earned = 2,031.25−1,250 = $781.25. Using T=100×I/(P×R): T=100×781.25/(1,250×12.5)=5 years.","Hard",VP),
-          Q("A town's population is 3,000 and grows by 3% in a year. Calculate the population increment for that year.",["30","60","90","120"],2,"3% of 3,000 = 0.03×3,000 = 90.","Easy",VP)
+          Q("A town's population is 3,000 and grows by 3% in a year. Calculate the population increment for that year.",["30","60","90","120"],2,"3% of 3,000 = 0.03×3,000 = 90.","Easy",VP),
+          Q("On Sam's first birthday, his grandfather deposited $1,000.00 in a bank account compounded at 4% interest annually. Find, correct to the nearest kobo/cent, how much is in the account when Sam is 4 years old.",["$1,120.00","$1,124.86","$1,040.00","$1,200.00"],1,"This covers 3 years of compounding (age 1 to age 4). A=1000×(1.04)³=$1,124.86.","Hard",VP),
+          Q("Two consecutive whole numbers are such that thrice the smaller plus twice the larger equals 17. Find, correct to 3 significant figures, the smaller number as a percentage of the sum of the two numbers.",["33.3%","40.0%","42.9%","50.0%"],2,"Let the numbers be n and n+1: 3n+2(n+1)=17 gives n=3, so the numbers are 3 and 4. As a percentage of the sum (7): 3/7×100=42.9%.","Hard",VP)
         ]
       },
       { id:"alg", name:"Algebraic Expressions and Linear Equations",
@@ -578,7 +584,8 @@ const SUBJECTS = [
           Q("Find the gradient of the line 7x − 5y + 3 = 0.",["7/5","5/7","−7/5","3/5"],0,"Rearranging: 5y=7x+3 → y=(7/5)x+3/5, so the gradient is 7/5.","Medium",VP),
           Q("Given y = 2x² − x − 4, find the value of y when x = −2.",["−4","2","6","10"],2,"y=2(−2)²−(−2)−4=8+2−4=6.","Medium",VP),
           Q("The diagram shows a straight line passing through the points (0,3) and (4,11). Find the gradient of the line.",["1","2","3","4"],1,"Gradient=(11−3)/(4−0)=8/4=2.","Easy",null,SVG_LINE_GRAPH),
-          Q("Given y = 2x² − x − 2, find the value of y when x = −2.",["4","8","−1","13"],1,"y=2(−2)²−(−2)−2=8+2−2=8.","Medium",VP)
+          Q("Given y = 2x² − x − 2, find the value of y when x = −2.",["4","8","−1","13"],1,"y=2(−2)²−(−2)−2=8+2−2=8.","Medium",VP),
+          Q("The coordinates of two points P and Q are (7,3) and (5,x) respectively. If |PQ|=√29 units, find the possible values of x.",["x=−2 or x=8","x=2 or x=−8","x=−2 only","x=8 only"],0,"|PQ|²=(7−5)²+(3−x)²=29 → 4+(3−x)²=29 → (3−x)²=25 → 3−x=±5 → x=−2 or x=8.","Hard",VP)
         ]
       },
       { id:"mens", name:"Mensuration",
@@ -688,7 +695,8 @@ const SUBJECTS = [
           Q("From the top T of a vertical mast 45m high, the angles of depression of two boats P and Q, in a straight line with the foot F of the mast, are 40° and 25° respectively. Calculate, correct to the nearest metre, the distance PQ.",["43m","53m","97m","150m"],0,"FP=45/tan40°≈53.6m; FQ=45/tan25°≈96.5m. PQ=FQ−FP≈43m.","Hard",VP,SVG_MAST),
           Q("In the diagram, a ladder leans against a vertical wall, making an angle of 65° with the ground. If the foot of the ladder is 3m from the wall, calculate, correct to 2 decimal places, the length of the ladder.",["7.10m","6.42m","3.31m","8.86m"],0,"cos65°=3/L, so L=3/cos65°≈7.10m.","Medium",null,SVG_LADDER),
           Q("A ship sails from port P on a bearing of 060° for 40km to reach point Q. Calculate, correct to the nearest km, how far east of P the ship has travelled.",["20km","28km","35km","40km"],2,"The eastward component is 40×sin60°≈35km.","Medium",null,SVG_BEARING),
-          Q("From two points 46m apart on the same side of, and in line with, the base of a vertical pole, the angles of elevation of the top of the pole are 48° and 40°. Calculate, correct to 1 decimal place, the height of the pole.",["157.9m","142.1m","46.0m","199.9m"],0,"Setting up y·tan48°=(46+y)·tan40° and solving gives y≈142.16m, so height=y·tan48°≈157.9m.","Hard",VP)
+          Q("From two points 46m apart on the same side of, and in line with, the base of a vertical pole, the angles of elevation of the top of the pole are 48° and 40°. Calculate, correct to 1 decimal place, the height of the pole.",["157.9m","142.1m","46.0m","199.9m"],0,"Setting up y·tan48°=(46+y)·tan40° and solving gives y≈142.16m, so height=y·tan48°≈157.9m.","Hard",VP),
+          Q("Point Y is 15km due south of point X, and point Z is 20km from X on a bearing of 270°. Calculate the distance YZ.",["20km","25km","30km","35km"],1,"Setting X at the origin, Y=(0,-15) and Z=(-20,0). Distance YZ=√(20²+15²)=√625=25km.","Hard",VP)
         ]
       },
       { id:"stat", name:"Statistics",
@@ -2677,7 +2685,7 @@ const UPLOAD_COVERAGE = {
 /* ======================= APP STATE ======================= */
 let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:{}, loaded:false,
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
-  adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null };
+  adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -2749,12 +2757,19 @@ async function adminRefresh(){
   state.adminBusy = true;
   render();
   try{
-    const [analytics, users] = await Promise.all([
+    const [analytics, users, trends, weakTopics] = await Promise.all([
       supabaseRPC("gce_admin_analytics", { p_secret: state.adminSecret }),
-      supabaseRPC("gce_admin_users", { p_secret: state.adminSecret })
+      supabaseRPC("gce_admin_users", { p_secret: state.adminSecret }),
+      supabaseRPC("gce_admin_trends", { p_secret: state.adminSecret, p_days: 30 }),
+      supabaseRPC("gce_admin_weak_topics", { p_secret: state.adminSecret, p_limit: 15 })
     ]);
     if(analytics && analytics.error){ state.adminError = analytics.error; state.adminAuthed = false; }
-    else { state.adminAnalytics = analytics; state.adminUsers = (users && users.users) ? users.users : []; }
+    else {
+      state.adminAnalytics = analytics;
+      state.adminUsers = (users && users.users) ? users.users : [];
+      state.adminTrends = (trends && !trends.error) ? trends : null;
+      state.adminWeakTopics = (weakTopics && weakTopics.weak_topics) ? weakTopics.weak_topics : [];
+    }
   }catch(e){
     state.adminError = "Couldn't refresh data (" + (e && e.message ? e.message : "network error") + ").";
   }
@@ -2769,10 +2784,77 @@ function adminLogout(){
   state.adminSecretField = "";
   state.adminAnalytics = null;
   state.adminUsers = null;
+  state.adminTrends = null;
+  state.adminWeakTopics = null;
   state.adminError = null;
   render();
 }
 window.adminLogout = adminLogout;
+
+function adminToggleChangeForm(){
+  state.adminShowChangeForm = !state.adminShowChangeForm;
+  state.adminChangeMsg = null;
+  render();
+}
+window.adminToggleChangeForm = adminToggleChangeForm;
+
+async function adminChangeSecret(){
+  const oldEl = document.getElementById("adminOldSecret");
+  const newEl = document.getElementById("adminNewSecret");
+  const confirmEl = document.getElementById("adminConfirmSecret");
+  const oldVal = oldEl ? oldEl.value : "";
+  const newVal = newEl ? newEl.value : "";
+  const confirmVal = confirmEl ? confirmEl.value : "";
+  state.adminChangeMsg = null;
+  if(newVal !== confirmVal){
+    state.adminChangeMsg = {type:"error", text:"The new passphrase and confirmation don't match."};
+    render();
+    return;
+  }
+  state.adminBusy = true;
+  render();
+  try{
+    const result = await supabaseRPC("gce_admin_change_secret", { p_old_secret: oldVal, p_new_secret: newVal });
+    if(result && result.error){
+      state.adminChangeMsg = {type:"error", text: result.error};
+    } else if(result && result.success){
+      state.adminSecret = newVal;
+      state.adminChangeMsg = {type:"success", text:"Passphrase updated. Use your new one next time you log in."};
+      state.adminShowChangeForm = false;
+    }
+  }catch(e){
+    state.adminChangeMsg = {type:"error", text:"Couldn't reach the server (" + (e && e.message ? e.message : "network error") + ")."};
+  }
+  state.adminBusy = false;
+  render();
+}
+window.adminChangeSecret = adminChangeSecret;
+
+function adminExportCSV(){
+  const users = state.adminUsers || [];
+  const header = ["username","joined","subjects_touched","questions_attempted","questions_correct","mocks_taken"];
+  const rows = users.map(u=>{
+    const subjEntries = Object.keys(u.progress||{});
+    let attempted=0, correct=0, mocks=0;
+    subjEntries.forEach(sid=>{
+      const topics = (u.progress[sid]&&u.progress[sid].topics)||{};
+      Object.values(topics).forEach(t=>{ attempted += (t.attempted||0); correct += (t.correct||0); });
+      mocks += ((u.progress[sid]&&u.progress[sid].mocks)||[]).length;
+    });
+    return [u.username, new Date(u.created_at).toISOString().slice(0,10), subjEntries.length, attempted, correct, mocks];
+  });
+  const csv = [header, ...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "buildnet-gce-academy-students-" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+window.adminExportCSV = adminExportCSV;
 
 async function createProfile(username, passkey){
   const uname = normUser(username);
@@ -3391,15 +3473,82 @@ function renderAdmin(){
     </tr>`;
   }).join("") || `<tr><td colspan="5" style="color:var(--ink-soft);text-align:center;padding:20px;">No users have signed up yet.</td></tr>`;
 
+  const trendsBlock = (() => {
+    if(!state.adminTrends) return "";
+    const signups = state.adminTrends.signups_by_day || [];
+    const active = state.adminTrends.active_by_day || [];
+    const maxVal = Math.max(1, ...signups.map(d=>d.count), ...active.map(d=>d.count));
+    const bars = (series, color) => series.map(d=>{
+      const h = Math.round((d.count / maxVal) * 60) + (d.count>0?4:2);
+      return `<div class="admin-bar-wrap" title="${d.date}: ${d.count}"><div class="admin-bar" style="height:${h}px;background:${color};"></div></div>`;
+    }).join("");
+    return `
+    <div class="section-block">
+      <h4>LAST 30 DAYS</h4>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:260px;">
+          <div style="font-size:12px;color:var(--purple-dark);font-weight:700;margin-bottom:6px;">NEW SIGNUPS PER DAY</div>
+          <div class="admin-chart">${bars(signups, "var(--purple)")}</div>
+        </div>
+        <div style="flex:1;min-width:260px;">
+          <div style="font-size:12px;color:var(--pink);font-weight:700;margin-bottom:6px;">STUDENTS ACTIVE PER DAY</div>
+          <div class="admin-chart">${bars(active, "var(--pink)")}</div>
+        </div>
+      </div>
+    </div>`;
+  })();
+
+  const weakTopicsBlock = (() => {
+    const wt = state.adminWeakTopics || [];
+    if(!wt.length) return `<div class="section-block"><h4>WEAKEST TOPICS ACROSS ALL STUDENTS</h4><div style="color:var(--ink-soft);font-size:13px;">Not enough practice data yet.</div></div>`;
+    const rows = wt.map(t=>{
+      const subj = findSubject(t.subject_id);
+      const topic = subj ? findTopic(t.subject_id, t.topic_id) : null;
+      const pct = t.accuracy_pct==null ? "-" : t.accuracy_pct+"%";
+      const barColor = t.accuracy_pct < 50 ? "#EF4444" : t.accuracy_pct < 75 ? "#F59E0B" : "#22C55E";
+      return `<tr>
+        <td>${topic?topic.name:t.topic_id}</td>
+        <td>${subj?subj.name:t.subject_id}</td>
+        <td>${t.student_count}</td>
+        <td>${t.total_correct}/${t.total_attempted}</td>
+        <td><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${barColor};color:#fff;font-weight:700;font-size:12px;">${pct}</span></td>
+      </tr>`;
+    }).join("");
+    return `
+    <div class="section-block">
+      <h4>WEAKEST TOPICS ACROSS ALL STUDENTS</h4>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">Sorted from lowest to highest average accuracy - a good hit-list for which study guides might need improvement.</p>
+      <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead><tr><th>Topic</th><th>Subject</th><th>Students</th><th>Correct/Attempted</th><th>Accuracy</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>
+    </div>`;
+  })();
+
   return `
   <div class="admin-dash">
     <div class="admin-head">
       <h2>🔐 Admin Console - BuildNET GCE Academy</h2>
-      <div style="display:flex;gap:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="ghost-btn" onclick="adminToggleChangeForm()">🔑 Change passphrase</button>
+        <button class="ghost-btn" onclick="adminExportCSV()" ${users.length?"":"disabled"}>⬇ Export CSV</button>
         <button class="ghost-btn" onclick="adminRefresh()" ${state.adminBusy?"disabled":""}>${state.adminBusy?"Refreshing...":"↻ Refresh"}</button>
         <button class="ghost-btn" onclick="adminLogout()">Log out</button>
       </div>
     </div>
+    ${state.adminShowChangeForm ? `
+    <div class="section-block" style="background:#FFF9EE;">
+      <h4>CHANGE ADMIN PASSPHRASE</h4>
+      ${state.adminChangeMsg ? `<div class="${state.adminChangeMsg.type==='error'?'auth-error':'admin-stat-row'}" style="${state.adminChangeMsg.type==='success'?'color:#166534;background:#DCFCE7;padding:10px 14px;border-radius:10px;':''}">${state.adminChangeMsg.text}</div>` : ""}
+      <div style="display:grid;gap:10px;max-width:360px;margin-top:10px;">
+        <input id="adminOldSecret" type="password" placeholder="Current passphrase" style="padding:10px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;">
+        <input id="adminNewSecret" type="password" placeholder="New passphrase (min. 6 characters)" style="padding:10px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;">
+        <input id="adminConfirmSecret" type="password" placeholder="Confirm new passphrase" style="padding:10px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;" onkeydown="if(event.key==='Enter') adminChangeSecret()">
+        <button class="primary-btn" onclick="adminChangeSecret()" ${state.adminBusy?"disabled":""}>${state.adminBusy?"Saving...":"Save new passphrase"}</button>
+      </div>
+    </div>` : ""}
     ${state.adminError ? `<div class="auth-error">${state.adminError}</div>` : ""}
 
     <div class="admin-cards">
@@ -3409,10 +3558,14 @@ function renderAdmin(){
       <div class="admin-card"><div class="admin-card-num">${a.users_with_any_progress||0}</div><div class="admin-card-label">Students with any activity</div></div>
     </div>
 
+    ${trendsBlock}
+
     <div class="section-block">
       <h4>SUBJECT ENGAGEMENT (students who've touched each subject)</h4>
       ${subjectRows}
     </div>
+
+    ${weakTopicsBlock}
 
     <div class="section-block">
       <h4>ALL STUDENTS (${users.length})</h4>
