@@ -279,6 +279,27 @@
   .admin-bar-wrap:hover .admin-bar{opacity:0.7;}
   .guardian-child-card{background:#fff;border:2px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(43,35,80,0.06);}
 
+  /* ---------- GAMIFICATION ---------- */
+  .xp-bar-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,#FFF3D6,#FFE8F3);border-radius:18px;padding:14px 20px;margin:16px 0 22px;cursor:pointer;transition:transform .15s;box-shadow:0 4px 12px rgba(124,58,237,0.10);}
+  .xp-bar-wrap:hover{transform:scale(1.01);}
+  .xp-level-badge{font-family:var(--font-display);font-weight:700;font-size:14.5px;color:var(--purple-dark);white-space:nowrap;}
+  .xp-track{flex:1;min-width:120px;height:10px;background:#fff;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);}
+  .xp-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--pink));border-radius:999px;transition:width .4s ease;}
+  .xp-num{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;}
+  .xp-streak{font-size:12.5px;font-weight:700;color:#B45309;background:#fff;padding:3px 10px;border-radius:999px;white-space:nowrap;}
+  .rewards-hero{display:flex;align-items:center;gap:20px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:22px;padding:24px;color:#fff;margin-bottom:20px;flex-wrap:wrap;}
+  .rewards-level-emoji{font-size:52px;line-height:1;}
+  .rewards-level-title{font-family:var(--font-display);font-size:24px;font-weight:700;}
+  .rewards-hero .xp-track{background:rgba(255,255,255,0.3);}
+  .rewards-hero .xp-fill{background:#fff;}
+  .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;}
+  .badge-card{text-align:center;padding:16px 10px;border-radius:16px;background:#F7F5FC;border:2px solid var(--line);}
+  .badge-card.earned{background:linear-gradient(135deg,#FFF3D6,#FFE8F3);border-color:var(--pink);}
+  .badge-card.locked{opacity:0.55;}
+  .badge-emoji{font-size:32px;margin-bottom:6px;}
+  .badge-name{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:3px;}
+  .badge-desc{font-size:11px;color:var(--ink-soft);line-height:1.35;}
+
   /* ---------- QUESTION DIAGRAMS ---------- */
   .q-diagram{background:#FBFAFF;border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;}
   .q-diagram svg{max-width:100%;height:auto;}
@@ -2716,7 +2737,8 @@ const UPLOAD_COVERAGE = {
 let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:{}, loaded:false,
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
-  guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login" };
+  guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
+  studentStreak:0 };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -2760,7 +2782,8 @@ async function supabaseRPC(fn, params){
 function normUser(u){ return (u||"").trim().toLowerCase().replace(/\s+/g,""); }
 
 /* ======================= GUARDIAN DASHBOARD ======================= */
-function weekRingSVG(last7Days, studiedToday){
+function weekRingSVG(last7Days, studiedToday, uid){
+  uid = uid || Math.random().toString(36).slice(2,8);
   const n = 7, gap = 5, segAngle = 360/n, cx=70, cy=70, r=56;
   function polar(angleDeg){ const rad=(angleDeg-90)*Math.PI/180; return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)]; }
   function arcPath(start,end){
@@ -2772,14 +2795,14 @@ function weekRingSVG(last7Days, studiedToday){
   let segs = "";
   (last7Days||[]).forEach((d,i)=>{
     const start = i*segAngle + gap/2, end = (i+1)*segAngle - gap/2;
-    const color = d.active ? "url(#weekGrad)" : "#E9E6F5";
+    const color = d.active ? `url(#weekGrad-${uid})` : "#E9E6F5";
     segs += `<path d="${arcPath(start,end)}" stroke="${color}" stroke-width="11" fill="none" stroke-linecap="round"/>`;
   });
   const centerIcon = studiedToday
     ? `<text x="70" y="64" text-anchor="middle" font-size="26">✅</text><text x="70" y="88" text-anchor="middle" font-size="10.5" fill="#166534" font-weight="700">Studied today</text>`
     : `<text x="70" y="64" text-anchor="middle" font-size="26">🕒</text><text x="70" y="88" text-anchor="middle" font-size="10.5" fill="#92400E" font-weight="700">Not yet today</text>`;
-  return `<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="weekGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  return `<svg viewBox="0 0 140 140" width="140" height="140" style="display:block;" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="weekGrad-${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#7C3AED"/><stop offset="100%" stop-color="#FF4FA3"/>
     </linearGradient></defs>
     ${segs}
@@ -3046,6 +3069,7 @@ async function loginSuccess(username){
   state.navStack = [];
   chatSessions = {};
   await loadAllProgress();
+  await loadStreak();
   saveLastUsername(username);
   go("home");
 }
@@ -3054,6 +3078,7 @@ function logout(){
   state.guest = false;
   state.progress = {};
   state.loaded = false;
+  state.studentStreak = 0;
   state.navStack = [];
   chatSessions = {};
   clearInterval(timerHandle);
@@ -3068,6 +3093,7 @@ async function continueAsGuest(){
   state.navStack = [];
   chatSessions = {};
   await loadAllProgress();
+  state.studentStreak = 0;
   go("home");
 }
 window.continueAsGuest = continueAsGuest;
@@ -3121,6 +3147,122 @@ async function saveProgress(subjectId){
   try{ await supabaseRPC("gce_save_progress", { p_username: state.user, p_subject: subjectId, p_data: state.progress[subjectId] }); }
   catch(e){ console.error("Could not save progress", e); }
 }
+/* ======================= GAMIFICATION ======================= */
+const LEVELS = [
+  {min:0,    title:"Fresh Starter",     emoji:"🌱"},
+  {min:150,  title:"Rising Learner",    emoji:"📚"},
+  {min:400,  title:"Sharp Thinker",     emoji:"🧠"},
+  {min:800,  title:"Exam Warrior",      emoji:"⚔️"},
+  {min:1400, title:"Knowledge Hunter",  emoji:"🎯"},
+  {min:2200, title:"Scholar",           emoji:"🎓"},
+  {min:3200, title:"Master Strategist", emoji:"👑"},
+  {min:4500, title:"GCE Legend",        emoji:"🏆"}
+];
+
+function computeXP(){
+  let xp = 0, totalCorrect = 0, totalAttempted = 0, totalMocks = 0, perfectTopics = 0, subjectsTouched = 0;
+  SUBJECTS.forEach(s=>{
+    const p = state.progress[s.id];
+    if(!p) return;
+    let touchedThisSubject = false;
+    Object.values(p.topics||{}).forEach(t=>{
+      if(t.attempted>0) touchedThisSubject = true;
+      totalCorrect += (t.correct||0);
+      totalAttempted += (t.attempted||0);
+      if(t.attempted>=3 && t.correct===t.attempted) perfectTopics++;
+    });
+    (p.mocks||[]).forEach(m=>{ totalMocks++; xp += 30; if(m.correct===m.total) xp += 40; });
+    if(touchedThisSubject) subjectsTouched++;
+  });
+  xp += totalCorrect*10 + perfectTopics*20;
+  return { xp, totalCorrect, totalAttempted, totalMocks, perfectTopics, subjectsTouched };
+}
+
+function levelForXP(xp){
+  let current = LEVELS[0], next = LEVELS[1];
+  for(let i=0;i<LEVELS.length;i++){
+    if(xp >= LEVELS[i].min){ current = LEVELS[i]; next = LEVELS[i+1] || null; }
+  }
+  return { current, next };
+}
+
+function computeBadges(stats, streak){
+  const badges = [
+    {id:"first_steps", name:"First Steps", emoji:"👣", desc:"Complete your first topic practice", earned: stats.totalAttempted>0},
+    {id:"century", name:"Century Club", emoji:"💯", desc:"Answer 100 questions in total", earned: stats.totalAttempted>=100},
+    {id:"perfect", name:"Perfect Score", emoji:"⭐", desc:"Score 100% on a topic (3+ questions)", earned: stats.perfectTopics>=1},
+    {id:"perfectionist", name:"Perfectionist", emoji:"🌟", desc:"Score 100% on 3 different topics", earned: stats.perfectTopics>=3},
+    {id:"explorer", name:"Subject Explorer", emoji:"🧭", desc:"Try practice in all 7 subjects", earned: stats.subjectsTouched>=7},
+    {id:"mock1", name:"Mock Debut", emoji:"📝", desc:"Complete your first readiness check", earned: stats.totalMocks>=1},
+    {id:"mock5", name:"Exam-Ready", emoji:"🎯", desc:"Complete 5 readiness checks", earned: stats.totalMocks>=5},
+    {id:"streak3", name:"Streak Starter", emoji:"🔥", desc:"Study 3 days in a row", earned: streak>=3},
+    {id:"streak7", name:"On Fire", emoji:"🔥🔥", desc:"Study 7 days in a row", earned: streak>=7},
+    {id:"streak30", name:"Unstoppable", emoji:"🔥🔥🔥", desc:"Study 30 days in a row", earned: streak>=30}
+  ];
+  return badges;
+}
+
+async function loadStreak(){
+  if(state.guest){ state.studentStreak = 0; return; }
+  try{
+    const result = await supabaseRPC("gce_get_streak", { p_username: state.user });
+    state.studentStreak = (result && typeof result.streak === "number") ? result.streak : 0;
+  }catch(e){ state.studentStreak = 0; }
+}
+
+function renderGamifiedHeader(){
+  const stats = computeXP();
+  const {current, next} = levelForXP(stats.xp);
+  const streak = state.studentStreak || 0;
+  const pctToNext = next ? Math.min(100, Math.round(100*(stats.xp-current.min)/(next.min-current.min))) : 100;
+  return `
+  <div class="xp-bar-wrap" onclick="go('rewards')" title="View your achievements">
+    <div class="xp-level-badge">${current.emoji} ${current.title}</div>
+    <div class="xp-track"><div class="xp-fill" style="width:${pctToNext}%;"></div></div>
+    <div class="xp-num">${stats.xp} XP</div>
+    ${streak>0 ? `<div class="xp-streak">🔥 ${streak}-day streak</div>` : ""}
+  </div>`;
+}
+
+function renderRewards(){
+  const stats = computeXP();
+  const {current, next} = levelForXP(stats.xp);
+  const streak = state.studentStreak || 0;
+  const badges = computeBadges(stats, streak);
+  const earnedCount = badges.filter(b=>b.earned).length;
+  const pctToNext = next ? Math.min(100, Math.round(100*(stats.xp-current.min)/(next.min-current.min))) : 100;
+
+  const badgeGrid = badges.map(b=>`
+    <div class="badge-card ${b.earned?'earned':'locked'}">
+      <div class="badge-emoji">${b.earned ? b.emoji : '🔒'}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`).join("");
+
+  return `
+  <div class="admin-dash">
+    <div class="admin-head">
+      <h2>🏆 Your Achievements</h2>
+    </div>
+    <div class="rewards-hero">
+      <div class="rewards-level-emoji">${current.emoji}</div>
+      <div>
+        <div class="rewards-level-title">${current.title}</div>
+        <div class="xp-track" style="max-width:280px;margin:8px 0;"><div class="xp-fill" style="width:${pctToNext}%;"></div></div>
+        <div style="font-size:13px;color:var(--ink-soft);">${stats.xp} XP ${next ? `- ${next.min-stats.xp} XP to reach ${next.title} ${next.emoji}` : "- Maximum level reached!"}</div>
+      </div>
+    </div>
+    ${streak>0 ? `<div class="ai-grading-disclaimer" style="background:#FFF3E0;border-color:#F59E0B;">🔥 You're on a <b>${streak}-day study streak</b>! Come back tomorrow to keep it going.</div>` : `<div class="ai-grading-disclaimer">Study today to start a streak - come back daily to build it up!</div>`}
+    <div class="section-block">
+      <h4>BADGES (${earnedCount}/${badges.length} earned)</h4>
+      <div class="badge-grid">${badgeGrid}</div>
+    </div>
+    <div class="topic-actions">
+      <button class="primary-btn" onclick="go('home')">Back to subjects</button>
+    </div>
+  </div>`;
+}
+
 function recordAnswer(subjectId, topicId, correct){
   const p = state.progress[subjectId];
   if(!p.topics[topicId]) p.topics[topicId] = {attempted:0, correct:0};
@@ -3149,7 +3291,7 @@ function topicHasVerified(t){ return t.qs.some(q=>q.src); }
 /* ======================= NAVIGATION ======================= */
 function go(view, params, skipHistory){
   params = params || {};
-  if(!state.user && ["home","subject","topic","quiz","results","dashboard","theorylist","theoryattempt","remediate"].includes(view)){ view = "welcome"; }
+  if(!state.user && ["home","subject","topic","quiz","results","dashboard","theorylist","theoryattempt","remediate","rewards"].includes(view)){ view = "welcome"; }
   if(!skipHistory && state.view && state.view !== view && !["welcome","signup","login"].includes(state.view)){
     state.navStack.push({ view: state.view, subjectId: state.subjectId, topicId: state.topicId });
     if(state.navStack.length > 20) state.navStack.shift();
@@ -3548,6 +3690,7 @@ function render(){
     else if(state.view==="theorylist") html += renderTheoryList();
     else if(state.view==="theoryattempt") html += renderTheoryAttempt();
     else if(state.view==="remediate") html += renderRemediation();
+    else if(state.view==="rewards") html += renderRewards();
   }
   html += renderFooter();
   app.innerHTML = '<div class="view-anim">' + html + '</div>';
@@ -3765,29 +3908,38 @@ function renderGuardian(){
     </div>` : "";
 
   const childCards = children.map(c=>{
-    const subjEntries = Object.keys(c.progress||{});
-    const subjectStats = subjEntries.map(sid=>{
-      const subj = findSubject(sid);
+    // Cover every subject, not just ones the child has touched - a guardian needs to see gaps too.
+    const allSubjectStats = SUBJECTS.map(subj=>{
+      const sid = subj.id;
       const topics = (c.progress[sid]&&c.progress[sid].topics)||{};
       let attempted=0, correct=0;
       Object.values(topics).forEach(t=>{ attempted+=(t.attempted||0); correct+=(t.correct||0); });
       const pct = attempted ? Math.round(100*correct/attempted) : null;
-      return {sid, name: subj?subj.name:sid, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid)};
-    }).filter(s=>s.attempted>0);
-    subjectStats.sort((a,b)=>(a.pct??100)-(b.pct??100));
-    const weakest = subjectStats.slice(0,3);
-    const strongest = subjectStats.slice(-2).reverse();
+      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid)};
+    });
+    const touched = allSubjectStats.filter(s=>s.attempted>0);
+    const untouched = allSubjectStats.filter(s=>s.attempted===0);
+    const ranked = [...touched].sort((a,b)=>(a.pct??100)-(b.pct??100));
+    const weakest = ranked.slice(0,3);
+    const strongest = ranked.slice(-2).reverse();
 
-    const subjRows = subjectStats.length ? subjectStats.map(s=>`
-      <div class="admin-stat-row">
+    const subjRows = allSubjectStats.map(s=>{
+      if(s.attempted===0){
+        return `<div class="admin-stat-row">
+          <span style="color:var(--ink-soft);">${s.name}</span>
+          <b style="color:var(--ink-soft);font-weight:600;">⚪ Never started</b>
+        </div>`;
+      }
+      return `<div class="admin-stat-row">
         <span>${s.name} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
-        <b style="color:${s.pct==null?'var(--ink-soft)':s.pct<50?'#EF4444':s.pct<75?'#F59E0B':'#22C55E'};">${s.pct==null?'-':s.pct+'%'} <span style="color:var(--ink-soft);font-weight:400;">(${s.correct}/${s.attempted})</span></b>
-      </div>`).join("") : `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No practice recorded yet.</span></div>`;
+        <b style="color:${s.pct<50?'#EF4444':s.pct<75?'#F59E0B':'#22C55E'};">${s.pct}% <span style="color:var(--ink-soft);font-weight:400;">(${s.correct}/${s.attempted})</span></b>
+      </div>`;
+    }).join("");
 
     return `
     <div class="guardian-child-card">
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
-        <div style="flex-shrink:0;">${weekRingSVG(c.last_7_days, c.studied_today)}</div>
+        <div style="flex-shrink:0;">${weekRingSVG(c.last_7_days, c.studied_today, c.username)}</div>
         <div style="flex:1;min-width:200px;">
           <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);">${c.username}</div>
           <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">Joined ${new Date(c.joined).toLocaleDateString()}</div>
@@ -3796,6 +3948,7 @@ function renderGuardian(){
             : `<div style="font-size:13px;color:#92400E;">🕒 Hasn't opened a subject yet today.</div>`}
           ${weakest.length ? `<div style="font-size:12.5px;margin-top:8px;color:var(--ink-soft);">Needs attention: <b style="color:var(--ink);">${weakest.map(s=>s.name).join(", ")}</b></div>` : ""}
           ${strongest.length ? `<div style="font-size:12.5px;color:var(--ink-soft);">Doing well in: <b style="color:var(--ink);">${strongest.map(s=>s.name).join(", ")}</b></div>` : ""}
+          ${untouched.length ? `<div style="font-size:12.5px;color:#92400E;">Never opened: <b>${untouched.map(s=>s.name).join(", ")}</b></div>` : ""}
         </div>
       </div>
       <div style="margin-top:14px;">${subjRows}</div>
@@ -3903,6 +4056,7 @@ function renderHome(){
     <h2>Hey ${state.user}! Seven subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
   </div>
+  ${!state.guest ? renderGamifiedHeader() : ""}
   <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format now comes from an official WAEC syllabus you provided. That's separate from <em>past exam questions</em> - where you've also uploaded real past papers, questions adapted from them are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span> with the answer independently re-checked. Past-paper coverage so far - Mathematics: ${UPLOAD_COVERAGE.math.pastPapers}; English: ${UPLOAD_COVERAGE.english.pastPapers}; Economics: ${UPLOAD_COVERAGE.economics.pastPapers}; Government: ${UPLOAD_COVERAGE.government.pastPapers}; Literature, Civic Education and CRS: ${UPLOAD_COVERAGE.crs.pastPapers}. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
   <div class="subject-grid">${cards}</div>
   `;
