@@ -277,6 +277,7 @@
   .admin-bar-wrap{flex:1;min-width:6px;display:flex;align-items:flex-end;height:100%;cursor:default;}
   .admin-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:opacity .15s;}
   .admin-bar-wrap:hover .admin-bar{opacity:0.7;}
+  .guardian-child-card{background:#fff;border:2px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(43,35,80,0.06);}
 
   /* ---------- QUESTION DIAGRAMS ---------- */
   .q-diagram{background:#FBFAFF;border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;}
@@ -2714,7 +2715,8 @@ const UPLOAD_COVERAGE = {
 /* ======================= APP STATE ======================= */
 let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:{}, loaded:false,
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
-  adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null };
+  adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
+  guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login" };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -2756,6 +2758,120 @@ async function supabaseRPC(fn, params){
 }
 
 function normUser(u){ return (u||"").trim().toLowerCase().replace(/\s+/g,""); }
+
+/* ======================= GUARDIAN DASHBOARD ======================= */
+function weekRingSVG(last7Days, studiedToday){
+  const n = 7, gap = 5, segAngle = 360/n, cx=70, cy=70, r=56;
+  function polar(angleDeg){ const rad=(angleDeg-90)*Math.PI/180; return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)]; }
+  function arcPath(start,end){
+    const [x1,y1]=polar(end), [x2,y2]=polar(start);
+    const largeArc = (end-start)>180 ? 1 : 0;
+    return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+  }
+  const dayLabels = ["S","M","T","W","T","F","S"];
+  let segs = "";
+  (last7Days||[]).forEach((d,i)=>{
+    const start = i*segAngle + gap/2, end = (i+1)*segAngle - gap/2;
+    const color = d.active ? "url(#weekGrad)" : "#E9E6F5";
+    segs += `<path d="${arcPath(start,end)}" stroke="${color}" stroke-width="11" fill="none" stroke-linecap="round"/>`;
+  });
+  const centerIcon = studiedToday
+    ? `<text x="70" y="64" text-anchor="middle" font-size="26">✅</text><text x="70" y="88" text-anchor="middle" font-size="10.5" fill="#166534" font-weight="700">Studied today</text>`
+    : `<text x="70" y="64" text-anchor="middle" font-size="26">🕒</text><text x="70" y="88" text-anchor="middle" font-size="10.5" fill="#92400E" font-weight="700">Not yet today</text>`;
+  return `<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="weekGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/><stop offset="100%" stop-color="#FF4FA3"/>
+    </linearGradient></defs>
+    ${segs}
+    ${centerIcon}
+  </svg>`;
+}
+
+async function guardianAuth(mode){
+  const uEl = document.getElementById("guUsername");
+  const pEl = document.getElementById("guPasskey");
+  const u = uEl ? uEl.value : "";
+  const p = pEl ? pEl.value : "";
+  state.guardianError = null;
+  state.guardianBusy = true;
+  render();
+  try{
+    const fn = mode==="signup" ? "gce_guardian_signup" : "gce_guardian_login";
+    const result = await supabaseRPC(fn, { p_username: u, p_passkey: p });
+    if(result && result.error){ state.guardianError = result.error; }
+    else if(result && result.success){
+      state.guardianAuthed = true;
+      state.guardianUsername = result.username;
+      state.guardianPasskey = p;
+      await guardianRefresh();
+    }
+  }catch(e){
+    state.guardianError = "Couldn't reach the server (" + (e && e.message ? e.message : "network error") + ").";
+  }
+  state.guardianBusy = false;
+  render();
+}
+window.guardianAuth = guardianAuth;
+
+function guardianLogout(){
+  state.guardianAuthed = false;
+  state.guardianUsername = "";
+  state.guardianPasskey = "";
+  state.guardianData = null;
+  state.guardianError = null;
+  state.guardianShowLinkForm = false;
+  render();
+}
+window.guardianLogout = guardianLogout;
+
+async function guardianRefresh(){
+  state.guardianBusy = true;
+  render();
+  try{
+    const result = await supabaseRPC("gce_guardian_dashboard", { p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey });
+    if(result && result.error){ state.guardianError = result.error; }
+    else { state.guardianData = result.children || []; }
+  }catch(e){
+    state.guardianError = "Couldn't refresh (" + (e && e.message ? e.message : "network error") + ").";
+  }
+  state.guardianBusy = false;
+  render();
+}
+window.guardianRefresh = guardianRefresh;
+
+function guardianToggleLinkForm(){
+  state.guardianShowLinkForm = !state.guardianShowLinkForm;
+  state.guardianLinkMsg = null;
+  render();
+}
+window.guardianToggleLinkForm = guardianToggleLinkForm;
+
+async function guardianLinkChild(){
+  const suEl = document.getElementById("guStudentUsername");
+  const spEl = document.getElementById("guStudentPasskey");
+  const su = suEl ? suEl.value : "";
+  const sp = spEl ? spEl.value : "";
+  state.guardianLinkMsg = null;
+  state.guardianBusy = true;
+  render();
+  try{
+    const result = await supabaseRPC("gce_guardian_link_child", {
+      p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey,
+      p_student_username: su, p_student_passkey: sp
+    });
+    if(result && result.error){ state.guardianLinkMsg = {type:"error", text: result.error}; }
+    else if(result && result.success){
+      state.guardianLinkMsg = {type:"success", text:"Linked to " + result.student + "!"};
+      state.guardianShowLinkForm = false;
+      await guardianRefresh();
+    }
+  }catch(e){
+    state.guardianLinkMsg = {type:"error", text:"Couldn't reach the server (" + (e && e.message ? e.message : "network error") + ")."};
+  }
+  state.guardianBusy = false;
+  render();
+}
+window.guardianLinkChild = guardianLinkChild;
 
 /* ======================= ADMIN DASHBOARD ======================= */
 async function adminLogin(){
@@ -3414,6 +3530,7 @@ function render(){
   const app = document.getElementById("app");
   let html = "";
   if(state.view==="admin"){ html = renderAdmin(); }
+  else if(state.view==="guardian"){ html = renderGuardian(); }
   else if(state.view==="welcome"){ html = renderWelcome(); }
   else if(state.view==="signup"){ html = renderHeader() + renderSignup(); }
   else if(state.view==="login"){ html = renderHeader() + renderLogin(); }
@@ -3607,6 +3724,101 @@ function renderAdmin(){
     </div>
 
     <div class="ai-grading-disclaimer">This console shows real, live data from your Supabase database. Nothing here is cached beyond this session - hit Refresh any time for the latest numbers.</div>
+  </div>`;
+}
+
+function renderGuardian(){
+  if(!state.guardianAuthed){
+    return `
+    <div class="welcome-wrap" style="max-width:420px;">
+      <div class="welcome-mark" style="font-size:22px;">👪 Guardian Portal</div>
+      <div class="welcome-sub">BuildNET GCE Academy - Family Monitoring</div>
+      <p class="welcome-p" style="margin-top:14px;">Keep an eye on your child's study habits - whether they've studied today, which subjects need attention, and where they're doing well.</p>
+      ${state.guardianError ? `<div class="auth-error">${state.guardianError}</div>` : ""}
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;">
+        <button class="ghost-btn" style="${state.guardianAuthMode==='login'?'background:var(--purple);color:#fff;':''}" onclick="state.guardianAuthMode='login';state.guardianError=null;render()">Log in</button>
+        <button class="ghost-btn" style="${state.guardianAuthMode==='signup'?'background:var(--purple);color:#fff;':''}" onclick="state.guardianAuthMode='signup';state.guardianError=null;render()">Create profile</button>
+      </div>
+      <div style="display:grid;gap:10px;margin-top:14px;">
+        <input id="guUsername" type="text" placeholder="Your username as a guardian" style="padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:15px;">
+        <input id="guPasskey" type="password" placeholder="4-digit passkey" maxlength="4" style="padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:15px;" onkeydown="if(event.key==='Enter') guardianAuth(state.guardianAuthMode)">
+      </div>
+      <div class="welcome-actions" style="margin-top:16px;">
+        <button class="stampbtn" onclick="guardianAuth(state.guardianAuthMode)" ${state.guardianBusy?"disabled":""}>${state.guardianBusy?"Please wait...":(state.guardianAuthMode==='login'?"Log in":"Create my guardian profile")}</button>
+      </div>
+      <div class="welcome-note" style="margin-top:12px;">This is separate from your child's own student login - guardians and students each have their own username and passkey.</div>
+    </div>`;
+  }
+
+  const children = state.guardianData || [];
+
+  const linkForm = state.guardianShowLinkForm ? `
+    <div class="section-block" style="background:#FFF9EE;">
+      <h4>LINK A CHILD'S PROFILE</h4>
+      <p style="font-size:12.5px;color:var(--ink-soft);">You'll need your child's own username AND their 4-digit passkey to link - ask them for it. This confirms you have their consent to monitor their account.</p>
+      ${state.guardianLinkMsg ? `<div class="${state.guardianLinkMsg.type==='error'?'auth-error':'admin-stat-row'}" style="${state.guardianLinkMsg.type==='success'?'color:#166534;background:#DCFCE7;padding:10px 14px;border-radius:10px;':''}">${state.guardianLinkMsg.text}</div>` : ""}
+      <div style="display:grid;gap:10px;max-width:360px;margin-top:10px;">
+        <input id="guStudentUsername" type="text" placeholder="Child's username" style="padding:10px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;">
+        <input id="guStudentPasskey" type="password" placeholder="Child's 4-digit passkey" maxlength="4" style="padding:10px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;" onkeydown="if(event.key==='Enter') guardianLinkChild()">
+        <button class="primary-btn" onclick="guardianLinkChild()" ${state.guardianBusy?"disabled":""}>${state.guardianBusy?"Linking...":"Link this child"}</button>
+      </div>
+    </div>` : "";
+
+  const childCards = children.map(c=>{
+    const subjEntries = Object.keys(c.progress||{});
+    const subjectStats = subjEntries.map(sid=>{
+      const subj = findSubject(sid);
+      const topics = (c.progress[sid]&&c.progress[sid].topics)||{};
+      let attempted=0, correct=0;
+      Object.values(topics).forEach(t=>{ attempted+=(t.attempted||0); correct+=(t.correct||0); });
+      const pct = attempted ? Math.round(100*correct/attempted) : null;
+      return {sid, name: subj?subj.name:sid, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid)};
+    }).filter(s=>s.attempted>0);
+    subjectStats.sort((a,b)=>(a.pct??100)-(b.pct??100));
+    const weakest = subjectStats.slice(0,3);
+    const strongest = subjectStats.slice(-2).reverse();
+
+    const subjRows = subjectStats.length ? subjectStats.map(s=>`
+      <div class="admin-stat-row">
+        <span>${s.name} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
+        <b style="color:${s.pct==null?'var(--ink-soft)':s.pct<50?'#EF4444':s.pct<75?'#F59E0B':'#22C55E'};">${s.pct==null?'-':s.pct+'%'} <span style="color:var(--ink-soft);font-weight:400;">(${s.correct}/${s.attempted})</span></b>
+      </div>`).join("") : `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No practice recorded yet.</span></div>`;
+
+    return `
+    <div class="guardian-child-card">
+      <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+        <div style="flex-shrink:0;">${weekRingSVG(c.last_7_days, c.studied_today)}</div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);">${c.username}</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">Joined ${new Date(c.joined).toLocaleDateString()}</div>
+          ${c.studied_today
+            ? `<div style="font-size:13px;color:#166534;">✅ Studied today: <b>${(c.subjects_today||[]).map(sid=>{const s=findSubject(sid);return s?s.name:sid;}).join(", ")}</b></div>`
+            : `<div style="font-size:13px;color:#92400E;">🕒 Hasn't opened a subject yet today.</div>`}
+          ${weakest.length ? `<div style="font-size:12.5px;margin-top:8px;color:var(--ink-soft);">Needs attention: <b style="color:var(--ink);">${weakest.map(s=>s.name).join(", ")}</b></div>` : ""}
+          ${strongest.length ? `<div style="font-size:12.5px;color:var(--ink-soft);">Doing well in: <b style="color:var(--ink);">${strongest.map(s=>s.name).join(", ")}</b></div>` : ""}
+        </div>
+      </div>
+      <div style="margin-top:14px;">${subjRows}</div>
+    </div>`;
+  }).join("");
+
+  return `
+  <div class="admin-dash">
+    <div class="admin-head">
+      <h2>👪 ${state.guardianUsername}'s Guardian Dashboard</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="ghost-btn" onclick="guardianToggleLinkForm()">➕ Link a child</button>
+        <button class="ghost-btn" onclick="guardianRefresh()" ${state.guardianBusy?"disabled":""}>${state.guardianBusy?"Refreshing...":"↻ Refresh"}</button>
+        <button class="ghost-btn" onclick="guardianLogout()">Log out</button>
+      </div>
+    </div>
+    ${state.guardianError ? `<div class="auth-error">${state.guardianError}</div>` : ""}
+    ${linkForm}
+    ${children.length ? childCards : `
+      <div class="section-block" style="text-align:center;padding:40px 20px;">
+        <p style="color:var(--ink-soft);">No children linked yet. Click "Link a child" above to start monitoring their progress.</p>
+      </div>`}
+    <div class="ai-grading-disclaimer">This dashboard shows real, live data. Refresh any time for the latest.</div>
   </div>`;
 }
 
@@ -4188,6 +4400,11 @@ function renderDashboard(){
 (async function init(){
   if(typeof window !== "undefined" && window.location && window.location.hash === "#admin"){
     state.view = "admin";
+    render();
+    return;
+  }
+  if(typeof window !== "undefined" && window.location && window.location.hash === "#guardian"){
+    state.view = "guardian";
     render();
     return;
   }
