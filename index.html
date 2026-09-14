@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BuildNET GCE Academy</title>
+<title>BuildNET Academy</title>
 <!-- No external fonts: this app is designed to load fully offline. System font stacks below approximate the same fun, rounded feel without needing a network request. -->
 <style>
   :root{
@@ -402,8 +402,8 @@ const SUBJECT_OVERVIEWS = {
   }
 };
 
-const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏" };
-const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D" };
+const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏", chemistry:"🧪", physics:"⚛️" };
+const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D", chemistry:"#06B6D4", physics:"#6366F1" };
 const READINESS_EMOJI = { "NOT STARTED":"🌱", "STARTED":"🚶", "DEVELOPING":"🔧", "COMPETENT":"👍", "STRONG":"🔥", "EXAM READY":"🌟" };
 function labelFun(label){ return (READINESS_EMOJI[label]||"") + " " + label; }
 
@@ -652,7 +652,8 @@ const SUBJECTS = [
         obj:["Apply angle facts on straight lines and parallel lines","Apply properties of triangles and polygons"],
         exp:[
           {t:"Angles at a point and on lines", b:"All the angles crammed around a single point always add up to exactly 360° - imagine spinning fully around on the spot until you face the way you started. Angles sitting on a straight line always add up to 180° instead, since a straight line is simply half a full turn. These two facts alone unlock a huge share of WAEC's angle-chasing diagrams.", diagram:SVG_PARALLEL_LINES},
-          {t:"Angles in polygons", b:"Every polygon's interior angles add up to a fixed total decided purely by how many sides it has - a triangle's always sum to 180°, a quadrilateral's to 360°, gaining another 180° for every extra side. Think of it like a group assignment with a fixed total mark: the total is locked in advance, but how it's split between the individual angles can vary wildly."}
+          {t:"Angles in polygons", b:"Every polygon's interior angles add up to a fixed total decided purely by how many sides it has - a triangle's always sum to 180°, a quadrilateral's to 360°, gaining another 180° for every extra side. Think of it like a group assignment with a fixed total mark: the total is locked in advance, but how it's split between the individual angles can vary wildly."},
+          {t:"Exterior angles - a separate, simpler rule", b:"Unlike interior angles, which grow with the number of sides, the exterior angles of ANY convex polygon, triangle, hexagon, or a 20-sided shape, always sum to exactly 360°, no exceptions. This is genuinely useful for regular polygons: divide 360° by the number of sides to instantly get each exterior angle, then subtract from 180° to get the interior angle, often faster than using the interior-angle formula directly."}
         ],
         err:["Forgetting exterior angle of a triangle equals the sum of the two interior opposite angles","Assuming all polygons are regular (equal sides/angles) when the question doesn't say so"],
         worked: WK("Four of the six interior angles of a hexagon sum to 420°. If the remaining two angles are equal, find each.",
@@ -666,7 +667,8 @@ const SUBJECTS = [
           Q("Four of the six interior angles of a hexagon sum to 420°. If the remaining two angles are equal, find each.",["60°","100°","120°","150°"],3,"Interior angles of a hexagon sum to 720°. Remaining = 720−420 = 300°, split equally: 150° each.","Hard",VP),
           Q("Two angles on a straight line are in the ratio 2:3. Find the smaller angle.",["72°","60°","108°","90°"],0,"2+3=5 parts of 180°; each part=36°; smaller angle=2×36=72°.","Medium"),
           Q("The exterior angle of a triangle is 110°. If one of the interior opposite angles is 40°, find the other.",["70°","110°","40°","150°"],0,"Exterior angle = sum of the two interior opposite angles: 110−40=70°.","Medium"),
-          Q("The interior angle of a regular polygon is 4 times its exterior angle. Find the number of sides of the polygon.",["8","9","10","12"],2,"Interior+exterior=180°. If interior=4×exterior, then 5×exterior=180°, exterior=36°. Number of sides=360/36=10.","Hard",VP)
+          Q("The interior angle of a regular polygon is 4 times its exterior angle. Find the number of sides of the polygon.",["8","9","10","12"],2,"Interior+exterior=180°. If interior=4×exterior, then 5×exterior=180°, exterior=36°. Number of sides=360/36=10.","Hard",VP),
+          Q("The sum of the exterior angles of any convex polygon, regardless of the number of sides, is always",["360°","180°","540°","dependent on the number of sides"],0,"Exterior angles of any convex polygon always sum to exactly 360°.","Medium")
         ]
       },
       { id:"circlesloci", name:"Plane Geometry: Circles, Construction and Loci",
@@ -674,6 +676,7 @@ const SUBJECTS = [
         obj:["Apply circle theorems","Construct basic geometric figures and describe loci"],
         exp:[
           {t:"Circle theorems", b:"Picture a circle as a clock face. Any angle formed at the very centre by two 'hands' pointing to the edge is always exactly double the angle formed by those same two points if you instead stood somewhere on the edge - a fixed, reliable relationship in every question. A diameter is even more generous: any angle it forms at the circle's edge is always a perfect right angle, guaranteed.", diagram:SVG_CIRCLE_THEOREM},
+          {t:"Two more circle theorems worth knowing", b:"ANGLES IN THE SAME SEGMENT are always equal to each other, if several people stand at different points on the same arc and all look at the same chord, they all see the exact same angle, no matter where along that arc they're standing. CYCLIC QUADRILATERALS (four-sided shapes with all corners touching the circle) have a neat property too: opposite angles always add up to 180°, so knowing one angle instantly gives you its opposite partner."},
           {t:"Loci", b:"A locus is 'every possible spot that satisfies one rule' - like marking every point in your school compound exactly ten steps from the flagpole, which, drawn out, becomes a perfect circle around it. Ruler-and-compass construction is simply how you draw that rule with total precision, rather than guessing and hoping it looks about right."}
         ],
         err:["Misapplying the angle-at-the-centre theorem to the wrong arc","Confusing a perpendicular bisector locus with an angle bisector locus"],
@@ -691,7 +694,9 @@ const SUBJECTS = [
           Q("The locus of points equidistant from two fixed points A and B is",["the perpendicular bisector of AB","a circle centred at A","a straight line through A and B","the angle bisector at A"],0,"Points equidistant from two points lie on the perpendicular bisector of the line joining them.","Medium"),
           Q("In the diagram, O is the centre of a circle and OBCD is a rhombus, with B, C and D on the circle. If ∠ADO = ∠OBA = 30°, find ∠ADC.",["90°","60°","120°","150°"],0,"Since OB=BC=CD=DO=OA=OC=radius, triangles OBC and OCD are equilateral (60° each). With ∠ADO=∠OBA=30° making triangles OAD and OAB isosceles, angle sums around O give ∠ADC = ∠ADO + ∠ODC = 30°+60° = 90°.","Hard",VP,SVG_CIRCLE_RHOMBUS),
           Q("In the diagram, O is the centre of a circle of radius 14cm and ∠AOB = 90°. Calculate, correct to the nearest whole number, the area of the shaded segment. (Take π=22/7)",["56cm²","98cm²","154cm²","42cm²"],0,"Sector area = ¼×22/7×14²=154cm². Triangle AOB area = ½×14×14×sin90°=98cm². Segment = 154−98=56cm².","Hard",VP,SVG_SEGMENT),
-          Q("In the diagram, AB is a diameter of a circle centre O, and C is a point on the circle. If ∠BAC = 35°, find ∠ABC.",["35°","45°","55°","90°"],2,"The angle in a semicircle (∠ACB) is always 90°. So ∠ABC=180−90−35=55°.","Medium",null,SVG_SEMICIRCLE_ANGLE)
+          Q("In the diagram, AB is a diameter of a circle centre O, and C is a point on the circle. If ∠BAC = 35°, find ∠ABC.",["35°","45°","55°","90°"],2,"The angle in a semicircle (∠ACB) is always 90°. So ∠ABC=180−90−35=55°.","Medium",null,SVG_SEMICIRCLE_ANGLE),
+          Q("In a cyclic quadrilateral PQRS, ∠P = 110°. Find ∠R, the angle opposite it.",["70°","110°","90°","180°"],0,"Opposite angles of a cyclic quadrilateral sum to 180°: 180−110=70°.","Medium"),
+          Q("Points A, B, C and D lie on a circle. If ∠BAC = 40° and ∠BDC is subtended by the same arc BC as ∠BAC, find ∠BDC.",["40°","50°","80°","20°"],0,"Angles in the same segment, subtended by the same arc, are always equal.","Medium")
         ]
       },
       { id:"trig", name:"Trigonometry",
@@ -699,7 +704,8 @@ const SUBJECTS = [
         obj:["Use trigonometric ratios to solve right-angled triangles","Solve problems on angles of elevation, depression and bearings"],
         exp:[
           {t:"Trig ratios", b:"SOH-CAH-TOA isn't just letters to chant before an exam - each third is a recipe converting a known angle and one known side into a missing side, or a known pair of sides into a missing angle. Sine relates the opposite side and hypotenuse, cosine relates the adjacent side and hypotenuse, tangent relates the opposite and adjacent sides - pick whichever recipe matches the two pieces of information you already have.", diagram:SVG_SOHCAHTOA},
-          {t:"Elevation, depression & bearings", b:"Angle of elevation is the angle you tilt your head UP through to see something above you, like the top of a flagpole; angle of depression is the angle you tilt DOWN through to see something below, like a boat from a cliff-top. A bearing is direction written the way pilots and ship captains write it - always a three-digit number measured clockwise from North, so due east is always 090°, never just 90°."}
+          {t:"Elevation, depression & bearings", b:"Angle of elevation is the angle you tilt your head UP through to see something above you, like the top of a flagpole; angle of depression is the angle you tilt DOWN through to see something below, like a boat from a cliff-top. A bearing is direction written the way pilots and ship captains write it - always a three-digit number measured clockwise from North, so due east is always 090°, never just 90°."},
+          {t:"Beyond right angles - the Sine and Cosine Rules", b:"SOH-CAH-TOA only works when a triangle has a right angle. For any OTHER triangle, two more tools take over: the SINE RULE (a/sinA = b/sinB = c/sinC) is best when you know an angle and its opposite side, plus one more piece of information. The COSINE RULE (a²=b²+c²−2bc·cosA) is best when you know two sides and the angle between them, or all three sides but no angles at all. Recognising WHICH rule fits a given triangle, based on what information you're given, is the real skill being tested."}
         ],
         err:["Confusing angle of elevation with angle of depression","Forgetting bearings are always written as three digits, e.g. 045° not 45°"],
         worked: WK("A tower TR stands vertically on level ground. An observer at a point O, 84m from the base of the tower, measures the angle of elevation of the top T as 57°. (a) Calculate, correct to 3 significant figures, the height of the tower. (b) The observer then moves further back until the angle of elevation becomes 49°. Calculate, correct to two decimal places, the distance the observer moved.",
@@ -721,7 +727,8 @@ const SUBJECTS = [
           Q("In the diagram, a ladder leans against a vertical wall, making an angle of 65° with the ground. If the foot of the ladder is 3m from the wall, calculate, correct to 2 decimal places, the length of the ladder.",["7.10m","6.42m","3.31m","8.86m"],0,"cos65°=3/L, so L=3/cos65°≈7.10m.","Medium",null,SVG_LADDER),
           Q("A ship sails from port P on a bearing of 060° for 40km to reach point Q. Calculate, correct to the nearest km, how far east of P the ship has travelled.",["20km","28km","35km","40km"],2,"The eastward component is 40×sin60°≈35km.","Medium",null,SVG_BEARING),
           Q("From two points 46m apart on the same side of, and in line with, the base of a vertical pole, the angles of elevation of the top of the pole are 48° and 40°. Calculate, correct to 1 decimal place, the height of the pole.",["157.9m","142.1m","46.0m","199.9m"],0,"Setting up y·tan48°=(46+y)·tan40° and solving gives y≈142.16m, so height=y·tan48°≈157.9m.","Hard",VP),
-          Q("Point Y is 15km due south of point X, and point Z is 20km from X on a bearing of 270°. Calculate the distance YZ.",["20km","25km","30km","35km"],1,"Setting X at the origin, Y=(0,-15) and Z=(-20,0). Distance YZ=√(20²+15²)=√625=25km.","Hard",VP)
+          Q("Point Y is 15km due south of point X, and point Z is 20km from X on a bearing of 270°. Calculate the distance YZ.",["20km","25km","30km","35km"],1,"Setting X at the origin, Y=(0,-15) and Z=(-20,0). Distance YZ=√(20²+15²)=√625=25km.","Hard",VP),
+          Q("In triangle ABC, AB=8cm, AC=10cm and angle A=60°. Use the cosine rule to find BC, correct to 2 decimal places.",["9.17cm","8.37cm","6.00cm","18.00cm"],0,"BC²=AB²+AC²−2·AB·AC·cosA=64+100−160×0.5=84, so BC=√84≈9.17cm.","Hard")
         ]
       },
       { id:"stat", name:"Statistics",
@@ -729,7 +736,8 @@ const SUBJECTS = [
         obj:["Calculate mean, median and mode for discrete data","Interpret bar charts, pie charts and frequency distributions"],
         exp:[
           {t:"Mean, median, mode", b:"Mean is fair-sharing every value equally - add them all up, divide by the count. Median is whoever stands exactly in the middle once everyone's lined up smallest to largest, averaging the two middle people if there's an even number. Mode is simply the single most popular answer - the value that shows up more than any other."},
-          {t:"Reading charts", b:"A pie chart slices up a whole circle by proportion, so a bigger slice always means a bigger share of the total. A bar chart instead lines categories up side by side so their heights compare directly. WAEC often expects you to read raw values off a chart accurately before any calculation even begins, so a careless misread at that first step can throw off an entire answer.", diagram:SVG_BARCHART}
+          {t:"Reading charts", b:"A pie chart slices up a whole circle by proportion, so a bigger slice always means a bigger share of the total. A bar chart instead lines categories up side by side so their heights compare directly. WAEC often expects you to read raw values off a chart accurately before any calculation even begins, so a careless misread at that first step can throw off an entire answer.", diagram:SVG_BARCHART},
+          {t:"Quartiles - splitting data into four, not just two", b:"While the median splits ordered data into two equal halves, QUARTILES split it into four. The lower quartile (Q1) is the median of the lower half of the data, the upper quartile (Q3) is the median of the upper half, and the median itself sits in the middle as Q2. The INTERQUARTILE RANGE (Q3−Q1) measures the spread of the 'middle 50%' of the data, useful because, unlike the full range, it isn't thrown off by one extreme outlier at either end."}
         ],
         err:["Forgetting to order data before finding the median","Misreading the scale on a bar chart or histogram axis"],
         worked: WK("A frequency table has values x: 3,4,5,6,7,8 with frequencies f: 4,6,4,5,6,2. Calculate (a) the mean, correct to 1 decimal place, and (b) the median of the distribution.",
@@ -747,7 +755,8 @@ const SUBJECTS = [
           Q("A frequency table has values x: 3,4,5,6,7,8 with frequencies f: 4,6,4,5,6,2. Calculate, correct to 1 decimal place, the mean of the distribution.",["4.8","5.0","5.3","5.9"],2,"Σfx=12+24+20+30+42+16=144, Σf=27, mean=144/27≈5.3.","Hard",VP),
           Q("Using the same distribution (x: 3,4,5,6,7,8, f: 4,6,4,5,6,2), find the median.",["4","5","6","7"],1,"Median position=(27+1)/2=14th value. Cumulative frequencies (4,10,14,19,25,27) reach 14 exactly at x=5.","Hard",VP),
           Q("The pie chart shows how 120 students' favourite subjects are distributed: Mathematics 90°, English 60°, Science 120°, Others 90°. How many students prefer Science?",["30","40","50","60"],1,"Science students = (120°/360°)×120 = 40.","Medium",null,SVG_PIE_CHART),
-          Q("Find the range of the following set of numbers: 28, 29, 39, 38, 37, 26, 20, 15 and 25.",["22","24","25","27"],1,"Range = highest − lowest = 39 − 15 = 24.","Medium",VP)
+          Q("Find the range of the following set of numbers: 28, 29, 39, 38, 37, 26, 20, 15 and 25.",["22","24","25","27"],1,"Range = highest − lowest = 39 − 15 = 24.","Medium",VP),
+          Q("Using the same set of numbers (28, 29, 39, 38, 37, 26, 20, 15, 25), find the interquartile range.",["10","15","20","24"],1,"Sorted: 15,20,25,26,28,29,37,38,39. Median=28, lower half median (Q1)=22.5, upper half median (Q3)=37.5. IQR=37.5−22.5=15.","Hard")
         ]
       },
       { id:"prob", name:"Probability",
@@ -755,7 +764,8 @@ const SUBJECTS = [
         obj:["Compute simple probability of an event","Apply addition and multiplication rules for combined events"],
         exp:[
           {t:"Simple probability", b:"Probability is always just a fraction: the number of outcomes you actually want, divided by the total number of outcomes that could possibly happen. It's a number that must land somewhere between 0, completely impossible like rolling a 7 on a normal die, and 1, completely certain like the sun rising tomorrow.", diagram:SVG_SPINNER},
-          {t:"Combined events", b:"Tossing two coins one after another is like doing two separate lucky-dips in a row - to find the chance BOTH go your way, multiply the two individual chances together (the word 'and' is your multiplication signal). But for the chance of EITHER of two outcomes that can't both happen at once, add their probabilities together instead (the word 'or' is your addition signal)."}
+          {t:"Combined events", b:"Tossing two coins one after another is like doing two separate lucky-dips in a row - to find the chance BOTH go your way, multiply the two individual chances together (the word 'and' is your multiplication signal). But for the chance of EITHER of two outcomes that can't both happen at once, add their probabilities together instead (the word 'or' is your addition signal)."},
+          {t:"Independent vs mutually exclusive - genuinely different ideas", b:"INDEPENDENT events don't affect each other's outcome, one coin's result has zero influence on the next coin's result, so their probabilities MULTIPLY when both must happen. MUTUALLY EXCLUSIVE events, by contrast, cannot both happen at the same time in a single trial, rolling a 3 and rolling a 5 on the SAME die roll can never both occur, so their probabilities ADD when finding the chance of either one. Students often blur these two into one idea, but 'independent' is about separate events not influencing each other, while 'mutually exclusive' is about two outcomes competing within the same single event."}
         ],
         err:["Adding probabilities instead of multiplying for independent events joined by 'and'","Forgetting mutually exclusive events can't both happen, so their probabilities simply add"],
         worked: WK("A bag contains 5 red and 3 blue balls. Two balls are drawn one after another, without replacing the first. Find the probability that both balls are red.",
@@ -768,7 +778,8 @@ const SUBJECTS = [
         qs:[
           Q("A bag contains 5 red and 3 blue balls. Find the probability of picking a red ball.",["5/8","3/8","1/2","5/3"],0,"P(red) = 5/(5+3) = 5/8.","Easy"),
           Q("A die is tossed once. Find the probability of getting a prime number.",["1/2","1/6","1/3","2/3"],0,"Prime numbers on a die: 2, 3, 5 - that's 3 out of 6, i.e. 1/2.","Medium",VP),
-          Q("Two fair coins are tossed. Find the probability of getting two heads.",["1/4","1/2","3/4","1/3"],0,"P(HH) = 1/2 × 1/2 = 1/4.","Medium")
+          Q("Two fair coins are tossed. Find the probability of getting two heads.",["1/4","1/2","3/4","1/3"],0,"P(HH) = 1/2 × 1/2 = 1/4.","Medium"),
+          Q("A single die is rolled once. Which pair of outcomes are mutually exclusive?",["Rolling a 3 and rolling a 5 on the same roll","Rolling an even number on the first roll and an even number on a second roll","Tossing a coin and rolling a die together","Drawing two cards from two separate decks"],0,"Rolling a 3 and a 5 on the SAME roll cannot both happen at once, making them mutually exclusive.","Hard")
         ]
       }
     ]
@@ -1009,6 +1020,41 @@ const SUBJECTS = [
       {section:"Paper 3 - Prose (answer 1 per section)", items:["African Prose: So the Path Does Not Die OR Redemption Road","Non-African Prose: To Kill a Mockingbird OR Path of Lucas: The Journey He Endured"]}
     ],
     topics:[
+      { id:"introlit", name:"Introduction to the Study of Literature in English",
+        hook:"Before Wemimo can analyse a single Shakespeare scene or an African prose text, she needs to answer a more basic question first: what actually counts as 'Literature', and why do exam boards across an entire continent think it's worth several hours of study? This topic is that foundation, laid before any specific text ever comes into view.",
+        obj:["Define literature and distinguish its three major genres","Explain the general functions of literature in society","Identify basic literary terms used across all genres"],
+        exp:[
+          {t:"What literature is, and its three genres", b:"Literature is imaginative writing that uses language artistically to explore human experience, not just to convey plain information. It's traditionally divided into three major genres: DRAMA (written to be performed, told through dialogue and stage action), PROSE (narrative fiction written in ordinary sentence and paragraph form, like novels and short stories), and POETRY (writing that uses condensed, often rhythmic and figurative language to convey meaning and feeling). Every text on this syllabus falls into one of these three."},
+          {t:"Why literature matters", b:"Literature entertains, but it also does more: it reflects and comments on society (holding up a mirror to real issues, the way 'An Inspector Calls' critiques class privilege), preserves culture and history (the way African prose and drama texts carry oral tradition forward), and builds empathy by letting readers genuinely inhabit lives very different from their own. WAEC sometimes asks students to explain these functions directly, not just assume 'it's just stories'."},
+          {t:"Basic literary terms used everywhere", b:"A few terms apply across all three genres and are worth knowing cold: THEME (the central idea or message a work explores, distinct from its plot), PLOT (the sequence of events), SETTING (where and when a work takes place), and CHARACTERIZATION (how a writer builds and reveals a character's personality, through action, dialogue, or description). These form the basic vocabulary every later Literature topic assumes you already have."}
+        ],
+        err:["Assuming 'literature' just means 'any book', rather than a specific category of imaginative, artistic writing","Confusing a work's theme (its central idea) with its plot (what actually happens)","Treating drama, prose and poetry as interchangeable rather than genuinely distinct forms"],
+        qs:[
+          Q("Literature is best defined as",["imaginative writing that uses language artistically to explore human experience","any written document, including reports and manuals","only fictional stories written in the last century","writing produced exclusively for entertainment, with no other purpose"],0,"Literature specifically refers to imaginative, artistic writing exploring human experience.","Easy"),
+          Q("The three major genres of literature are",["drama, prose and poetry","fiction, non-fiction and biography","tragedy, comedy and satire","novels, letters and essays"],0,"Drama, prose and poetry are the three traditional major literary genres.","Easy"),
+          Q("Writing intended primarily to be performed, using dialogue and stage action, is classified as",["drama","prose","poetry","an essay"],0,"Drama is specifically written for performance through dialogue and action.","Easy"),
+          Q("The central idea or message a literary work explores is called its",["theme","plot","setting","genre"],0,"Theme refers to the central idea, distinct from the sequence of events (plot).","Medium"),
+          Q("The way a writer builds and reveals a character's personality, through action, dialogue or description, is called",["characterization","setting","theme","plot"],0,"Characterization is specifically how a character is constructed and revealed.","Medium"),
+          Q("One widely recognised function of literature in society is that it",["reflects and comments on real social issues","exists purely as decoration with no deeper purpose","only serves to test students in examinations","replaces the need for historical records entirely"],0,"Literature often reflects and critiques society, among its several functions.","Medium")
+        ]
+      },
+      { id:"litcrit", name:"Literary Appreciation and Criticism",
+        hook:"Two students read the exact same short story. One writes a page retelling exactly what happened, scene by scene. The other writes a page explaining HOW the writer built suspense, WHY a particular twist worked, and WHETHER the ending earned its emotional weight. Only one of them just wrote a summary; the other wrote genuine literary criticism, and WAEC rewards the second student every single time.",
+        obj:["Distinguish literary appreciation/criticism from plot summary","Identify key elements evaluated in literary criticism","Apply basic critical vocabulary to discuss a text's effectiveness"],
+        exp:[
+          {t:"Criticism vs summary - the single most important distinction", b:"A PLOT SUMMARY simply retells what happens in a text, in order. LITERARY CRITICISM (or appreciation) instead EVALUATES the text: does the writer's technique work? Is a character believable? Does the structure serve the story well? A student who only summarises, however accurately, is answering a different question than the one usually being asked, and this single confusion costs more marks on Literature papers than almost any other single error."},
+          {t:"What criticism actually evaluates", b:"Genuine literary appreciation looks at specific elements: STYLE (word choice, sentence structure, tone), STRUCTURE (how the work is organised, and whether that organisation serves its purpose), CHARACTERIZATION (whether characters feel real and consistent), and the writer's USE OF LANGUAGE (imagery, symbolism, dialogue) to achieve a specific effect. A strong critical answer names the SPECIFIC technique and explains its EFFECT, not just that a passage is 'good' or 'interesting'."},
+          {t:"Basic critical vocabulary", b:"Useful evaluative terms include: EFFECTIVE (a technique that successfully achieves its intended purpose), CONVINCING (a character or plot development that feels believable within the story's own logic), and POIGNANT (emotionally moving in a way that lingers). Using this kind of precise evaluative language, rather than vague praise like 'nice' or 'good', is what separates strong critical writing from a plot recap wearing an opinion as a disguise."}
+        ],
+        err:["Writing an extended plot summary when a critical evaluation was actually asked for","Praising or criticising a text vaguely ('it was good') without naming the specific technique responsible","Assuming criticism means only finding fault, when it equally involves recognising what works well and explaining why"],
+        qs:[
+          Q("Literary criticism is best distinguished from plot summary by its focus on",["evaluating how well a text achieves its effects, not just retelling events","listing every character's name in order of appearance","counting the number of chapters in a text","describing the book's cover and physical length"],0,"Criticism evaluates technique and effect; summary merely retells events.","Easy"),
+          Q("A strong piece of literary criticism about a character would mainly",["explain whether the character feels believable and how the writer achieves this","simply list all the character's actions in the story","describe the actor who might play the character in a film","ignore the character entirely to focus on setting"],0,"Criticism evaluates believability and technique, not just cataloguing actions.","Medium"),
+          Q("Which of these is an example of vague, non-critical praise rather than genuine literary evaluation?",["'The story was really nice.'","'The writer's short, clipped sentences in this scene build tension effectively.'","'The unreliable narrator makes the twist ending genuinely convincing.'","'The repeated bird imagery reinforces the theme of freedom.'"],0,"Vague praise names no specific technique or effect, unlike genuine critical statements.","Medium"),
+          Q("Evaluating whether a text's organisation (e.g. its use of flashback, or chapter order) serves the story well falls under assessing its",["structure","setting only","genre","publication date"],0,"Structure specifically concerns how a work is organised.","Medium"),
+          Q("A common, mark-losing error in Literature essay answers is",["writing an extended plot summary instead of the critical evaluation actually requested","quoting too accurately from the text","organising the answer into clear paragraphs","referring to the writer's specific choices"],0,"Summarising instead of evaluating is one of the most frequent, costly errors on this paper.","Hard")
+        ]
+      },
       { id:"shakespeare", name:"Shakespeare (Antony and Cleopatra) and Unseen Passages",
         summary:[
           {t:"Antony and Cleopatra - the full story", b:"Mark Antony, one of the three rulers of Rome (alongside Octavius Caesar and Lepidus), has fallen deeply in love with Cleopatra, the Queen of Egypt, and spends most of his time in Egypt with her instead of attending to his duties in Rome. When war threatens and his wife Fulvia dies, Antony is pulled back to Rome, where he patches up his political alliance with Caesar by marrying Caesar's sister, Octavia - a marriage of convenience that devastates Cleopatra when she hears of it. Antony can't stay away from Egypt for long, though, and eventually abandons Octavia to return to Cleopatra, which Caesar treats as a declaration of war. In the decisive Battle of Actium, fought at sea, Cleopatra's ships flee the fighting, and Antony, unable to bear being apart from her, follows her instead of continuing the battle - a decision that costs him the war and much of his reputation as a soldier. As Caesar's forces close in on Egypt, Cleopatra, fearing Antony's rage after the defeat, sends him a false message that she has died. Believing this, and seeing no reason left to live, Antony falls on his own sword, only to be told the truth as he is dying and carried to Cleopatra to die in her arms. Rather than be captured and paraded through Rome as Caesar's trophy, Cleopatra kills herself by allowing a poisonous snake to bite her, choosing to die on her own terms as a queen rather than live as a conquered prisoner. Caesar, arriving too late to stop it, orders the two lovers buried together, acknowledging even in defeat the scale of their story. The play's key tension throughout is the pull between duty and desire - Rome's cold political discipline versus Egypt's passionate, sensory pleasure - and Antony is torn apart precisely because he can never fully choose one over the other."}
@@ -1016,14 +1062,16 @@ const SUBJECTS = [
         hook:"Wemimo has exactly nine minutes left on the clock and three unanswered questions about a Shakespeare scene she's never actually memorised word for word. Instead of panicking, she does what every top scorer on this paper does: she looks at WHO is speaking, WHO they're speaking to, and what's happening around them in the scene - and suddenly the unfamiliar lines start making sense, because she isn't being tested on her memory, she's being tested on her understanding. That's the entire secret to Paper 1: it's built entirely on objective and context questions, so speed and sharp reading matter more here than deep essay-writing.",
         obj:["Answer context questions on the compulsory Shakespeare text","Apply general literary appreciation skills to unseen prose and poetry"],
         exp:[
-          {t:"Context questions", b:"These test whether you understood WHO said something, WHEN in the story it happened, and WHY it matters - not whether you can recite the line word for word like a phone number. Imagine a friend forwards you a screenshot of a chat mid-conversation with no names attached - you can usually still tell who's speaking from tone and context alone, and that's exactly the instinct WAEC is testing here."},
-          {t:"Unseen passages", b:"You genuinely cannot predict the exact unseen passage that will appear on exam day - but you CAN practise the underlying skill on any similar unfamiliar text: spot the theme, notice the tone, catch what's implied rather than stated outright. It's the same reading muscle a detective uses on a scene they've never visited before, applying a general skill to brand-new evidence."}
+          {t:"Context questions", b:"These test whether you understood WHO said something, WHEN in the story it happened, and WHY it matters, not whether you can recite the line word for word like a phone number. Imagine a friend forwards you a screenshot of a chat mid-conversation with no names attached, you can usually still tell who's speaking from tone and context alone, and that's exactly the instinct WAEC is testing here."},
+          {t:"Spotting literary devices in an unseen extract", b:"Beyond just following the plot, unseen-passage questions often ask you to name a specific device at work: a METAPHOR (calling one thing another directly), a SIMILE (comparing using 'like' or 'as'), IRONY (a gap between what's said/expected and what's actually true), or FORESHADOWING (an early hint of something that happens later). Training yourself to spot these on sight, in ANY unfamiliar text, not just ones you've studied before, is exactly the transferable skill this paper rewards."},
+          {t:"Unseen passages", b:"You genuinely cannot predict the exact unseen passage that will appear on exam day, but you CAN practise the underlying skill on any similar unfamiliar text: spot the theme, notice the tone, catch what's implied rather than stated outright. It's the same reading muscle a detective uses on a scene they've never visited before, applying a general skill to brand-new evidence."}
         ],
-        err:["Trying to memorise the whole play word for word instead of understanding key scenes and relationships","Assuming an unseen passage matches a previously studied text exactly"],
+        err:["Trying to memorise the whole play word for word instead of understanding key scenes and relationships","Assuming an unseen passage matches a previously studied text exactly","Being unable to name a specific literary device (metaphor, simile, irony) when a question asks for one directly"],
         qs:[
           Q("'Antony and Cleopatra' is tested on Paper 1 primarily through",["objective and context questions, with no essay set on it","a full essay question","a group presentation","an oral interview"],0,"Only context/objective questions are set on the compulsory Shakespeare text.","Easy"),
           Q("A 'context question' in Literature mainly tests whether a student can",["identify who said a quoted line, when, and its significance","recite the whole play from memory","design a stage set","translate the play into another language"],0,"Context questions probe understanding of speaker, situation and significance.","Medium"),
-          Q("For an unseen prose or poem passage, the safest general strategy is to",["read carefully first, then answer based on the actual text given","guess based on a similar text studied in class","skip the passage entirely","assume it matches a previously seen text exactly"],0,"Unseen passages must be answered from the actual text provided, not assumption.","Easy")
+          Q("For an unseen prose or poem passage, the safest general strategy is to",["read carefully first, then answer based on the actual text given","guess based on a similar text studied in class","skip the passage entirely","assume it matches a previously seen text exactly"],0,"Unseen passages must be answered from the actual text provided, not assumption.","Easy"),
+          Q("A comparison made directly using the word 'like' or 'as', such as 'her voice was like thunder', is an example of a",["simile","metaphor","irony","foreshadowing"],0,"A simile explicitly compares using 'like' or 'as', unlike a metaphor which states one thing IS another.","Medium")
         ]
       },
       { id:"africandrama", name:"African Drama: Once Upon an Elephant & The Marriage of Anansewa",
@@ -1058,15 +1106,17 @@ const SUBJECTS = [
         hook:"Imagine a stranger walks into your family dinner and, one by one, reveals a secret each person has been hiding - and by the end, everyone realises they played a part in someone else's downfall. That eerie, tense dinner is basically the plot of 'An Inspector Calls', one of two prescribed Non-African Drama options. The other option, 'A Man for All Seasons', trades the dinner table for a royal court, where a quietly stubborn man risks everything rather than say something he doesn't believe - same exam skills, completely different setting.",
         obj:["Analyse character motivations in the studied Non-African Drama text","Discuss the play's central themes"],
         exp:[
-          {t:"The Inspector's role (An Inspector Calls)", b:"He isn't investigating like a normal detective - think of him more like a mirror the playwright holds up so the family, and the audience, see their own selfishness reflected back at exactly the moment they'd rather look away."},
-          {t:"The alternative text (A Man for All Seasons)", b:"Robert Bolt's play dramatises Sir Thomas More's real historical conflict of conscience with King Henry VIII - a man quietly refusing to say something he doesn't believe, even as the pressure to simply go along with power grows unbearable. If your class studied this instead, the same exam-answering principles (theme, character motivation, structure) still apply."}
+          {t:"The Inspector's role (An Inspector Calls)", b:"He isn't investigating like a normal detective, think of him more like a mirror the playwright holds up so the family, and the audience, see their own selfishness reflected back at exactly the moment they'd rather look away."},
+          {t:"Dramatic irony - a specific device the play depends on", b:"Priestley wrote 'An Inspector Calls' in 1945 but SET it in 1912, meaning the ORIGINAL AUDIENCE already knew the Titanic would sink and a devastating World War would follow, right after Mr Birling confidently declares both impossible on stage. This gap, between what the audience knows and what the characters confidently but wrongly believe, is dramatic irony, and it's precisely how Priestley makes Birling's arrogance look foolish without ever needing to say so directly. Naming this specific device, not just 'Birling is wrong', is what a stronger answer does."},
+          {t:"The alternative text (A Man for All Seasons)", b:"Robert Bolt's play dramatises Sir Thomas More's real historical conflict of conscience with King Henry VIII, a man quietly refusing to say something he doesn't believe, even as the pressure to simply go along with power grows unbearable. If your class studied this instead, the same exam-answering principles (theme, character motivation, structure) still apply."}
         ],
-        err:["Confusing the playwright's message with a single character's opinion","Ignoring stage directions when analysing mood"],
+        err:["Confusing the playwright's message with a single character's opinion","Ignoring stage directions when analysing mood","Missing dramatic irony as the specific device behind Mr Birling's confidently wrong predictions"],
         qs:[
           Q("'An Inspector Calls' was written by",["J. B. Priestley","Arthur Miller","Robert Bolt","George Bernard Shaw"],0,"The play is by J. B. Priestley.","Easy"),
           Q("The Inspector in the play primarily functions to",["expose the family's collective guilt and prompt reflection on social responsibility","serve as comic relief","arrest a suspect for a minor crime","act as a family friend with no wider purpose"],0,"Inspector Goole is a symbolic device probing the family's conscience.","Medium"),
           Q("'A Man for All Seasons' by Robert Bolt centres on the conflict between Sir Thomas More and",["King Henry VIII","the French monarchy","the Roman Senate","a fictional dictator"],0,"The play dramatises More's real historical clash with Henry VIII over conscience and loyalty.","Medium"),
-          Q("The play 'An Inspector Calls' is structured mainly around",["a single evening in one setting","several years across multiple settings","a courtroom trial","a flashback narrated by a child"],0,"The play unfolds in real time in the Birling dining room.","Easy")
+          Q("The play 'An Inspector Calls' is structured mainly around",["a single evening in one setting","several years across multiple settings","a courtroom trial","a flashback narrated by a child"],0,"The play unfolds in real time in the Birling dining room.","Easy"),
+          Q("Mr Birling's confident on-stage predictions that the Titanic is 'unsinkable' and that war will never happen are a clear example of",["dramatic irony, since the 1945 audience already knew both predictions were wrong","foreshadowing of events that will actually occur","comic relief with no deeper purpose","a factually accurate assessment praised by the playwright"],0,"The audience's knowledge that both predictions proved false, unknown to Birling, is a textbook case of dramatic irony.","Hard")
         ]
       },
       { id:"apoetry", name:"African Poetry (2026-2030 set: Okara, Kamara, Soyinka, Osundare, Afriyie-Vidza, Cheney-Coker)",
@@ -1565,16 +1615,18 @@ const SUBJECTS = [
       },
       { id:"industry", name:"Industrialization",
         hook:"A country that only ever exports raw cocoa beans earns far less than one that also turns those same beans into finished chocolate bars ready for supermarket shelves abroad - that leap from raw material to finished, more valuable product is the entire heart of industrialization.",
-        obj:["Explain the meaning and importance of industrialization","Identify problems facing industrialization"],
+        obj:["Explain the meaning and importance of industrialization","Identify problems facing industrialization","Distinguish import-substitution from export-promotion industrialization strategies"],
         exp:[
           {t:"Meaning", b:"Industrialization is the shift from relying mainly on raw agriculture or extraction toward manufacturing and processing goods, the cocoa-to-chocolate leap, usually adding much more value along the way."},
+          {t:"Import-substitution vs export-promotion - two named strategies", b:"IMPORT-SUBSTITUTION industrialization aims to manufacture locally what a country previously imported, reducing foreign dependence, often protected behind tariffs while the local industry is still young and finding its feet (the 'infant industry' argument). EXPORT-PROMOTION industrialization instead deliberately builds industries specifically to sell competitively abroad, chasing foreign exchange earnings rather than merely replacing imports at home. Many East Asian economies famously shifted from the first strategy toward the second as their industries matured, a specific, nameable policy pivot rather than just 'industrializing' in the abstract."},
           {t:"Problems", b:"Common obstacles include unreliable power supply, limited funding, inadequate infrastructure, and competition from cheaper imported manufactured goods that can undercut a young local industry before it's had a chance to grow."}
         ],
-        err:["Assuming industrialization means abandoning agriculture entirely","Overlooking power supply as a major industrial constraint"],
+        err:["Assuming industrialization means abandoning agriculture entirely","Overlooking power supply as a major industrial constraint","Confusing import-substitution (replacing imports locally) with export-promotion (building industries to sell abroad)"],
         qs:[
           Q("Industrialization mainly refers to a shift towards",["manufacturing and processing activities that add more value to raw materials","reducing all forms of trade","abandoning agriculture completely","exporting only raw, unprocessed materials"],0,"Industrialization adds value by processing and manufacturing.","Easy"),
           Q("A common problem facing industrialization in West African countries is",["inadequate and unreliable power supply","too much foreign investment","excess skilled labour","overly cheap local currency"],0,"Power supply issues are a widely cited barrier to industrial growth.","Medium"),
-          Q("A government policy that favours locally-made goods and local ownership of industry is called",["indigenization policy","privatization policy","deflationary policy","tariff removal"],0,"Indigenization policies promote local ownership and production.","Medium")
+          Q("A government policy that favours locally-made goods and local ownership of industry is called",["indigenization policy","privatization policy","deflationary policy","tariff removal"],0,"Indigenization policies promote local ownership and production.","Medium"),
+          Q("An industrialization strategy focused on manufacturing locally what a country previously imported is known as",["import-substitution industrialization","export-promotion industrialization","free trade industrialization","laissez-faire industrialization"],0,"Import-substitution specifically targets replacing imports with local production.","Medium")
         ]
       },
       { id:"natincome", name:"National Income",
@@ -1983,59 +2035,68 @@ const SUBJECTS = [
       },
       { id:"nigeria", name:"Constitutional Developments (Pre- and Post-Independence)",
         hook:"Nigeria's journey from colonial rule to a modern republic passed through a whole sequence of constitutions, each one handing a little more control to Nigerians than the last, like a series of increasingly independent training wheels being removed one at a time until the bicycle could finally ride on its own.",
-        obj:["Outline key pre-independence and post-independence constitutions of Nigeria"],
+        obj:["Outline key pre-independence and post-independence constitutions of Nigeria","Explain the SPECIFIC key change each major constitution introduced"],
         exp:[
           {t:"Pre-independence constitutions", b:"Constitutions like the Richards (1946) and Macpherson (1951) constitutions gradually introduced more Nigerian representation and regional structure before full independence, small but deliberate steps rather than one sudden leap."},
-          {t:"Post-independence constitutions", b:"The 1960 Independence Constitution, the 1963 Republican Constitution, which removed the British monarch as head of state, and later the 1979 and 1999 Constitutions each reshaped Nigeria's system of government further, the training wheels coming off in stages."}
+          {t:"Post-independence constitutions", b:"The 1960 Independence Constitution, the 1963 Republican Constitution, which removed the British monarch as head of state, and later the 1979 and 1999 Constitutions each reshaped Nigeria's system of government further, the training wheels coming off in stages."},
+          {t:"The 1979 Constitution's specific, major shift", b:"The 1979 Constitution introduced a genuinely fundamental change often glossed over: it replaced Nigeria's earlier Westminster-style PARLIAMENTARY system (a Prime Minister answerable to parliament) with an American-style PRESIDENTIAL system (a directly elected President serving as both head of state and head of government). This specific system-type change, not just 'a new constitution', is exactly the detail WAEC likes to test about 1979 specifically."}
         ],
-        err:["Treating all pre-independence constitutions as identical","Confusing the 1960 Independence Constitution with the 1963 Republican Constitution"],
+        err:["Treating all pre-independence constitutions as identical","Confusing the 1960 Independence Constitution with the 1963 Republican Constitution","Missing that 1979 specifically introduced the presidential system, replacing the earlier parliamentary model"],
         qs:[
           Q("Nigeria gained independence from British colonial rule in",["1960","1963","1970","1954"],0,"Nigeria became independent on 1 October 1960.","Easy"),
           Q("Nigeria became a republic, removing the British monarch as head of state, in",["1963","1960","1979","1999"],0,"Nigeria became a republic in 1963.","Medium"),
-          Q("Nigeria's current (Fourth) Republic, based on the 1999 Constitution, began with",["the return of civilian rule in 1999","the 1960 independence ceremony","continued military rule","a monarchy being restored"],0,"The Fourth Republic began with civilian rule in 1999.","Medium")
+          Q("Nigeria's current (Fourth) Republic, based on the 1999 Constitution, began with",["the return of civilian rule in 1999","the 1960 independence ceremony","continued military rule","a monarchy being restored"],0,"The Fourth Republic began with civilian rule in 1999.","Medium"),
+          Q("The 1979 Constitution's most significant structural change was",["replacing the parliamentary system with a presidential system of government","restoring the British monarch as head of state","abolishing all political parties permanently","introducing a purely unitary system"],0,"1979 introduced an American-style presidential system, replacing the earlier Westminster parliamentary model.","Hard")
         ]
       },
       { id:"partyhistory", name:"Development of Major Political Parties",
         hook:"Ask an elderly relative from the West which party their grandparents supported around independence, and an elderly relative from the North the same question, and you'll likely get two very different answers, not by accident, but because Nigeria's earliest major parties formed heavily around specific regions rather than one shared national identity, a pattern that still quietly echoes in political alignment today.",
-        obj:["Describe the formation, objectives and challenges of early major political parties"],
+        obj:["Describe the formation, objectives and challenges of early major political parties","Name the specific leaders associated with each major early party"],
         exp:[
           {t:"Early parties", b:"Parties such as the NCNC, Action Group (AG) and Northern People's Congress (NPC) each drew much of their support from a particular region, shaping Nigeria's early party politics along regional lines, exactly the pattern that surfaces when you ask two grandparents from different regions the same question."},
+          {t:"Matching each party to its specific leader", b:"The NCNC (National Council of Nigeria and the Cameroons) was led by Nnamdi Azikiwe, drawing strong support in the East. The Action Group (AG) was led by Obafemi Awolowo, based mainly in the West. The Northern People's Congress (NPC) was led by Ahmadu Bello (as Premier of the Northern Region) with Abubakar Tafawa Balewa serving as the party's parliamentary leader and eventually Nigeria's first Prime Minister. Matching each party to its specific real leader, not just naming parties in isolation, is exactly the kind of precision WAEC rewards."},
           {t:"Achievements & failures", b:"These parties helped organise the push toward independence and self-government, but their strong regional bases also contributed to political tension between regions, tension that didn't simply disappear once independence was won."}
         ],
-        err:["Assuming Nigeria's earliest parties were organised around national ideology rather than region","Overlooking the tensions this regional basis created"],
+        err:["Assuming Nigeria's earliest parties were organised around national ideology rather than region","Overlooking the tensions this regional basis created","Being unable to correctly match each major party (NCNC, AG, NPC) to its specific real leader"],
         qs:[
           Q("Nigeria's earliest major political parties were largely organised around",["regional and ethnic bases of support","a single unifying national ideology","religious denominations only","foreign-controlled agendas"],0,"Early parties drew support along regional/ethnic lines.","Medium"),
           Q("A key achievement of early Nigerian political parties was",["mobilising support for self-government and independence","preventing independence entirely","abolishing all elections","merging into one party voluntarily"],0,"They played a key role in the push for independence.","Medium"),
-          Q("A common criticism of Nigeria's early party system is that its regional basis",["contributed to political tension between regions","made the country instantly more united","had no effect on politics at all","was copied exactly from the United States"],0,"Regionalism in parties is linked to political tension.","Medium")
+          Q("A common criticism of Nigeria's early party system is that its regional basis",["contributed to political tension between regions","made the country instantly more united","had no effect on politics at all","was copied exactly from the United States"],0,"Regionalism in parties is linked to political tension.","Medium"),
+          Q("The National Council of Nigeria and the Cameroons (NCNC) was led by",["Nnamdi Azikiwe","Obafemi Awolowo","Ahmadu Bello","Abubakar Tafawa Balewa"],0,"Azikiwe led the NCNC, drawing strong support particularly in the East.","Medium"),
+          Q("The Action Group (AG), based mainly in Western Nigeria, was led by",["Obafemi Awolowo","Nnamdi Azikiwe","Ahmadu Bello","Herbert Macaulay"],0,"Awolowo led the Action Group, based mainly in the Western Region.","Medium")
         ]
       },
       { id:"militaryrule", name:"Military Rule",
         hook:"Several West African countries, including Nigeria, spent long stretches of their history governed not by elected civilians but by military officers who seized power, often promising order 'just until things stabilise', but sometimes staying in charge for decades before civilians were allowed to vote again.",
-        obj:["Explain how military governments typically come to power","Explain common features and effects of military rule"],
+        obj:["Explain how military governments typically come to power","Explain common features and effects of military rule","Identify Nigeria's specific periods of military rule"],
         exp:[
           {t:"How military rule begins", b:"Military takeovers, coups, often happen when soldiers seize power from a civilian government, frequently justified by claims of tackling corruption, instability or economic crisis, promises that don't always match what follows."},
+          {t:"Nigeria's specific military periods - concrete anchors, not just a general idea", b:"Nigeria experienced two extended stretches of military rule: 1966 to 1979 (beginning with the coup that ended the First Republic, including the civil war years), and 1983 to 1999 (beginning with the coup that ended the Second Republic, running through several military heads of state until civilian rule returned in 1999). Naming these SPECIFIC periods, not just saying 'Nigeria had military rule at some point', is the kind of precision that separates a strong answer from a vague one."},
           {t:"Effects", b:"Military rule typically suspends the constitution, bans political parties and concentrates power in a small group, trading civilian checks and balances for centralised command authority, exactly the kind of unchecked power a constitution is normally designed to prevent."}
         ],
-        err:["Assuming military rule always immediately improves stability","Assuming coups always have purely selfless motives as claimed"],
+        err:["Assuming military rule always immediately improves stability","Assuming coups always have purely selfless motives as claimed","Being unable to name Nigeria's two specific periods of military rule (1966-1979 and 1983-1999)"],
         qs:[
           Q("A sudden, forceful seizure of government power by the military is called a",["coup d'état","referendum","impeachment","general election"],0,"A coup d'état is a forceful, extra-constitutional seizure of power.","Easy"),
           Q("Military governments typically justify seizing power by claiming to address",["corruption, instability or economic crisis","a shortage of food only","a request from the United Nations","a natural disaster only"],0,"Coups are commonly justified by claims of fixing crises.","Medium"),
-          Q("A common feature of military rule is that it usually",["suspends the constitution and bans political parties","strengthens the legislature's power","increases press freedom","has no effect on civilian institutions"],0,"Military regimes typically suspend normal constitutional processes.","Medium")
+          Q("A common feature of military rule is that it usually",["suspends the constitution and bans political parties","strengthens the legislature's power","increases press freedom","has no effect on civilian institutions"],0,"Military regimes typically suspend normal constitutional processes.","Medium"),
+          Q("Nigeria's second extended period of military rule, ending with the return of civilian government, ran from",["1983 to 1999","1960 to 1963","1979 to 1983","1999 to present"],0,"The second period of military rule ran from the 1983 coup until civilian rule returned in 1999.","Hard")
         ]
       },
       { id:"fedunitary_wa", name:"Federal/Unitary Systems in West Africa",
         hook:"Nigeria chose a federal system to manage its many ethnic groups and regions, sharing power out deliberately, while several of its neighbours chose a more centralized, unitary approach instead, keeping power concentrated at the centre. Same underlying regional challenges across the region, genuinely different answers to them.",
-        obj:["Explain why some West African countries adopt federal versus unitary systems","Identify problems facing federal systems in the region"],
+        obj:["Explain why some West African countries adopt federal versus unitary systems","Identify problems facing federal systems in the region","Name specific West African examples of each system type"],
         exp:[
           {t:"Why federalism in Nigeria", b:"Nigeria's huge ethnic and regional diversity made federalism attractive, sharing power between the centre and states or regions to reduce the risk of any one group dominating entirely over the others."},
+          {t:"Specific named examples, not just the general idea", b:"Nigeria stands out in West Africa as a genuinely FEDERAL system, with power constitutionally shared between the centre and 36 states. Most of its neighbours, by contrast, adopted UNITARY systems instead, Ghana and Senegal, for instance, concentrate governmental authority centrally rather than dividing it constitutionally among regions. Being able to name specific countries on each side of this comparison, not just describing 'federal' and 'unitary' abstractly, is exactly the kind of concrete detail WAEC rewards."},
           {t:"Problems", b:"Federal systems in West Africa have faced challenges like disputes over resource control, such as oil revenue, uneven development between regions, and ongoing tension over exactly how much autonomy individual states should really have."}
         ],
-        err:["Assuming federal systems automatically eliminate regional tension","Confusing federalism with confederation"],
+        err:["Assuming federal systems automatically eliminate regional tension","Confusing federalism with confederation","Being unable to name a specific unitary West African state (like Ghana or Senegal) to contrast with Nigeria's federal system"],
         qs:[
           Q("A key reason Nigeria adopted a federal system of government is its",["significant ethnic and regional diversity","small population size","lack of natural resources","identical culture across all regions"],0,"Diversity made power-sharing between regions attractive.","Medium"),
           Q("A common problem of federal systems in West Africa involves disputes over",["the sharing of resource revenue between the centre and regions","the colour of the national flag","the naming of political parties","which language to teach in universities"],0,"Resource revenue sharing is a frequent source of federal tension.","Medium"),
           Q("Compared to a unitary system, a federal system generally",["shares power constitutionally between central and regional governments","concentrates all power in the centre alone","has no central government at all","cannot have a written constitution"],0,"Federalism constitutionally divides power between levels of government.","Easy"),
-          Q("One of the widely cited negative effects of colonial rule on West African states is the",["dependency syndrome on former colonial powers","complete elimination of foreign trade","total self-sufficiency in all sectors","full elimination of ethnic diversity"],0,"Colonial rule is commonly criticised for leaving former colonies with a lasting dependency on their former colonial powers.","Medium",VP)
+          Q("One of the widely cited negative effects of colonial rule on West African states is the",["dependency syndrome on former colonial powers","complete elimination of foreign trade","total self-sufficiency in all sectors","full elimination of ethnic diversity"],0,"Colonial rule is commonly criticised for leaving former colonies with a lasting dependency on their former colonial powers.","Medium",VP),
+          Q("Unlike Nigeria's federal structure, which of the following West African countries is typically cited as an example of a unitary system?",["Ghana","No other West African country has a unitary system","Only Nigeria has any system of government","Cameroon only"],0,"Ghana is commonly cited as a unitary West African state, unlike federal Nigeria.","Medium")
         ]
       },
       { id:"foreignpolicy", name:"Foreign Policies",
@@ -2115,19 +2176,23 @@ const SUBJECTS = [
       },
       { id:"citnat", name:"Citizenship and Nationalism",
         hook:"When Debo's family travels abroad for the first time, he's surprised that a total stranger at the airport, wearing the same green-white-green pin on her bag, greets his dad like an old friend just because they're both Nigerian. A passport says who you officially belong to; the flag, the anthem sung at assembly, and small shared symbols like that pin are constant reminders that millions of strangers across a country belong to the same 'family', even when they've never met.",
-        obj:["Explain the meaning and importance of citizenship","Explain nationalism and ways of promoting national unity"],
+        obj:["Explain the meaning and importance of citizenship","Explain nationalism and specific ways of promoting national unity","Distinguish healthy patriotism from excessive nationalism (jingoism)"],
         exp:[
-          {t:"Citizenship", b:"Citizenship is membership in the 'Team Nigeria' club - with rights, like a passport and protection abroad the way Debo's dad received at that airport, and duties, like obeying the law and paying tax, that come bundled together with wearing the jersey."},
-          {t:"Nationalism", b:"It's a strong sense of pride and loyalty to one's nation, and a genuine desire to protect and promote its interests and unity - helpful when it builds the kind of instant connection Debo saw at the airport, but risky if that pride ever curdles into hostility toward people from other countries."}
+          {t:"Citizenship", b:"Citizenship is membership in the 'Team Nigeria' club, with rights, like a passport and protection abroad the way Debo's dad received at that airport, and duties, like obeying the law and paying tax, that come bundled together with wearing the jersey."},
+          {t:"Nationalism", b:"It's a strong sense of pride and loyalty to one's nation, and a genuine desire to protect and promote its interests and unity, helpful when it builds the kind of instant connection Debo saw at the airport, but risky if that pride ever curdles into hostility toward people from other countries."},
+          {t:"Specific ways of promoting national unity", b:"Beyond just 'feeling proud', concrete measures include the National Youth Service Corps (NYSC), which deliberately sends young graduates to work in a different part of the country from where they grew up, specifically to build cross-regional friendships and understanding. Other measures include shared national symbols (flag, anthem, pledge), civic education in schools, and national days of celebration that bring different groups together around one shared identity."},
+          {t:"Patriotism vs jingoism - where healthy pride tips over", b:"Patriotism is a healthy, constructive love for one's country that still allows fair criticism when the country gets something wrong. Jingoism (or excessive nationalism) instead treats one's own country as always right and superior, often at the expense of fairly viewing other nations, or even citizens who disagree. This is precisely the 'downside' hinted at above: pride itself isn't the problem, but pride that can't tolerate honest self-criticism or respect for others often is."}
         ],
-        err:["Confusing residency with citizenship","Assuming nationalism can never have any downsides"],
+        err:["Confusing residency with citizenship","Assuming nationalism can never have any downsides","Confusing healthy patriotism (allows fair self-criticism) with jingoism (treats one's country as always right)"],
         qs:[
           Q("Citizenship confers on a person mainly",["legal rights and obligations within a state","unlimited freedom without responsibility","automatic wealth","exemption from all laws"],0,"Citizenship grants rights but also comes with corresponding duties.","Easy"),
           Q("Which of these is a symbol of national identity?",["The national flag","A private company logo","A personal identification number","A local market stall sign"],0,"The national flag represents the sovereignty and identity of a nation.","Easy"),
           Q("Nationalism is best described as",["a strong sense of pride, loyalty and commitment to one's nation","a legal document","a type of tax","an electoral system"],0,"Nationalism is a sentiment of loyalty and commitment to one's nation.","Easy"),
           Q("The most common method of acquiring the citizenship of a country is by",["registration","birth","marriage","naturalization"],1,"Most people become citizens simply by being born in, or to parents of, a country - the most common route of all.","Medium",VP),
           Q("Who among the following is NOT typically recognised as a foremost Nigerian nationalist?",["Nnamdi Azikiwe","General Yakubu Gowon","Chief Obafemi Awolowo","Sir Abubakar Tafawa Balewa"],1,"Gowon was a military head of state after independence; Azikiwe, Awolowo and Balewa were leading figures of the pre-independence nationalist movement.","Hard",VP),
-          Q("One major criticism levelled against the United Nations (UN) is its",["excessive spending on humanitarian aid","inability to ensure fair, permanent representation on the Security Council","complete lack of international influence","overly democratic voting structure"],1,"A frequently cited UN weakness is that permanent Security Council seats are not fairly distributed among all regions and nations.","Hard",VP)
+          Q("One major criticism levelled against the United Nations (UN) is its",["excessive spending on humanitarian aid","inability to ensure fair, permanent representation on the Security Council","complete lack of international influence","overly democratic voting structure"],1,"A frequently cited UN weakness is that permanent Security Council seats are not fairly distributed among all regions and nations.","Hard",VP),
+          Q("Nigeria's National Youth Service Corps (NYSC) specifically promotes national unity by",["sending young graduates to work in a different part of the country from where they grew up","excusing graduates from all future civic duties","only recruiting from one region","paying graduates to remain in their home state"],0,"NYSC deliberately places graduates outside their home region to build cross-regional understanding.","Medium"),
+          Q("The key difference between healthy patriotism and jingoism (excessive nationalism) is that patriotism",["still allows fair criticism of one's own country, while jingoism treats it as always right","means never feeling pride in one's country","only applies to elected officials","requires hostility toward other nations"],0,"Patriotism permits honest self-criticism; jingoism does not.","Hard")
         ]
       },
       { id:"rights", name:"Human Rights",
@@ -2328,17 +2393,19 @@ const SUBJECTS = [
       },
       { id:"structgov", name:"Structure and Functions of Government",
         hook:"Even Mr Adeyemi's Civic Education class needs some basic structure to function - a class captain to represent everyone, agreed class rules, a treasurer to guard the class's contributed funds. A government is really the exact same idea, just scaled up from thirty students to an entire country of millions, with three separate tiers instead of one classroom.",
-        obj:["Explain the meaning of government","Identify the tiers and core functions of government"],
+        obj:["Explain the meaning of government","Identify the tiers and core functions of government","Distinguish the three tiers of government from the three arms of government, a commonly confused pair"],
         exp:[
-          {t:"Meaning", b:"Government refers to the body of people and institutions with authority to make and enforce laws, and to manage the affairs of a state - the class captain, rules and treasurer scaled up to a national level."},
-          {t:"Tiers", b:"In Nigeria, government operates at three tiers - federal, state and local - each with its own specific responsibilities, the way a school might have a principal, a head of department, and a class captain, each handling a different scale of decision."}
+          {t:"Meaning", b:"Government refers to the body of people and institutions with authority to make and enforce laws, and to manage the affairs of a state, the class captain, rules and treasurer scaled up to a national level."},
+          {t:"Tiers vs arms - two different ways government is divided", b:"The three TIERS (federal, state, local) divide government GEOGRAPHICALLY, by level and area of coverage, the way a school might have national, state and local education authorities. The three ARMS (executive, legislature, judiciary) instead divide government by FUNCTION, regardless of tier: the executive implements laws and runs day-to-day administration, the legislature makes laws, and the judiciary interprets laws and settles disputes. Every tier can have its own version of all three arms, a state government, for instance, has its own executive (governor), legislature (state assembly) and judiciary (state courts). Confusing 'tiers' with 'arms' is a common, testable mix-up."},
+          {t:"Tiers", b:"In Nigeria, government operates at three tiers, federal, state and local, each with its own specific responsibilities, the way a school might have a principal, a head of department, and a class captain, each handling a different scale of decision."}
         ],
-        err:["Assuming government has only one tier or level","Confusing government's functions with those of private businesses"],
+        err:["Assuming government has only one tier or level","Confusing government's functions with those of private businesses","Confusing the three TIERS (federal/state/local, a geographic division) with the three ARMS (executive/legislature/judiciary, a functional division)"],
         qs:[
           Q("Government is best defined as",["the body of people and institutions with authority to make and enforce laws","a single elected individual only","a private business","a religious organisation"],0,"Government is the institutional body with lawmaking and enforcement authority.","Easy"),
           Q("Nigeria's government operates at how many tiers?",["Three (federal, state, local)","One","Two","Five"],0,"Nigeria has federal, state and local tiers of government.","Easy"),
           Q("A core function of government includes",["maintaining law and order and providing public services","running private businesses exclusively","eliminating all forms of taxation","banning political participation"],0,"Law and order and public services are core government functions.","Medium"),
-          Q("A local government administration primarily supports",["a unitary government","consensus politics","grassroot governance","foreign culture"],2,"Local government exists specifically to bring governance to the grassroots level.","Medium",VP)
+          Q("A local government administration primarily supports",["a unitary government","consensus politics","grassroot governance","foreign culture"],2,"Local government exists specifically to bring governance to the grassroots level.","Medium",VP),
+          Q("The key difference between the 'tiers' and the 'arms' of government is that",["tiers divide government geographically (federal/state/local), while arms divide it functionally (executive/legislature/judiciary)","they are simply two different names for the same three-part division","only the federal tier has all three arms","arms only exist at the local government level"],0,"Tiers are a geographic division; arms are a functional division that can exist within each tier.","Hard")
         ]
       },
       { id:"democracy", name:"Democracy, Rule of Law and National Development",
@@ -2778,6 +2845,528 @@ const SUBJECTS = [
         ]
       }
     ]
+  },
+  {
+    id:"chemistry", name:"Chemistry",
+    examFormat:"Paper 1 (1 hour, 50 marks) - 50 objective questions drawn from the common syllabus section. Paper 2 (2 hours, 100 marks) - essay paper covering the entire syllabus, in two sections. Paper 3 - a practical (or alternative-to-practical) paper testing laboratory skills; this app covers Papers 1 and 2 content only, since practical work needs an actual lab.",
+    topics:[
+      { id:"intro_chem", name:"Introduction to Chemistry",
+        hook:"Before a chemist trusts a single result, they trust the tool that measured it. A mass recorded as '5g' and one recorded as '5.00g' aren't saying the same thing, the second is a promise of precision the first never made, and WAEC's very first chemistry topic exists specifically to make sure you understand that difference before anything else.",
+        obj:["Explain the importance of measurement and significant figures in chemistry","Outline the steps of the scientific method"],
+        exp:[
+          {t:"Measurement and significant figures", b:"Every measurement (mass, length, time, temperature, volume) has a precision limit set by the instrument used, and significant figures communicate exactly how precise a value is. '5.00g' (3 significant figures) claims far more precision than '5g' (1 significant figure), even though both could describe the same object, this is why WAEC insists on correct significant figures and SI units in calculations rather than treating them as decoration."},
+          {t:"The scientific method", b:"Chemistry as a discipline follows a repeatable sequence: OBSERVATION (noticing something worth explaining), forming a HYPOTHESIS (a testable proposed explanation), EXPERIMENTATION (testing the hypothesis under controlled conditions), and finally formulating LAWS or THEORIES once results are consistently confirmed. A hypothesis that keeps failing under testing gets revised or discarded, this self-correcting cycle is what separates genuine scientific knowledge from a lucky guess."}
+        ],
+        err:["Recording a measurement with more significant figures than the instrument actually supports","Confusing a scientific 'theory' with a mere guess, when it actually means a well-tested, well-supported explanation"],
+        qs:[
+          Q("A measurement recorded as 12.50g has how many significant figures?",["4","3","2","5"],0,"12.50 has four significant figures: 1, 2, 5, and the trailing zero after the decimal point.","Medium"),
+          Q("The first step in the scientific method is generally",["careful observation of a phenomenon","forming a final law","publishing a conclusion","building an industrial plant"],0,"Observation precedes hypothesis formation and testing.","Easy"),
+          Q("A testable proposed explanation for an observation is called a",["hypothesis","law","constant","catalyst"],0,"A hypothesis is a proposed, testable explanation.","Easy"),
+          Q("The SI unit for temperature used in scientific measurement is the",["Kelvin","Celsius only","Fahrenheit","calorie"],0,"The Kelvin is the SI base unit for temperature.","Medium",VP)
+        ]
+      },
+      { id:"atom", name:"Structure of the Atom",
+        hook:"Every single thing you have ever touched, tasted, or breathed is built from atoms so small that a single drop of water contains more of them than there are stars in the observable universe, and yet by the end of this topic, you'll be able to describe exactly what's inside one.",
+        obj:["Describe the structure of the atom, including protons, neutrons and electrons","Distinguish atomic number from mass number","Explain isotopes and calculate relative atomic mass"],
+        exp:[
+          {t:"Subatomic particles", b:"An atom has a tiny, dense NUCLEUS at its centre containing PROTONS (positive charge) and NEUTRONS (no charge), with ELECTRONS (negative charge) occupying the much larger space around the nucleus. The ATOMIC NUMBER is simply the number of protons, and it's what makes an element that specific element, change the proton count and you've made a completely different element."},
+          {t:"Mass number and isotopes", b:"MASS NUMBER is protons plus neutrons combined. ISOTOPES are atoms of the same element (same proton count) with different numbers of neutrons, and therefore different mass numbers, carbon-12 and carbon-14 are both carbon, just with two extra neutrons in the second one. RELATIVE ATOMIC MASS accounts for all of an element's naturally occurring isotopes, weighted by how common each one actually is in nature, which is why it's rarely a perfectly round number."}
+        ],
+        err:["Confusing atomic number (proton count) with mass number (protons + neutrons)","Assuming isotopes of the same element have different chemical properties, when they mainly differ in mass"],
+        qs:[
+          Q("The atomic number of an element represents its number of",["protons","neutrons","protons and neutrons combined","electrons and neutrons combined"],0,"Atomic number specifically counts protons.","Easy"),
+          Q("An atom with 17 protons and 18 neutrons has a mass number of",["35","17","18","1"],0,"Mass number = protons + neutrons = 17+18 = 35.","Medium"),
+          Q("Isotopes of the same element have the same number of",["protons","neutrons","mass number","total subatomic particles"],0,"Isotopes share proton count but differ in neutron count.","Medium"),
+          Q("Chlorine exists as two isotopes, chlorine-35 (75% abundance) and chlorine-37 (25% abundance). Its relative atomic mass is closest to",["35.5","36","35","37"],0,"(35×0.75)+(37×0.25)=26.25+9.25=35.5.","Hard",VP),
+          Q("The subatomic particle with a negative charge, found outside the nucleus, is the",["electron","proton","neutron","nucleon"],0,"Electrons carry negative charge and orbit the nucleus.","Easy")
+        ]
+      },
+      { id:"separation", name:"Standard Separation Techniques",
+        hook:"Muddy water, crude oil, and a mixture of salt and sand all have one thing in common: someone, somewhere, figured out a clever physical trick to pull their components cleanly apart without any chemical reaction at all, and those tricks are exactly what this topic catalogues.",
+        obj:["Identify appropriate separation techniques for different types of mixtures","Explain the principle behind each major technique"],
+        exp:[
+          {t:"Filtration, evaporation and crystallization", b:"FILTRATION separates an insoluble solid from a liquid (sand from water) by passing the mixture through a barrier the solid can't cross. EVAPORATION removes a liquid entirely, leaving a dissolved solid behind (getting salt back from salt water). CRYSTALLIZATION is a gentler, more controlled version, cooling a hot saturated solution slowly so the dissolved solid forms pure, well-shaped crystals rather than just a messy residue."},
+          {t:"Distillation and chromatography", b:"DISTILLATION separates liquids with different boiling points by heating the mixture and collecting the vapour that boils off first, this is exactly how crude oil gets separated into petrol, diesel and other fractions. CHROMATOGRAPHY separates substances based on how differently they travel through a medium (like paper), used for anything from testing ink purity to analysing complex mixtures in a lab."}
+        ],
+        err:["Using filtration for a mixture of two miscible liquids, when distillation is needed instead","Confusing evaporation (destroys the liquid to keep the solid) with distillation (keeps and collects the liquid too)"],
+        qs:[
+          Q("Separating sand from water is best achieved by",["filtration","distillation","chromatography","crystallization"],0,"Filtration separates an insoluble solid from a liquid.","Easy"),
+          Q("Separating a mixture of ethanol and water, which have different boiling points, is best achieved by",["distillation","filtration","decantation","magnetism"],0,"Distillation separates liquids by their differing boiling points.","Medium"),
+          Q("Obtaining pure, well-shaped salt crystals from a salt solution is best achieved by",["crystallization","filtration only","chromatography","use of a separating funnel"],0,"Crystallization allows slow, controlled crystal formation from a saturated solution.","Medium"),
+          Q("A technique that separates the components of a mixture based on their differing movement through a medium is",["chromatography","distillation","filtration","sublimation"],0,"Chromatography separates by differential movement through a medium.","Medium",VP)
+        ]
+      },
+      { id:"periodic", name:"Periodic Chemistry",
+        hook:"Long before every element was even discovered, Dmitri Mendeleev arranged the known ones into a table so logically structured that he could confidently predict the exact properties of elements nobody had found yet, purely from the gaps left in his own pattern.",
+        obj:["Explain the arrangement of the periodic table by atomic number","Explain periodicity, including trends across periods and down groups"],
+        exp:[
+          {t:"Groups and periods", b:"Elements are arranged by increasing ATOMIC NUMBER. A GROUP (vertical column) contains elements with the same number of electrons in their outermost shell, giving them similar chemical properties, all of Group 1 reacts vigorously with water, for instance. A PERIOD (horizontal row) instead reflects the number of electron shells an atom has, elements in Period 3 all have three shells."},
+          {t:"Periodic trends", b:"Moving ACROSS a period (left to right), atomic radius generally shrinks and elements become progressively less metallic, more non-metallic. Moving DOWN a group, atomic radius generally increases as more electron shells are added, and for Group 1 metals specifically, reactivity increases down the group since the outermost electron is held more loosely, further from the nucleus."}
+        ],
+        err:["Confusing a 'group' (column, similar properties) with a 'period' (row, same number of shells)","Assuming reactivity trends work identically for metals and non-metals down a group"],
+        qs:[
+          Q("Elements in the same group of the periodic table have the same number of",["outermost (valence) electrons","neutrons","protons","electron shells"],0,"Group membership is determined by valence electron count.","Easy"),
+          Q("Elements in the same period of the periodic table have the same number of",["electron shells","valence electrons","protons","isotopes"],0,"Period membership reflects the number of electron shells.","Easy"),
+          Q("Moving down Group 1 of the periodic table, reactivity of the metals generally",["increases","decreases","stays exactly constant","becomes zero"],0,"Group 1 reactivity increases down the group as the outer electron is held more loosely.","Medium"),
+          Q("Moving across a period from left to right, elements generally become",["less metallic and more non-metallic","more metallic","heavier only, with no property change","identical in all chemical properties"],0,"Metallic character decreases across a period.","Medium",VP)
+        ]
+      },
+      { id:"bonding", name:"Chemical Bonds",
+        hook:"Table salt doesn't fall apart in your hand, and a diamond can scratch almost anything else on Earth, both because of an invisible force holding their atoms firmly together, just not the same kind of force in each case.",
+        obj:["Distinguish ionic, covalent and metallic bonding","Explain how bond type relates to a substance's physical properties"],
+        exp:[
+          {t:"Ionic vs covalent bonding", b:"IONIC bonding happens when a metal atom transfers electrons to a non-metal atom, creating oppositely charged ions that attract each other strongly, sodium chloride (table salt) is a classic example. COVALENT bonding instead happens when two non-metal atoms SHARE electrons rather than transferring them, water and carbon dioxide are both covalently bonded molecules."},
+          {t:"Metallic bonding and physical properties", b:"METALLIC bonding involves metal atoms surrounded by a 'sea' of delocalised (freely moving) electrons, which explains why metals conduct electricity so well, those free electrons carry charge easily. Bond type also predicts physical behaviour more broadly: ionic compounds typically have high melting points and conduct electricity only when melted or dissolved, while simple covalent compounds often have much lower melting points since only weaker forces hold separate molecules together, even though the covalent bonds within each molecule are themselves strong."}
+        ],
+        err:["Assuming all bonds between two atoms work the same way, ionic or covalent","Confusing the STRENGTH of a bond within a molecule with the weaker forces holding separate molecules together"],
+        qs:[
+          Q("A bond formed by the transfer of electrons from a metal to a non-metal is called",["ionic bonding","covalent bonding","metallic bonding","hydrogen bonding"],0,"Ionic bonding involves electron transfer between metal and non-metal.","Easy"),
+          Q("A bond formed by two non-metal atoms sharing electrons is called",["covalent bonding","ionic bonding","metallic bonding","van der Waals bonding"],0,"Covalent bonding involves electron sharing between non-metals.","Easy"),
+          Q("Metals conduct electricity well mainly because of their",["sea of delocalised, freely moving electrons","fixed, immovable electrons","complete absence of electrons","very heavy nuclei"],0,"Delocalised electrons in metallic bonding allow easy charge flow.","Medium"),
+          Q("Ionic compounds typically conduct electricity",["only when molten or dissolved in water, not as a solid","equally well as a solid, liquid or gas","only as a solid","never, under any conditions"],0,"Ionic compounds need mobile ions to conduct, present only when molten or in solution.","Medium",VP)
+        ]
+      },
+      { id:"stoich", name:"Stoichiometry and Chemical Reactions",
+        hook:"A baker doubling a recipe multiplies every ingredient by exactly the same factor, or the cake fails; a chemist balancing an equation is following the exact same non-negotiable logic, just with atoms instead of flour and sugar.",
+        obj:["Balance simple chemical equations","Explain the mole concept and Avogadro's number","Perform simple stoichiometric calculations"],
+        exp:[
+          {t:"Balancing equations", b:"The Law of Conservation of Mass means atoms can't simply appear or disappear in a reaction, so a correctly balanced equation must have the exact same number of each type of atom on both sides. This is done by adjusting the numbers placed IN FRONT of each formula (coefficients), never by changing the formulas themselves."},
+          {t:"The mole and Avogadro's number", b:"A MOLE is simply a specific, very large counting number, 6.02×10²³ particles, called Avogadro's number, the chemist's version of a 'dozen', just scaled up enormously to be useful for atoms and molecules. Once you know how many moles of a substance you have, you can calculate its mass (using molar mass) or, for a gas, its volume, letting stoichiometry connect the balanced equation's ratios to real, measurable quantities in the lab."}
+        ],
+        err:["Changing a chemical formula's subscripts to balance an equation, instead of adjusting coefficients","Confusing 'moles' with 'mass' or 'number of particles' directly, without applying the correct conversion"],
+        qs:[
+          Q("Balancing a chemical equation means ensuring",["the same number of each type of atom appears on both sides","the same number of molecules appears on both sides","the same mass of gas is produced","the reaction happens faster"],0,"Balancing enforces conservation of atoms, not necessarily molecule count.","Easy"),
+          Q("Avogadro's number, approximately 6.02×10²³, represents the number of particles in",["one mole of a substance","one gram of any substance","one litre of any gas","one atom"],0,"Avogadro's number defines the mole as a counting unit.","Medium"),
+          Q("In the balanced equation 2H₂ + O₂ → 2H₂O, how many moles of oxygen are needed to react completely with 4 moles of hydrogen?",["2 moles","1 mole","4 moles","8 moles"],0,"The 2:1 ratio of H₂:O₂ means 4 moles of H₂ requires 2 moles of O₂.","Hard",VP),
+          Q("The mass of one mole of a substance, in grams, is numerically equal to its",["relative molecular (or atomic) mass","atomic number","number of protons","boiling point"],0,"Molar mass in grams equals the relative molecular/atomic mass.","Medium")
+        ]
+      },
+      { id:"states", name:"States of Matter",
+        hook:"Ice, water and steam are all exactly the same substance, H₂O, and yet one holds its shape stubbornly, one flows to fit any container, and one expands to fill an entire room, purely because of how energetically their particles are moving.",
+        obj:["Explain the kinetic theory of matter","Distinguish solids, liquids and gases by particle arrangement and energy","Explain changes of state"],
+        exp:[
+          {t:"Kinetic theory", b:"All matter is made of tiny particles in constant motion, and how much energy those particles have determines the state of matter. In a SOLID, particles vibrate in fixed positions, tightly packed. In a LIQUID, particles have enough energy to slide past each other while staying close together. In a GAS, particles have enough energy to move independently and spread far apart, filling whatever space is available."},
+          {t:"Changes of state", b:"Adding heat energy increases particle movement, driving a substance from solid to liquid (melting) to gas (boiling/evaporation); removing heat energy does the reverse (condensing, freezing). Crucially, during an actual change of state, the temperature stays constant even while heat is still being added or removed, since that energy is being used to break or form the bonds between particles, not to raise the temperature further."}
+        ],
+        err:["Assuming heating always immediately raises temperature, even during a phase change","Confusing evaporation (occurs at any temperature, from the surface only) with boiling (occurs throughout the liquid, at a fixed temperature)"],
+        qs:[
+          Q("According to kinetic theory, particles in a gas, compared to a solid, have",["much greater energy and move independently, far apart","less energy and are more tightly packed","identical energy and arrangement","no motion at all"],0,"Gas particles have high energy and move freely, unlike the fixed vibration of solid particles.","Easy"),
+          Q("The process of a liquid changing directly to a gas at any temperature, from its surface only, is called",["evaporation","boiling","condensation","sublimation"],0,"Evaporation occurs at the surface at any temperature, unlike boiling.","Medium"),
+          Q("During melting, while heat is continuously supplied, the temperature of the substance",["remains constant until melting is complete","rises steadily","falls","becomes negative"],0,"Temperature plateaus during a phase change as energy breaks particle bonds instead of raising temperature.","Medium",VP),
+          Q("A substance changing directly from a solid to a gas, without passing through the liquid state, undergoes",["sublimation","evaporation","condensation","deposition"],0,"Sublimation is the direct solid-to-gas transition.","Medium")
+        ]
+      },
+      { id:"energy_chem", name:"Energy and Energy Changes",
+        hook:"Striking a match releases heat you can feel instantly; dissolving certain salts in water makes the container feel colder to the touch, both are genuine chemical reactions, just releasing or absorbing energy in opposite directions.",
+        obj:["Distinguish exothermic from endothermic reactions","Explain enthalpy change and simple energy diagrams"],
+        exp:[
+          {t:"Exothermic vs endothermic", b:"An EXOTHERMIC reaction releases energy to the surroundings, usually felt as heat, like the lit match. An ENDOTHERMIC reaction instead absorbs energy from the surroundings, making the immediate area feel colder, like certain salts dissolving. Combustion reactions are reliably exothermic; many dissolving and decomposition reactions are endothermic."},
+          {t:"Enthalpy change", b:"Enthalpy change (ΔH) measures the heat energy difference between products and reactants. By convention, ΔH is NEGATIVE for an exothermic reaction (energy leaves the system) and POSITIVE for an endothermic reaction (energy enters the system), a sign convention that trips students up if they assume 'negative' always means 'less energy released' rather than 'energy released outward'."}
+        ],
+        err:["Assuming all reactions release heat, when many genuinely absorb it instead","Getting the sign convention backwards: exothermic is NEGATIVE ΔH, not positive"],
+        qs:[
+          Q("A reaction that releases heat energy to its surroundings is called",["exothermic","endothermic","isothermic","adiabatic"],0,"Exothermic reactions release energy outward.","Easy"),
+          Q("A reaction that absorbs heat energy from its surroundings, making the surroundings feel colder, is called",["endothermic","exothermic","catalytic","neutral"],0,"Endothermic reactions absorb energy from surroundings.","Easy"),
+          Q("By convention, the enthalpy change (ΔH) for an exothermic reaction is",["negative","positive","always zero","undefined"],0,"Exothermic reactions have negative ΔH since energy leaves the system.","Medium",VP),
+          Q("Combustion of fuels, such as burning wood or petrol, is best classified as",["an exothermic reaction","an endothermic reaction","a non-chemical physical change","a purely nuclear reaction"],0,"Combustion reliably releases heat energy, making it exothermic.","Easy")
+        ]
+      },
+      { id:"acidsbase", name:"Acids, Bases and Salts",
+        hook:"A lemon and a bar of soap sit at opposite ends of a scale invisible to your eye but very real to your tongue, one sharp and sour, one slippery and bitter, and chemistry has a precise number, pH, for exactly where on that scale anything sits.",
+        obj:["Define acids and bases using the Arrhenius concept","Explain the pH scale","Explain neutralization and salt formation"],
+        exp:[
+          {t:"Acids and bases", b:"By the Arrhenius definition, an ACID is a substance that produces H⁺ (or H₃O⁺) ions in water, while a BASE produces OH⁻ ions in water. The pH SCALE (0-14) measures how acidic or basic a solution is: below 7 is acidic, exactly 7 is neutral (pure water), above 7 is basic (alkaline)."},
+          {t:"Neutralization and salts", b:"When an acid reacts with a base, they NEUTRALISE each other, producing a SALT and water, acid + base → salt + water. This is exactly why milk of magnesia (a base) relieves the discomfort of excess stomach acid, and why farmers add lime (a base) to acidic soil to bring its pH closer to neutral for better crop growth."}
+        ],
+        err:["Assuming a strong acid and a concentrated acid mean the same thing (strength refers to ionisation, concentration to amount dissolved)","Forgetting that pH 7 specifically means neutral, not 'a little acidic'"],
+        qs:[
+          Q("According to the Arrhenius concept, an acid is a substance that produces",["H+ ions in water","OH- ions in water","only salt","only water"],0,"Arrhenius acids specifically produce H+ ions in aqueous solution.","Easy"),
+          Q("A solution with a pH of 7 is described as",["neutral","strongly acidic","strongly basic","unmeasurable"],0,"pH 7 is exactly neutral.","Easy"),
+          Q("The reaction between an acid and a base to form a salt and water is called",["neutralization","oxidation","sublimation","electrolysis"],0,"Acid + base reactions producing salt and water are neutralization reactions.","Easy"),
+          Q("A solution with a pH of 3 is best described as",["acidic","neutral","basic (alkaline)","impossible to determine"],0,"Any pH below 7 is acidic.","Medium",VP)
+        ]
+      },
+      { id:"solubility", name:"Solubility of Substances",
+        hook:"Stir sugar into cold tea and only so much will dissolve before granules start settling stubbornly at the bottom, stir the same sugar into hot tea and far more disappears completely, the exact same sugar behaving completely differently, purely because of temperature.",
+        obj:["Explain solubility and distinguish saturated from unsaturated solutions","Explain factors affecting solubility"],
+        exp:[
+          {t:"Saturated vs unsaturated", b:"A SATURATED solution has dissolved the maximum amount of solute possible at that temperature, adding more just leaves undissolved solid sitting at the bottom. An UNSATURATED solution can still dissolve more solute before reaching that limit."},
+          {t:"Factors affecting solubility", b:"For most solids dissolving in water, solubility INCREASES as temperature rises, exactly why hot tea dissolves more sugar than cold tea. Gases behave oppositely, their solubility in water DECREASES as temperature rises, which is why a warm fizzy drink loses its carbonation faster than a cold one."}
+        ],
+        err:["Assuming solubility always increases with temperature, forgetting gases behave the opposite way","Confusing a saturated solution with a concentrated one (a dilute solution can still be saturated if the solute simply doesn't dissolve well)"],
+        qs:[
+          Q("A solution that has dissolved the maximum solute possible at a given temperature is called",["saturated","unsaturated","dilute","pure"],0,"A saturated solution holds the maximum dissolvable solute at that temperature.","Easy"),
+          Q("For most solid solutes dissolving in water, solubility generally",["increases as temperature rises","decreases as temperature rises","stays exactly constant with temperature","becomes zero at high temperature"],0,"Most solids become more soluble in water as temperature increases.","Medium"),
+          Q("For gases dissolving in water, solubility generally",["decreases as temperature rises","increases as temperature rises","is unaffected by temperature","only depends on pressure, never temperature"],0,"Gas solubility in water decreases as temperature rises, unlike most solids.","Medium",VP),
+          Q("A warm carbonated drink loses its fizz faster than a cold one mainly because",["the gas's solubility decreases as temperature rises, releasing it from solution","the liquid evaporates completely","the sugar content increases with heat","carbon dioxide becomes heavier when warm"],0,"Reduced gas solubility at higher temperature causes CO2 to escape more readily.","Medium")
+        ]
+      },
+      { id:"kinetics", name:"Chemical Kinetics and Equilibrium",
+        hook:"A cut apple browns slowly at room temperature but almost instantly if dropped whole into hot oil, the same chemical process, dramatically sped up, because chemical kinetics is really just the study of what makes reactions go faster or slower.",
+        obj:["Explain factors affecting the rate of a chemical reaction","Explain the concept of chemical equilibrium"],
+        exp:[
+          {t:"Factors affecting reaction rate", b:"Reaction rate increases with: higher TEMPERATURE (particles move faster, colliding more often and more energetically), higher CONCENTRATION (more particles available to collide), a CATALYST (speeds up a reaction without being used up itself, by providing an easier reaction pathway), and greater SURFACE AREA (more particle contact area, which is why powdered substances react faster than solid lumps)."},
+          {t:"Chemical equilibrium", b:"Some reactions don't go to completion, instead reaching a point where the forward and reverse reactions occur at exactly the same rate, called EQUILIBRIUM. At equilibrium, the amounts of reactants and products stay constant, not because the reaction has stopped, but because it's happening in both directions at matched speed, a dynamic balance rather than a frozen one."}
+        ],
+        err:["Assuming a catalyst gets consumed in the reaction it speeds up","Assuming equilibrium means the reaction has completely stopped, rather than balanced in both directions"],
+        qs:[
+          Q("Which of these would generally INCREASE the rate of a chemical reaction?",["Increasing the temperature","Decreasing the concentration of reactants","Using larger solid lumps instead of powder","Removing the catalyst"],0,"Higher temperature increases particle energy and collision frequency, speeding up reactions.","Easy"),
+          Q("A catalyst speeds up a reaction by",["providing an alternative pathway with lower activation energy, without being consumed","being permanently used up in the reaction","cooling the reaction mixture","removing reactants from the mixture"],0,"Catalysts lower activation energy and are not consumed.","Medium"),
+          Q("At chemical equilibrium, the forward and reverse reaction rates are",["equal, with a dynamic balance maintained","completely stopped","always exactly zero for the reverse reaction","impossible to compare"],0,"Equilibrium is a dynamic state where forward and reverse rates match.","Medium",VP),
+          Q("Powdered zinc reacts with dilute acid faster than a solid zinc lump mainly because powder has",["greater surface area for particle collisions","lower temperature","less mass overall","weaker chemical bonds"],0,"Greater surface area increases the frequency of effective collisions.","Medium")
+        ]
+      },
+      { id:"redox", name:"Redox Reactions",
+        hook:"A shiny iron nail left out in the rain slowly turns to reddish-brown rust, and that transformation, however ordinary it looks, is the exact same fundamental process, electrons changing hands, that powers a battery.",
+        obj:["Define oxidation and reduction in terms of electron transfer","Identify oxidising and reducing agents in a reaction"],
+        exp:[
+          {t:"OIL RIG - the memory device", b:"OXIDATION Is Loss (of electrons); REDuction Is Gain (of electrons), remembered as 'OIL RIG'. Since electrons lost by one substance must be gained by another, oxidation and reduction always happen together in the same reaction, which is exactly why it's called a REDOX (reduction-oxidation) reaction, never one without the other."},
+          {t:"Oxidising and reducing agents", b:"The OXIDISING AGENT is the substance that causes oxidation in another substance by accepting its electrons, meaning the oxidising agent itself gets reduced in the process. The REDUCING AGENT causes reduction in another substance by donating electrons, meaning it itself gets oxidised. This 'agent gets the opposite treatment' logic is exactly where students most often trip up."}
+        ],
+        err:["Confusing which substance is 'oxidised' versus which one is the 'oxidising agent' (they refer to opposite roles)","Forgetting that oxidation and reduction always occur together, never in isolation"],
+        qs:[
+          Q("Using the 'OIL RIG' memory device, oxidation involves the",["loss of electrons","gain of electrons","gain of protons","loss of neutrons"],0,"OIL = Oxidation Is Loss (of electrons).","Easy"),
+          Q("Using the 'OIL RIG' memory device, reduction involves the",["gain of electrons","loss of electrons","loss of protons","gain of neutrons"],0,"RIG = Reduction Is Gain (of electrons).","Easy"),
+          Q("A substance that causes oxidation in another substance, by accepting electrons from it, is called a(n)",["oxidising agent","reducing agent","catalyst","indicator"],0,"An oxidising agent accepts electrons, causing oxidation elsewhere, while itself being reduced.","Medium"),
+          Q("In a redox reaction, if Substance A loses electrons to Substance B, then Substance A has been",["oxidised, and acted as the reducing agent","reduced, and acted as the oxidising agent","neither oxidised nor reduced","both oxidised and reduced simultaneously"],0,"Losing electrons means Substance A is oxidised, making it the reducing agent (it caused B's reduction).","Hard",VP)
+        ]
+      },
+      { id:"carbon_chem", name:"Chemistry of Carbon Compounds",
+        hook:"Carbon is a strange kind of chemical celebrity: a single element responsible for forming more known compounds than almost every other element on the periodic table combined, from the plastic in your pen to the sugar in your tea to your own DNA.",
+        obj:["Distinguish alkanes, alkenes and alkynes","Explain the general properties of hydrocarbons"],
+        exp:[
+          {t:"Alkanes, alkenes and alkynes", b:"ALKANES contain only single bonds between carbon atoms (saturated), like methane (CH₄). ALKENES contain at least one carbon-carbon double bond (unsaturated), like ethene (C₂H₄). ALKYNES contain at least one carbon-carbon triple bond, like ethyne (C₂H₂). The degree of 'saturation' (single vs double/triple bonds) directly affects reactivity, unsaturated compounds react more readily since that extra bond can be 'opened up' in addition reactions."},
+          {t:"Testing for unsaturation", b:"A classic, testable lab technique: adding bromine water to an unsaturated hydrocarbon (an alkene or alkyne) causes the orange bromine water to decolourise, as it reacts across the double or triple bond. A saturated alkane shows NO such colour change, since it has no extra bond available to react with the bromine. This simple test is a genuinely reliable way to distinguish the two categories experimentally."}
+        ],
+        err:["Assuming all hydrocarbons behave identically regardless of single/double/triple bonds","Forgetting the specific bromine water test result: decolourises for unsaturated compounds, no change for saturated ones"],
+        qs:[
+          Q("A hydrocarbon containing only single bonds between carbon atoms is called an",["alkane","alkene","alkyne","aromatic compound"],0,"Alkanes are saturated hydrocarbons with only single bonds.","Easy"),
+          Q("A hydrocarbon containing at least one carbon-carbon double bond is called an",["alkene","alkane","alkyne","alcohol"],0,"Alkenes contain at least one C=C double bond.","Easy"),
+          Q("Adding bromine water to an unsaturated hydrocarbon typically results in",["decolourisation of the bromine water","no visible change at all","an explosive reaction","formation of a solid precipitate only"],0,"Unsaturated compounds decolourise bromine water by reacting across their double/triple bond.","Medium",VP),
+          Q("Ethyne (C₂H₂), containing a carbon-carbon triple bond, is classified as an",["alkyne","alkane","alkene","aromatic hydrocarbon"],0,"Alkynes contain at least one C≡C triple bond.","Medium")
+        ]
+      },
+      { id:"chem_industry", name:"Chemistry, Industry and the Environment",
+        hook:"The fertiliser that helps feed billions of people worldwide exists today because chemists a century ago solved one specific industrial problem: how to force nitrogen gas, extremely reluctant to react with anything, into a usable compound at a scale the whole world could benefit from.",
+        obj:["Explain the industrial importance of key chemical processes","Discuss chemistry's role in environmental pollution and its control"],
+        exp:[
+          {t:"Key industrial processes", b:"The HABER PROCESS combines nitrogen and hydrogen gas under high pressure and temperature, with an iron catalyst, to manufacture AMMONIA, the essential starting material for nitrogen-based fertilisers that support much of the world's food production. Industrial chemistry like this is exactly why chemistry and economic development are so closely linked."},
+          {t:"Chemistry and environmental pollution", b:"Industrial chemical processes can also cause real environmental harm: burning fossil fuels releases carbon dioxide (linked to global warming) and sulfur dioxide (a cause of acid rain), while improperly disposed industrial waste can contaminate water and soil. Understanding the SAME chemistry that enables useful production is exactly what's needed to design cleaner alternatives and pollution controls."}
+        ],
+        err:["Assuming industrial chemistry is only relevant to factories, with no connection to environmental issues","Being unable to name a specific industrial process (like the Haber process) when asked for a concrete example"],
+        qs:[
+          Q("The Haber process is industrially important because it manufactures",["ammonia, used mainly for nitrogen-based fertilisers","table salt","plastic","glass"],0,"The Haber process combines nitrogen and hydrogen to produce ammonia.","Medium"),
+          Q("The burning of fossil fuels is a major source of the gas most associated with",["global warming (carbon dioxide)","completely harmless byproducts only","increased oxygen levels","reduced atmospheric pollution"],0,"Fossil fuel combustion releases significant carbon dioxide, linked to global warming.","Easy"),
+          Q("Sulfur dioxide released from industrial processes is a major contributor to",["acid rain","ozone layer thickening","increased soil fertility","reduced global temperatures"],0,"Sulfur dioxide dissolving in atmospheric moisture is a key cause of acid rain.","Medium",VP),
+          Q("The Haber process typically uses which catalyst to speed up ammonia production?",["Iron","Copper","Platinum only","No catalyst is used"],0,"Iron is the classic catalyst used in the Haber process.","Hard")
+        ]
+      },
+      { id:"biochem", name:"Basic Biochemistry and Synthetic Polymers",
+        hook:"A cotton shirt and a plastic bottle are both, at the molecular level, exactly the same basic idea: countless small, repeating units linked together into one very long chain, one made by nature, one made in a factory.",
+        obj:["Identify the major classes of biomolecules","Distinguish natural from synthetic polymers"],
+        exp:[
+          {t:"Major biomolecules", b:"CARBOHYDRATES (like starch and sugar) are the body's primary energy source. PROTEINS, built from amino acids, form structural tissue and enzymes. LIPIDS (fats and oils) store energy and form cell membranes. These three, alongside nucleic acids like DNA, are the core biomolecules basic biochemistry studies."},
+          {t:"Natural vs synthetic polymers", b:"A POLYMER is a large molecule made of many repeating smaller units (monomers) linked together. NATURAL polymers, like starch (made of repeating glucose units) or proteins (made of repeating amino acids), are produced by living organisms. SYNTHETIC polymers, like polythene or PVC, are man-made in factories from simpler starting monomers, the same basic 'long chain of repeating units' concept, just engineered rather than grown."}
+        ],
+        err:["Assuming 'polymer' only refers to man-made plastic, forgetting starch and proteins are natural polymers too","Confusing carbohydrates, proteins and lipids' distinct biological roles"],
+        qs:[
+          Q("The body's primary source of quick energy among the major biomolecules is",["carbohydrates","proteins","lipids","nucleic acids"],0,"Carbohydrates are the body's main quick-energy source.","Easy"),
+          Q("A large molecule made of many repeating smaller units linked together is called a",["polymer","monomer","isotope","catalyst"],0,"A polymer consists of repeating monomer units.","Easy"),
+          Q("Starch is an example of a",["natural polymer, made of repeating glucose units","synthetic polymer","simple monomer only","non-carbon compound"],0,"Starch is a natural polymer built from repeating glucose (monomer) units.","Medium"),
+          Q("Proteins are built from repeating units called",["amino acids","glucose units","fatty acids","nucleotides only"],0,"Proteins are polymers of amino acids.","Medium",VP)
+        ]
+      },
+      { id:"nonmetals", name:"Non-Metals and Their Compounds",
+        hook:"The same element that forms the graphite in your pencil also forms diamond, one of the hardest natural materials on Earth, purely because of how its atoms are arranged, a striking reminder that a non-metal's identity is only half the story.",
+        obj:["Identify the allotropes of carbon and their properties","Explain key properties and uses of major non-metals"],
+        exp:[
+          {t:"Allotropes of carbon", b:"ALLOTROPES are different structural forms of the same element. Carbon has several: GRAPHITE (layers of atoms that slide easily past each other, making it soft and a good conductor, used in pencils), DIAMOND (a rigid 3D network making it extremely hard, used in cutting tools), and AMORPHOUS carbon (like charcoal, with no ordered structure)."},
+          {t:"Other key non-metals", b:"Non-metals such as nitrogen, oxygen, sulfur and chlorine each have distinct, industrially important properties: oxygen supports combustion and respiration, nitrogen is largely unreactive and used to create inert atmospheres, sulfur is used in making sulfuric acid, and chlorine is widely used for water purification and disinfection."}
+        ],
+        err:["Assuming graphite and diamond, being the same element, must share identical physical properties","Confusing an element's chemical identity with its allotropic (structural) form"],
+        qs:[
+          Q("Graphite and diamond are both allotropes of",["carbon","silicon","sulfur","nitrogen"],0,"Both are structural forms of pure carbon.","Easy"),
+          Q("Diamond is extremely hard mainly because of its",["rigid three-dimensional bonded structure","soft layered structure","lack of any bonding","high electrical conductivity"],0,"Diamond's rigid 3D covalent network gives it exceptional hardness.","Medium"),
+          Q("Graphite conducts electricity, unlike diamond, mainly because graphite has",["delocalised electrons able to move within its layered structure","no carbon atoms at all","a completely different chemical formula","a lower melting point"],0,"Graphite's layered structure allows delocalised electrons to move and conduct charge.","Hard",VP),
+          Q("Chlorine is widely used industrially for",["water purification and disinfection","only as a fuel","only as a fertiliser","only as a lubricant"],0,"Chlorine's disinfecting properties make it useful for water treatment.","Medium")
+        ]
+      },
+      { id:"metals", name:"Metals and Their Compounds",
+        hook:"Iron left exposed to air and moisture slowly crumbles into reddish rust, while gold jewellery buried for a thousand years can be dug up looking exactly as shiny as the day it was made, the same basic category of substance, 'metal', behaving in wildly different ways.",
+        obj:["Explain the general physical and chemical properties of metals","Explain corrosion and methods of preventing it"],
+        exp:[
+          {t:"General properties of metals", b:"Metals are typically good conductors of heat and electricity, malleable (can be hammered into shape without breaking) and ductile (can be drawn into wires), properties that trace back to their metallic bonding and the 'sea' of delocalised electrons discussed earlier in Chemical Bonds."},
+          {t:"Corrosion and its prevention", b:"CORROSION is the gradual destruction of a metal through chemical reaction with its environment, iron RUSTING (reacting with oxygen and water to form hydrated iron oxide) is the most familiar example. Prevention methods include PAINTING or GALVANISING (coating with a protective layer, often zinc, that reacts preferentially so the underlying metal doesn't), and ALLOYING (mixing with other metals to produce a more corrosion-resistant material, like stainless steel)."}
+        ],
+        err:["Assuming all metals corrode at the same rate or in the same way","Confusing galvanising (a protective coating) with simple painting, when galvanising specifically uses a sacrificial metal layer"],
+        qs:[
+          Q("A general physical property shared by most metals is that they are",["good conductors of heat and electricity","poor conductors of electricity","always brittle","never malleable"],0,"Metals are typically good thermal and electrical conductors.","Easy"),
+          Q("The rusting of iron is a chemical reaction between iron and",["oxygen and water","only nitrogen","only carbon dioxide","only sunlight"],0,"Rust (hydrated iron oxide) forms from iron reacting with oxygen and water.","Easy"),
+          Q("Galvanising protects iron from rusting mainly by",["coating it with a layer of zinc that corrodes preferentially instead of the iron","removing all oxygen from the atmosphere permanently","painting it a bright colour only","heating it to extremely high temperatures"],0,"Galvanising uses a sacrificial zinc coating that corrodes in place of the iron.","Medium",VP),
+          Q("A metal's ability to be hammered into thin sheets without breaking is called",["malleability","ductility","conductivity","reactivity"],0,"Malleability specifically describes resistance to breaking under hammering/shaping.","Medium")
+        ]
+      }
+    ]
+  },
+  {
+    id:"physics", name:"Physics",
+    examFormat:"Paper 1 (1¾ hrs, 70 marks) - 70 objective questions covering the entire syllabus, including practical-related items. Paper 2 (2½ hrs, 100 marks) - essay paper in two sections; Section A has 6 compulsory short-answer questions, Section B has 5 longer questions of which candidates answer 3. Paper 3 - a practical (or alternative-to-practical) paper testing laboratory skills; this app covers Papers 1 and 2 content only, since practical work needs an actual lab.",
+    topics:[
+      { id:"quantities", name:"Physical Quantities and Measurement",
+        hook:"An engineer building a bridge and a nurse measuring a dose both rely on the exact same foundation: agreed units that mean the same thing to everyone, everywhere, which is precisely why Physics begins here, with quantities and how we measure them, before touching a single formula.",
+        obj:["Distinguish fundamental from derived quantities","Identify correct SI units for common physical quantities"],
+        exp:[
+          {t:"Fundamental vs derived quantities", b:"FUNDAMENTAL (base) quantities can't be broken down into simpler quantities, length, mass, time, electric current, temperature and luminous intensity are the core fundamental quantities in physics. DERIVED quantities are built by combining fundamental ones, speed (length ÷ time), area (length × length), and density (mass ÷ volume) are all derived from fundamentals combined mathematically."},
+          {t:"SI units", b:"Physics relies on a standardised system (SI units) so measurements mean the same thing globally: metre (m) for length, kilogram (kg) for mass, second (s) for time, ampere (A) for current, kelvin (K) for temperature. Every derived unit, like the newton (force) or the joule (energy), can be traced back to combinations of these base units."}
+        ],
+        err:["Assuming any measured quantity is automatically 'fundamental'","Mixing up base units (like the kilogram) with derived units (like the newton)"],
+        qs:[
+          Q("Which of these is a fundamental (base) physical quantity?",["Mass","Speed","Density","Force"],0,"Mass is a fundamental quantity; speed, density and force are all derived.","Easy"),
+          Q("The SI unit of length is the",["metre","centimetre","kilometre","foot"],0,"The metre is the SI base unit of length.","Easy"),
+          Q("Speed is classified as a derived quantity because it is calculated from",["length divided by time, both fundamental quantities","mass multiplied by acceleration","a single fundamental quantity alone","temperature and pressure combined"],0,"Speed = distance/time, combining two fundamental quantities.","Medium"),
+          Q("The SI unit of electric current is the",["ampere","volt","ohm","watt"],0,"The ampere is the SI base unit for electric current.","Medium",VP)
+        ]
+      },
+      { id:"motion", name:"Position, Distance, Displacement and Motion",
+        hook:"Walk 5 metres east then 5 metres back west, and you've genuinely covered 10 metres of ground, your legs are tired to prove it, yet your actual displacement from where you started is exactly zero. Physics needs a precise way to talk about both facts at once.",
+        obj:["Distinguish distance from displacement","Explain position as a description of location relative to a reference point"],
+        exp:[
+          {t:"Distance vs displacement", b:"DISTANCE is the total path length actually travelled, a scalar quantity with no direction attached. DISPLACEMENT is the straight-line distance from the starting point to the final point, in a specific direction, a vector quantity. Someone walking 5m east then 5m west has travelled a distance of 10m, but their displacement is 0m, since they ended up exactly back where they started."},
+          {t:"Position and reference points", b:"POSITION describes where an object is relative to a chosen reference point (an origin). Motion itself is simply a change in position over time, and describing it accurately always requires agreeing on that reference point first, 'the ball is 3m ahead' only makes sense once everyone agrees what 'ahead' is measured from."}
+        ],
+        err:["Treating distance and displacement as always equal, when they only match for straight-line, one-direction motion","Forgetting displacement requires both magnitude AND direction"],
+        qs:[
+          Q("Distance differs from displacement mainly because distance",["has no direction, while displacement does","is always smaller than displacement","can never be measured accurately","only applies to circular motion"],0,"Distance is a scalar (no direction); displacement is a vector (has direction).","Easy"),
+          Q("A person walks 8m north then 8m south. Their total displacement is",["0m","16m","8m","4m"],0,"Ending at the starting point means displacement is zero, despite covering 16m of distance.","Medium",VP),
+          Q("Displacement is best classified as a",["vector quantity","scalar quantity","fundamental quantity only","dimensionless quantity"],0,"Displacement has both magnitude and direction, making it a vector.","Easy")
+        ]
+      },
+      { id:"speedvel", name:"Speed, Velocity and Acceleration",
+        hook:"A speedometer only ever tells a driver how fast they're going, never which way, that's precisely the gap between speed and velocity, and it's exactly the distinction this topic is built around.",
+        obj:["Distinguish speed from velocity","Explain acceleration and apply the equations of motion"],
+        exp:[
+          {t:"Speed vs velocity", b:"SPEED is distance covered per unit time (a scalar, no direction). VELOCITY is displacement per unit time (a vector, direction included). A car maintaining constant speed while going around a bend still has changing VELOCITY, since its direction keeps changing even if its speed doesn't."},
+          {t:"Acceleration and equations of motion", b:"ACCELERATION is the rate of change of velocity with time (Δv/Δt), measured in ms⁻². For motion with constant acceleration, key equations connect initial velocity (u), final velocity (v), acceleration (a), time (t), and displacement (s): v = u + at, and s = ut + ½at². These let you solve for any unknown once enough of the others are given."}
+        ],
+        err:["Assuming constant speed always means zero acceleration, forgetting direction changes count too","Mixing up which equation of motion to use for a given set of known values"],
+        qs:[
+          Q("Velocity differs from speed because velocity specifically includes",["direction","a larger numerical value","time only","no numerical value at all"],0,"Velocity is speed with direction specified, making it a vector.","Easy"),
+          Q("Acceleration is defined as the rate of change of",["velocity with time","distance with time","mass with time","force with time"],0,"Acceleration specifically measures how velocity changes over time.","Easy"),
+          Q("An object starts from rest and accelerates uniformly at 9.8 ms⁻² for 3 seconds. Its final velocity is",["29.4 m/s","9.8 m/s","3 m/s","19.6 m/s"],0,"v = u + at = 0 + (9.8×3) = 29.4 m/s.","Medium",VP),
+          Q("Using the same object (starting from rest, accelerating at 9.8 ms⁻² for 3 seconds), the distance it covers is",["44.1 m","29.4 m","9.8 m","88.2 m"],0,"s = ut + ½at² = 0 + 0.5×9.8×9 = 44.1 m.","Hard",VP)
+        ]
+      },
+      { id:"vectors", name:"Scalars and Vectors",
+        hook:"Telling a lost driver 'drive for 10km' is only half the direction they need, telling them 'drive 10km north' actually gets them somewhere, and that missing piece, direction, is the whole reason physics separates quantities into two distinct categories.",
+        obj:["Distinguish scalar from vector quantities, with examples of each","Explain vector addition and resolution"],
+        exp:[
+          {t:"Scalars vs vectors", b:"SCALAR quantities have magnitude only, no direction: mass, distance, speed and time are all scalars. VECTOR quantities have both magnitude AND direction: weight, displacement, velocity and acceleration are all vectors. Confusing the two matters in practice, adding two forces acting in DIFFERENT directions is not as simple as adding two masses."},
+          {t:"Vector addition and resolution", b:"Vectors acting in the same direction simply add together; vectors acting at an angle to each other combine using methods like the PARALLELOGRAM or TRIANGLE of vectors to find a single RESULTANT vector representing their combined effect. RESOLUTION does the reverse, breaking one vector down into two perpendicular components (often horizontal and vertical), useful for analysing motion on an incline or a projectile's path."}
+        ],
+        err:["Adding vector magnitudes directly without accounting for their different directions","Forgetting that resolving a vector into components requires basic trigonometry (sine and cosine)"],
+        qs:[
+          Q("Which of the following is a scalar quantity?",["Mass","Weight","Velocity","Acceleration"],0,"Mass has magnitude only, with no direction, making it a scalar.","Easy"),
+          Q("Which of the following is a vector quantity?",["Displacement","Distance","Speed","Time"],0,"Displacement has both magnitude and direction, making it a vector.","Easy"),
+          Q("The single vector representing the combined effect of two or more vectors is called the",["resultant","component","scalar sum","magnitude"],0,"The resultant is the combined single vector from adding multiple vectors.","Medium"),
+          Q("Breaking a single vector into two perpendicular parts is called",["resolution of the vector","addition of the vector","cancellation of the vector","scalar conversion"],0,"Resolution splits a vector into perpendicular components.","Medium",VP)
+        ]
+      },
+      { id:"forces", name:"Equilibrium of Forces",
+        hook:"A picture frame hanging perfectly still on a wall looks like nothing is happening, but in reality, several forces are locked in an exact, silent tug-of-war, gravity pulling down, the string pulling up, all perfectly balanced, and that balance is exactly what 'equilibrium' means.",
+        obj:["Explain the conditions for equilibrium of forces","Explain the principle of moments and centre of gravity"],
+        exp:[
+          {t:"Conditions for equilibrium", b:"A body is in EQUILIBRIUM when the net force acting on it is zero (it isn't accelerating) and the net turning effect (moment/torque) about any point is also zero (it isn't rotating). This is why the picture frame stays perfectly still, every force is exactly cancelled out by another."},
+          {t:"Principle of moments and centre of gravity", b:"The PRINCIPLE OF MOMENTS states that for a body in rotational equilibrium, the sum of clockwise moments about a point equals the sum of anticlockwise moments about that same point (this is exactly how a see-saw balances). CENTRE OF GRAVITY is the single point where an object's entire weight can be considered to act; a low, wide centre of gravity makes an object more stable, harder to tip over, which is why race cars are built low and wide."}
+        ],
+        err:["Assuming equilibrium means 'no forces are acting', rather than 'forces are perfectly balanced'","Confusing clockwise and anticlockwise moments when applying the principle of moments"],
+        qs:[
+          Q("A body is in equilibrium when",["the net force and net turning moment acting on it are both zero","no forces at all are acting on it","it is moving at high constant speed only","its mass is exactly zero"],0,"Equilibrium requires zero net force AND zero net moment, not the absence of forces.","Medium"),
+          Q("The principle of moments states that, for a body in equilibrium, the sum of clockwise moments about a point equals the",["sum of anticlockwise moments about that same point","total weight of the body","total distance travelled","object's acceleration"],0,"Clockwise and anticlockwise moments must balance for rotational equilibrium.","Medium"),
+          Q("The single point where an object's entire weight can be considered to act is called its",["centre of gravity","moment of inertia","point of impact","resultant force"],0,"Centre of gravity is the effective point of action of an object's weight.","Easy"),
+          Q("An object with a low, wide centre of gravity is generally",["more stable and harder to tip over","less stable and easier to tip over","completely unaffected by stability concerns","only stable while moving"],0,"A low, wide centre of gravity improves stability against tipping.","Medium",VP)
+        ]
+      },
+      { id:"shm", name:"Simple Harmonic Motion",
+        hook:"A child on a swing, a plucked guitar string, and a ticking pendulum clock all share the exact same underlying mathematical heartbeat, a smooth, repeating back-and-forth motion that physics has a precise name and formula for.",
+        obj:["Define simple harmonic motion (SHM)","Explain period, frequency and amplitude of SHM"],
+        exp:[
+          {t:"What SHM is", b:"SIMPLE HARMONIC MOTION is a repeating, back-and-forth motion where the restoring force pulling an object back toward its resting position is always proportional to how far it has moved from that position, and always directed back toward it. A simple pendulum and a mass on a spring are the two classic examples used to demonstrate it experimentally."},
+          {t:"Period, frequency and amplitude", b:"PERIOD is the time taken for one complete oscillation (back and forth once). FREQUENCY is the number of complete oscillations per second (the inverse of period). AMPLITUDE is the maximum displacement from the resting (equilibrium) position. A pendulum swinging wider has greater amplitude, but, notably, a simple pendulum's period stays essentially the same regardless of amplitude, for small swings."}
+        ],
+        err:["Assuming a bigger swing (amplitude) automatically means a longer period for a simple pendulum","Confusing period (time per oscillation) with frequency (oscillations per unit time), which are reciprocals of each other"],
+        qs:[
+          Q("Simple harmonic motion is characterised by a restoring force that is",["proportional to displacement from equilibrium, and directed back toward it","constant regardless of displacement","directed away from the equilibrium position","completely random in direction"],0,"SHM's defining feature is a restoring force proportional to, and directed against, displacement.","Medium"),
+          Q("The time taken for one complete oscillation is called the",["period","frequency","amplitude","wavelength"],0,"Period is the time for one complete cycle.","Easy"),
+          Q("Frequency and period are related as",["reciprocals of each other (f = 1/T)","always numerically equal","unrelated quantities","both measured in metres"],0,"Frequency is the inverse of period.","Medium",VP),
+          Q("The maximum displacement of an oscillating body from its equilibrium position is called its",["amplitude","period","frequency","velocity"],0,"Amplitude is the maximum displacement from rest position.","Easy")
+        ]
+      },
+      { id:"newtonlaws", name:"Newton's Laws of Motion",
+        hook:"A passenger jerks forward when a car brakes suddenly, not because some mysterious force pushed them, but because their own body simply kept trying to continue moving forward exactly as it was, a live demonstration of a law Newton wrote down centuries before seatbelts existed.",
+        obj:["State and apply Newton's three laws of motion","Explain momentum and its conservation"],
+        exp:[
+          {t:"Newton's three laws", b:"FIRST LAW (inertia): an object stays at rest, or keeps moving at constant velocity, unless acted on by a net external force, exactly why the braking passenger keeps moving forward. SECOND LAW: force equals mass times acceleration (F = ma), a bigger force or a smaller mass produces greater acceleration. THIRD LAW: for every action force, there is an equal and opposite reaction force, exactly how a rocket propels itself forward by pushing exhaust gas backward."},
+          {t:"Momentum and its conservation", b:"MOMENTUM is mass multiplied by velocity (p = mv). In a closed system with no external forces, total momentum before a collision equals total momentum after it, the LAW OF CONSERVATION OF MOMENTUM. This is exactly why a stationary gun recoils backward the instant a bullet fires forward, momentum must balance out in both directions."}
+        ],
+        err:["Assuming a stationary object has 'no forces' acting on it, rather than balanced forces (Newton's first law)","Forgetting Newton's third law pairs act on TWO DIFFERENT objects, not the same one"],
+        qs:[
+          Q("Newton's First Law states that an object will remain at rest or move at constant velocity unless acted on by",["a net external force","its own internal energy","gravity alone, always","a change in its own mass"],0,"Newton's First Law is the law of inertia.","Easy"),
+          Q("Newton's Second Law is expressed by the equation",["F = ma","F = mv","p = Ft","v = u + at"],0,"F=ma is Newton's Second Law.","Easy"),
+          Q("A force of 10N acting on a 5kg mass produces an acceleration of",["2 ms⁻²","5 ms⁻²","10 ms⁻²","50 ms⁻²"],0,"a = F/m = 10/5 = 2 ms⁻².","Medium",VP),
+          Q("Newton's Third Law states that for every action force, there is",["an equal and opposite reaction force acting on a different object","an equal force acting on the same object","no reaction force at all","a reaction force twice as large"],0,"Action-reaction pairs act on two different objects, equal in size, opposite in direction.","Medium"),
+          Q("Momentum is calculated as",["mass multiplied by velocity","mass multiplied by acceleration","force multiplied by time","mass divided by velocity"],0,"Momentum = mass × velocity.","Medium")
+        ]
+      },
+      { id:"workenergy", name:"Work, Energy and Power",
+        hook:"Pushing hard against a locked wall for an hour, however exhausting it feels, technically does zero work in the physics sense, because nothing actually moved, a reminder that physics defines everyday words far more strictly than casual conversation does.",
+        obj:["Define work, energy and power with correct units","Distinguish potential from kinetic energy","Apply the principle of conservation of mechanical energy"],
+        exp:[
+          {t:"Work, energy and power - precise definitions", b:"WORK is done only when a force causes actual displacement in the direction of that force (Work = Force × distance moved), measured in JOULES (J). ENERGY is the capacity to do work, also measured in joules. POWER is the rate at which work is done (Power = Work ÷ time), measured in WATTS (W). Pushing a locked wall involves force, but zero displacement, hence zero work done, however tired you get."},
+          {t:"Potential vs kinetic energy, and their conservation", b:"POTENTIAL ENERGY (P.E.) is stored energy due to position (like a ball held up high) = mgh (mass × gravity × height). KINETIC ENERGY (K.E.) is energy due to motion = ½mv². The PRINCIPLE OF CONSERVATION OF MECHANICAL ENERGY states that, ignoring friction/air resistance, the total of P.E. and K.E. stays constant as one converts into the other, a dropped ball loses potential energy exactly as fast as it gains kinetic energy, right up until it hits the ground."}
+        ],
+        err:["Assuming 'work' is done whenever effort is exerted, even without any actual displacement","Forgetting energy conversions (P.E. to K.E.) conserve TOTAL mechanical energy, not each type separately"],
+        qs:[
+          Q("Work is done on an object only when a force causes",["actual displacement in the direction of the force","the object to simply exist","the object's mass to change","time to pass, regardless of movement"],0,"Work requires force AND displacement in that force's direction.","Easy"),
+          Q("The SI unit of power is the",["watt","joule","newton","pascal"],0,"Power is measured in watts (joules per second).","Easy"),
+          Q("A force of 200N moves an object 3m in the direction of the force. The work done is",["600 J","203 J","197 J","66.7 J"],0,"Work = Force × distance = 200×3 = 600 J.","Medium",VP),
+          Q("A machine does 600 J of work in 5 seconds. Its power output is",["120 W","3000 W","605 W","120 J"],0,"Power = Work/time = 600/5 = 120 W.","Medium",VP),
+          Q("As a ball falls freely from a height, its potential energy",["decreases while its kinetic energy increases by a corresponding amount","increases while kinetic energy also increases","stays constant throughout the fall","decreases while kinetic energy also decreases"],0,"Mechanical energy conservation converts P.E. to K.E. as height decreases.","Medium")
+        ]
+      },
+      { id:"heat", name:"Heat Energy",
+        hook:"The same word, 'hot', gets used for a warm bath and a raging bonfire, but physics needs something far more precise than a feeling, a proper temperature scale, and a genuine understanding of what heat energy actually does to matter.",
+        obj:["Distinguish heat from temperature","Explain the Celsius and Kelvin temperature scales","Explain heat transfer methods"],
+        exp:[
+          {t:"Heat vs temperature", b:"TEMPERATURE measures the degree of hotness or coldness of a body (how energetically its particles are moving, on average). HEAT is the actual energy transferred between objects due to a temperature difference. Two objects can be at the same temperature but contain very different amounts of heat energy, depending on their mass and material."},
+          {t:"Temperature scales and heat transfer", b:"The CELSIUS scale sets water's freezing point at 0°C and boiling point at 100°C; the KELVIN (absolute) scale starts at absolute zero (0K = -273°C, the coldest theoretically possible temperature). Heat transfers by three methods: CONDUCTION (through direct contact, mainly in solids), CONVECTION (through the movement of heated fluid, liquids and gases), and RADIATION (through electromagnetic waves, needing no medium at all, exactly how the sun's heat reaches Earth through empty space)."}
+        ],
+        err:["Assuming 'heat' and 'temperature' mean exactly the same thing","Assuming all three heat transfer methods require a physical medium, forgetting radiation doesn't"],
+        qs:[
+          Q("Temperature is best described as a measure of",["the degree of hotness or coldness of a body","the total heat energy contained in a body","a body's mass","a body's density"],0,"Temperature measures hotness/coldness, not total energy content.","Easy"),
+          Q("Absolute zero on the Kelvin scale corresponds to approximately",["-273°C","0°C","100°C","-100°C"],0,"Absolute zero is 0K, equivalent to -273°C.","Medium",VP),
+          Q("Heat transfer through direct contact, mainly in solids, is called",["conduction","convection","radiation","insulation"],0,"Conduction transfers heat through direct particle contact.","Easy"),
+          Q("The method of heat transfer that requires no physical medium at all is",["radiation","conduction","convection","condensation"],0,"Radiation transfers heat via electromagnetic waves, needing no medium.","Medium")
+        ]
+      },
+      { id:"waves", name:"Waves: Types and Properties",
+        hook:"Shout across a valley and your voice comes back seconds later; flick a rope up and down and a visible ripple travels along it, both are waves carrying energy from one place to another, without the medium itself actually travelling anywhere.",
+        obj:["Distinguish transverse from longitudinal waves","Identify key properties of waves: wavelength, frequency, amplitude, speed"],
+        exp:[
+          {t:"Transverse vs longitudinal waves", b:"In a TRANSVERSE wave, particles vibrate PERPENDICULAR to the direction the wave travels, like a rope flicked up and down while the wave moves forward, light and water waves are transverse. In a LONGITUDINAL wave, particles vibrate PARALLEL to the wave's direction of travel, compressing and stretching along the same line, sound waves are the classic example."},
+          {t:"Key wave properties", b:"WAVELENGTH is the distance between two consecutive identical points on a wave (crest to crest). FREQUENCY is the number of complete waves passing a point per second. AMPLITUDE is the maximum displacement from rest. Wave SPEED relates them all: speed = frequency × wavelength (v = fλ), a formula that applies to every type of wave, sound, light or water."}
+        ],
+        err:["Confusing transverse (perpendicular vibration) with longitudinal (parallel vibration) waves","Forgetting the universal wave equation v = fλ applies across ALL wave types"],
+        qs:[
+          Q("In a transverse wave, particles vibrate",["perpendicular to the direction of wave travel","parallel to the direction of wave travel","in no consistent direction","only at the wave's source"],0,"Transverse waves have perpendicular particle vibration.","Easy"),
+          Q("Sound waves are classified as",["longitudinal waves","transverse waves","electromagnetic waves","standing waves only"],0,"Sound waves vibrate parallel to their direction of travel, making them longitudinal.","Easy"),
+          Q("The distance between two consecutive crests of a wave is called its",["wavelength","amplitude","frequency","period"],0,"Wavelength is the distance between two identical, consecutive points.","Easy"),
+          Q("A wave has a frequency of 50 Hz and a wavelength of 2m. Its speed is",["100 m/s","25 m/s","52 m/s","48 m/s"],0,"v = fλ = 50×2 = 100 m/s.","Medium",VP)
+        ]
+      },
+      { id:"light", name:"Light Waves",
+        hook:"A straw dipped in a glass of water looks bent, even though it's perfectly straight, a small, everyday illusion caused by light doing something very specific the instant it crosses from air into water.",
+        obj:["Explain reflection and refraction of light","Explain the use of simple lenses"],
+        exp:[
+          {t:"Reflection and refraction", b:"REFLECTION is light bouncing off a surface, following the law: angle of incidence equals angle of reflection. REFRACTION is light bending as it passes from one medium into another (like air into water) due to a change in speed, exactly what makes the straw appear bent at the water's surface, even though it's perfectly straight."},
+          {t:"Lenses", b:"A CONVEX (converging) lens bulges outward and bends light rays inward to a focal point, used in magnifying glasses and to correct long-sightedness. A CONCAVE (diverging) lens curves inward and spreads light rays outward, used to correct short-sightedness. Both work by refracting light as it passes through the curved glass."}
+        ],
+        err:["Confusing reflection (bouncing off) with refraction (bending through)","Mixing up convex (converging, bulges out) and concave (diverging, curves in) lenses"],
+        qs:[
+          Q("The law of reflection states that the angle of incidence",["equals the angle of reflection","is always twice the angle of reflection","is always zero","has no relationship to the angle of reflection"],0,"Angle of incidence equals angle of reflection.","Easy"),
+          Q("The bending of light as it passes from one medium into another is called",["refraction","reflection","diffraction only","polarization"],0,"Refraction is the bending of light between media of different density.","Easy"),
+          Q("A convex lens is also known as a",["converging lens","diverging lens","flat lens","opaque lens"],0,"Convex lenses converge (bring together) light rays.","Medium"),
+          Q("A concave lens is typically used to correct",["short-sightedness","long-sightedness only","colour blindness","hearing loss"],0,"Concave (diverging) lenses correct short-sightedness (myopia).","Medium",VP)
+        ]
+      },
+      { id:"sound", name:"Sound Waves",
+        hook:"Thunder always arrives after the lightning flash that caused it, even though they happen at the exact same instant, a simple, everyday proof that sound travels dramatically slower than light.",
+        obj:["Explain the production and propagation of sound","Distinguish pitch, loudness and quality of sound"],
+        exp:[
+          {t:"Production and propagation", b:"Sound is produced by a VIBRATING source (a plucked string, vocal cords) and travels as a longitudinal wave through a medium (air, water, solids), requiring particles to actually pass the vibration along, which is exactly why sound cannot travel through a vacuum, unlike light."},
+          {t:"Pitch, loudness and quality", b:"PITCH depends on FREQUENCY, a higher frequency sounds higher-pitched. LOUDNESS depends on AMPLITUDE, a bigger amplitude sounds louder. QUALITY (or timbre) is what lets you tell a piano and a guitar apart even when they play the exact same note at the same loudness, caused by differing combinations of additional overtones layered on the main frequency."}
+        ],
+        err:["Assuming sound can travel through a vacuum, like light can","Confusing pitch (frequency-based) with loudness (amplitude-based)"],
+        qs:[
+          Q("Sound cannot travel through a vacuum because sound waves require a",["medium with particles to transmit vibrations","source of light","magnetic field","electric field"],0,"Sound is a mechanical wave needing a medium; it cannot travel through empty space.","Easy"),
+          Q("The pitch of a sound is mainly determined by its",["frequency","amplitude","speed only","medium of travel only"],0,"Higher frequency corresponds to higher pitch.","Easy"),
+          Q("The loudness of a sound is mainly determined by its",["amplitude","frequency","wavelength only","pitch"],0,"Greater amplitude corresponds to louder sound.","Medium"),
+          Q("Two different musical instruments playing the same note at the same loudness can still be told apart because of differences in",["quality (timbre)","frequency alone","amplitude alone","the medium used"],0,"Quality/timbre, from differing overtones, distinguishes otherwise identical notes.","Medium",VP)
+        ]
+      },
+      { id:"fields", name:"Gravitational and Electric Fields",
+        hook:"You can't see gravity, and you can't see the electric force between a charged balloon and your hair, yet both act invisibly across empty space, and physics describes exactly this kind of invisible influence using the concept of a 'field'.",
+        obj:["Explain the concept of a field","Distinguish gravitational from electric fields"],
+        exp:[
+          {t:"What a field is", b:"A FIELD is a region of space where a particular force can be experienced by an appropriate object placed within it, without any direct physical contact needed. Fields are usually represented by FIELD LINES showing the direction a test object would be pushed or pulled at any point."},
+          {t:"Gravitational vs electric fields", b:"A GRAVITATIONAL FIELD surrounds any mass, and attracts other masses toward it, always attractive, never repulsive. An ELECTRIC FIELD surrounds any electric charge, and can either attract or repel other charges, opposite charges attract, like charges repel, a key difference from gravity, which only ever pulls."}
+        ],
+        err:["Assuming electric fields, like gravitational fields, can only ever attract, forgetting like charges repel","Assuming a 'field' requires physical contact to have an effect"],
+        qs:[
+          Q("A field is best described as a region of space where",["a force can be experienced without direct contact","only light can travel","sound waves are blocked","temperature is always zero"],0,"Fields exert influence at a distance, without contact.","Easy"),
+          Q("A gravitational field is always",["attractive, pulling masses together","either attractive or repulsive, depending on mass","repulsive only","non-existent near small masses"],0,"Gravity is exclusively attractive, unlike electric fields.","Medium"),
+          Q("Two like electric charges placed near each other will",["repel each other","attract each other","have no effect on each other","merge into a single charge"],0,"Like charges repel; unlike charges attract.","Easy",VP)
+        ]
+      },
+      { id:"electromagnetism", name:"Electromagnetism and Simple A.C. Circuits",
+        hook:"Every electric motor spinning inside a fan, and every generator supplying a national power grid, both rely on one elegant two-way relationship: electricity can create magnetism, and magnetism, moved correctly, can create electricity right back.",
+        obj:["Explain the relationship between electricity and magnetism","Explain the basic principle of simple a.c. circuits"],
+        exp:[
+          {t:"Electromagnetism", b:"A current-carrying wire produces a magnetic field around it, the basis of ELECTROMAGNETS. Conversely, moving a magnet near a coil of wire (or moving the coil relative to the magnet) induces an electric current in that wire, ELECTROMAGNETIC INDUCTION, the exact principle behind how generators produce electricity."},
+          {t:"Simple a.c. circuits", b:"In an ALTERNATING CURRENT (a.c.) circuit, current periodically reverses direction, unlike direct current (d.c.), which flows one way only. Mains electricity supplied to homes is typically a.c., specifically because it can be efficiently transformed to different voltages for transmission over long distances, then stepped back down for safe household use."}
+        ],
+        err:["Confusing electromagnets (current creates magnetism) with electromagnetic induction (magnetism creates current), which are opposite directions of the same relationship","Assuming a.c. and d.c. are simply different names for the same thing"],
+        qs:[
+          Q("A wire carrying an electric current produces a",["magnetic field around it","permanent loss of charge","sound wave only","gravitational field increase"],0,"Current-carrying wires generate magnetic fields, the basis of electromagnets.","Easy"),
+          Q("The production of an electric current by moving a magnet near a coil of wire is called",["electromagnetic induction","electrostatics","electrolysis","conduction"],0,"Electromagnetic induction is the generation of current via a changing magnetic field.","Medium"),
+          Q("In an alternating current (a.c.) circuit, the current",["periodically reverses direction","flows in one direction only","is always zero","cannot be measured"],0,"A.c. specifically reverses direction periodically, unlike d.c.","Medium",VP),
+          Q("Mains electricity is typically supplied as a.c. mainly because it",["can be efficiently transformed to different voltages for transmission","is inherently safer at all voltages","cannot be generated any other way","requires no wiring at all"],0,"A.c.'s transformability makes long-distance transmission efficient.","Medium")
+        ]
+      },
+      { id:"atom_phys", name:"Structure of the Atom (Physics)",
+        hook:"A series of experiments, decades apart, each overturned the previous best guess at what an atom actually looked like, from a solid ball, to a 'plum pudding' of charge, to the mostly-empty, nucleus-centred model physics now teaches.",
+        obj:["Describe the historical development of atomic models","Explain the modern (Bohr) model of the atom"],
+        exp:[
+          {t:"From Thomson to Rutherford to Bohr", b:"J.J. THOMSON proposed the 'plum pudding' model, negative electrons scattered through a positive 'pudding'. Ernest RUTHERFORD's famous alpha-particle scattering experiment overturned this, revealing atoms are mostly empty space with a tiny, dense, positively charged NUCLEUS at the centre. Niels BOHR refined this further, proposing electrons orbit the nucleus in fixed, specific energy levels (shells) rather than anywhere at all."},
+          {t:"The Bohr model today", b:"In the Bohr model, electrons can only occupy specific, quantised energy levels around the nucleus, and jump between levels by absorbing or releasing exact packets of energy, never anything in between. This model successfully explains why atoms emit light only at specific, characteristic wavelengths rather than a continuous smear of colour."}
+        ],
+        err:["Assuming the 'plum pudding' model is still the accepted model today","Assuming electrons can occupy any arbitrary distance from the nucleus, rather than fixed energy levels"],
+        qs:[
+          Q("Rutherford's alpha-particle scattering experiment revealed that the atom has",["a tiny, dense, positively charged nucleus, with mostly empty space around it","electrons scattered through a uniform positive 'pudding'","no nucleus at all","equal density of charge throughout"],0,"Rutherford's experiment established the nuclear model of the atom.","Medium"),
+          Q("The Bohr model proposes that electrons occupy",["fixed, specific energy levels around the nucleus","any random position around the nucleus","only the nucleus itself","positions outside the atom entirely"],0,"Bohr's model places electrons in defined, quantised energy levels.","Medium",VP),
+          Q("J.J. Thomson's atomic model is commonly known as the",["'plum pudding' model","nuclear model","quantum model","Bohr model"],0,"Thomson's model pictured electrons within a positive 'pudding'.","Easy")
+        ]
+      },
+      { id:"nucleus", name:"Structure of the Nucleus and Radioactivity",
+        hook:"Deep inside every atom's nucleus, some combinations of protons and neutrons are simply unstable, and when they break down, they release radiation, an invisible process powerful enough to both treat cancer and, if mishandled, cause it.",
+        obj:["Explain the composition of the nucleus","Distinguish alpha, beta and gamma radiation"],
+        exp:[
+          {t:"Nuclear composition", b:"The nucleus contains PROTONS (positive charge) and NEUTRONS (no charge), collectively called nucleons. An unstable nucleus (a radioactive isotope) spontaneously breaks down over time, emitting radiation as it moves toward a more stable configuration."},
+          {t:"Alpha, beta and gamma radiation", b:"ALPHA particles are relatively large and heavy (like a helium nucleus), stopped easily by just a sheet of paper. BETA particles are much smaller and faster (essentially high-speed electrons), penetrating further, stopped by a few millimetres of aluminium. GAMMA rays are pure electromagnetic radiation with no mass at all, the most penetrating of the three, needing thick lead or concrete to stop them effectively."}
+        ],
+        err:["Assuming all three radiation types have identical penetrating power","Confusing an alpha particle (helium nucleus) with a beta particle (fast electron)"],
+        qs:[
+          Q("The nucleus of an atom contains",["protons and neutrons","protons and electrons","neutrons and electrons only","only electrons"],0,"Protons and neutrons together make up the nucleus.","Easy"),
+          Q("Which type of radiation is stopped by just a sheet of paper?",["Alpha radiation","Beta radiation","Gamma radiation","X-rays"],0,"Alpha particles, being large and heavy, are stopped by paper.","Medium"),
+          Q("Which type of radiation is the most penetrating, requiring thick lead or concrete to stop it?",["Gamma radiation","Alpha radiation","Beta radiation","Infrared radiation"],0,"Gamma rays are the most penetrating of the three radiation types.","Medium",VP),
+          Q("A beta particle is best described as",["a high-speed electron","a helium nucleus","a pure electromagnetic wave","a neutral neutron"],0,"Beta particles are fast-moving electrons emitted from the nucleus.","Medium")
+        ]
+      },
+      { id:"pressure", name:"Fluid at Rest (Pressure)",
+        hook:"A wide, flat rescue mat is used to catch someone falling from height rather than a narrow beam, not because it magically absorbs more force, but because spreading that same force over a much larger area dramatically reduces the pressure at any single point.",
+        obj:["Define pressure and its SI unit","Explain pressure in fluids, including the effect of depth"],
+        exp:[
+          {t:"Pressure - definition and unit", b:"PRESSURE is force acting per unit area (Pressure = Force ÷ Area), measured in PASCALS (Pa). The same force spread over a larger area produces lower pressure, exactly why the wide rescue mat is safer than a narrow beam under the same falling weight."},
+          {t:"Pressure in fluids and depth", b:"In a fluid at rest, pressure increases with DEPTH, since deeper points have more fluid weighing down on them from above, this is why a diver feels increasing pressure the deeper they descend. Fluid pressure also acts equally in ALL directions at a given depth, not just downward."}
+        ],
+        err:["Assuming pressure only acts downward in a fluid, not equally in all directions","Forgetting that pressure decreases as the same force spreads over a larger area"],
+        qs:[
+          Q("Pressure is defined as",["force per unit area","force multiplied by area","mass per unit volume","force per unit time"],0,"Pressure = Force/Area.","Easy"),
+          Q("The SI unit of pressure is the",["pascal","newton","joule","watt"],0,"Pressure is measured in pascals (Pa).","Easy"),
+          Q("A force of 200N acts on an area of 0.5m². The pressure exerted is",["400 Pa","100 Pa","200.5 Pa","199.5 Pa"],0,"Pressure = Force/Area = 200/0.5 = 400 Pa.","Medium",VP),
+          Q("In a fluid at rest, pressure at a given point",["increases with depth and acts equally in all directions","only acts downward","decreases with depth","is unaffected by depth"],0,"Fluid pressure increases with depth and acts equally in all directions.","Medium")
+        ]
+      }
+    ]
   }
 ];
 
@@ -3065,7 +3654,9 @@ const UPLOAD_COVERAGE = {
   government:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"light - only a couple of pages of theory answers were in the upload"},
   literature:{syllabus:"official WAEC syllabus and the 2026-2030 harmonized prescribed text list received", pastPapers:"none yet - practice questions below are AI-generated only"},
   civic:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"},
-  crs:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"}
+  crs:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"},
+  chemistry:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"},
+  physics:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"}
 };
 
 /* ======================= APP STATE ======================= */
@@ -3088,7 +3679,7 @@ function allSubjectQuestions(subject){
 /* ---------- lightweight account system -----------------------------------
    Not real security - just enough to keep each student's own dashboard
    separate when several students share the same link. Profiles and progress
-   live in a real Supabase database (project: BuildNET GCE Academy), keyed by
+   live in a real Supabase database (project: BuildNET Academy), keyed by
    username, so profiles and progress work identically whether this file is
    opened inside Claude.ai or as a fully standalone downloaded/hosted file.
    The 4-digit passkey is hashed with bcrypt server-side (via Postgres
@@ -3491,7 +4082,7 @@ const LEVELS = [
   {min:1400, title:"Knowledge Hunter",  emoji:"🎯"},
   {min:2200, title:"Scholar",           emoji:"🎓"},
   {min:3200, title:"Master Strategist", emoji:"👑"},
-  {min:4500, title:"GCE Legend",        emoji:"🏆"}
+  {min:4500, title:"Academy Legend",    emoji:"🏆"}
 ];
 
 function computeXP(){
@@ -3527,7 +4118,7 @@ function computeBadges(stats, streak){
     {id:"century", name:"Century Club", emoji:"💯", desc:"Answer 100 questions in total", earned: stats.totalAttempted>=100},
     {id:"perfect", name:"Perfect Score", emoji:"⭐", desc:"Score 100% on a topic (3+ questions)", earned: stats.perfectTopics>=1},
     {id:"perfectionist", name:"Perfectionist", emoji:"🌟", desc:"Score 100% on 3 different topics", earned: stats.perfectTopics>=3},
-    {id:"explorer", name:"Subject Explorer", emoji:"🧭", desc:"Try practice in all 7 subjects", earned: stats.subjectsTouched>=7},
+    {id:"explorer", name:"Subject Explorer", emoji:"🧭", desc:"Try practice in all "+SUBJECTS.length+" subjects", earned: stats.subjectsTouched>=SUBJECTS.length},
     {id:"mock1", name:"Mock Debut", emoji:"📝", desc:"Complete your first readiness check", earned: stats.totalMocks>=1},
     {id:"mock5", name:"Exam-Ready", emoji:"🎯", desc:"Complete 5 readiness checks", earned: stats.totalMocks>=5},
     {id:"streak3", name:"Streak Starter", emoji:"🔥", desc:"Study 3 days in a row", earned: streak>=3},
@@ -4047,15 +4638,15 @@ function renderHeader(){
   return `
   <div class="masthead">
     <div class="brand" onclick="go(${state.user?"'home'":"'welcome'"})">
-      <img src="${APP_LOGO}" alt="BuildNET GCE Academy logo" class="brand-logo">
+      <img src="${APP_LOGO}" alt="BuildNET Academy logo" class="brand-logo">
       <div class="brand-text">
-        <div class="mark">BuildNET GCE Academy</div>
-        <div class="sub">WAEC GCE PRIVATE CANDIDATE PREP PLATFORM</div>
+        <div class="mark">BuildNET Academy</div>
+        <div class="sub">PRIVATE CANDIDATE EXAM PREP PLATFORM</div>
       </div>
     </div>
     <div class="navrow">${navRight}</div>
   </div>
-  <div class="datestamp"><span>NG · PRIVATE CANDIDATE TRACK</span><span>SESSION: 2026 GCE</span></div>
+  <div class="datestamp"><span>NG · PRIVATE CANDIDATE TRACK</span><span>SESSION: 2026</span></div>
   ${state.guest ? `<div class="ai-grading-disclaimer" style="margin-top:14px;">👀 <b>Guest preview mode:</b> you're browsing without an account, so nothing you do here will be saved, and AI features (study buddy chat, theory grading) need a real connection to Claude to work. Great for looking around - create a real profile to actually track progress.</div>` : ""}
   ${inMock ? `<div class="ai-grading-disclaimer" style="margin-top:14px;background:#FEF2F2;border-color:#EF4444;">🔒 <b>Readiness check in progress:</b> navigation and the Study Buddy are locked until you submit, so this feels like the real thing. Focus up!</div>` : ""}
   `;
@@ -4065,7 +4656,7 @@ function renderAdmin(){
     return `
     <div class="welcome-wrap" style="max-width:420px;">
       <div class="welcome-mark" style="font-size:22px;">🔐 Admin Access</div>
-      <div class="welcome-sub">BuildNET GCE Academy - Backend Console</div>
+      <div class="welcome-sub">BuildNET Academy - Backend Console</div>
       <p class="welcome-p" style="margin-top:14px;">This area is separate from the student app. Enter the admin passphrase to view usage analytics and user data.</p>
       ${state.adminError ? `<div class="auth-error">${state.adminError}</div>` : ""}
       <div class="auth-field">
@@ -4157,7 +4748,7 @@ function renderAdmin(){
   return `
   <div class="admin-dash">
     <div class="admin-head">
-      <h2>🔐 Admin Console - BuildNET GCE Academy</h2>
+      <h2>🔐 Admin Console - BuildNET Academy</h2>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="ghost-btn" onclick="adminToggleChangeForm()">🔑 Change passphrase</button>
         <button class="ghost-btn" onclick="adminExportCSV()" ${users.length?"":"disabled"}>⬇ Export CSV</button>
@@ -4213,7 +4804,7 @@ function renderGuardian(){
     return `
     <div class="welcome-wrap" style="max-width:420px;">
       <div class="welcome-mark" style="font-size:22px;">👪 Guardian Portal</div>
-      <div class="welcome-sub">BuildNET GCE Academy - Family Monitoring</div>
+      <div class="welcome-sub">BuildNET Academy - Family Monitoring</div>
       <p class="welcome-p" style="margin-top:14px;">Keep an eye on your child's study habits - whether they've studied today, which subjects need attention, and where they're doing well.</p>
       ${state.guardianError ? `<div class="auth-error">${state.guardianError}</div>` : ""}
       <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;">
@@ -4320,12 +4911,12 @@ function renderFooter(){
 function renderWelcome(){
   return `
   <div class="welcome-wrap">
-    <img src="${APP_LOGO}" alt="BuildNET GCE Academy logo" class="welcome-logo">
-    <div class="welcome-mark">BuildNET GCE Academy</div>
-    <div class="welcome-sub">WAEC GCE PRIVATE CANDIDATE PREP PLATFORM</div>
+    <img src="${APP_LOGO}" alt="BuildNET Academy logo" class="welcome-logo">
+    <div class="welcome-mark">BuildNET Academy</div>
+    <div class="welcome-sub">PRIVATE CANDIDATE EXAM PREP PLATFORM</div>
     <div class="welcome-buildnet">Part of the BuildNET Universe</div>
     <h1 class="welcome-h1">Welcome. Pull up a chair.</h1>
-    <p class="welcome-p">Seven subjects, real WAEC syllabuses, and a study buddy that explains things like you're ten years old - all tracked on your own personal dashboard, so you always know exactly what to revise next. Nothing here bites. Promise.</p>
+    <p class="welcome-p">${SUBJECTS.length} subjects, real WAEC syllabuses, and a study buddy that explains things like you're ten years old - all tracked on your own personal dashboard, so you always know exactly what to revise next. Nothing here bites. Promise.</p>
     <div class="welcome-actions">
       <button class="stampbtn" onclick="go('signup')">I'M NEW HERE - CREATE MY PROFILE</button>
       <button class="ghost-btn" onclick="go('login')">I already have a profile - Log in</button>
@@ -4391,7 +4982,7 @@ function renderHome(){
 
   return `
   <div class="intro">
-    <h2>Hey ${state.user}! Seven subjects. One desk. 🎉</h2>
+    <h2>Hey ${state.user}! ${SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
   </div>
   ${!state.guest ? renderGamifiedHeader() : ""}
