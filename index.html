@@ -191,6 +191,21 @@
   .bar-track{height:11px;background:var(--line);border-radius:999px;position:relative;overflow:hidden;}
   .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--yellow),var(--orange));transition:width .6s cubic-bezier(.22,1,.36,1);}
   .bar-fill.low{background:linear-gradient(90deg,var(--red),#FF8A8A);} .bar-fill.high{background:linear-gradient(90deg,var(--teal),var(--green));}
+  .bar-target-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,0.35);z-index:2;}
+
+  /* ---------- READINESS SCORE (per-subject benchmark) ---------- */
+  .readiness-score-wrap{margin-top:10px;}
+  .readiness-score-wrap.compact{margin-top:8px;margin-bottom:10px;}
+  .readiness-score-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  .readiness-score-num{font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink);}
+  .readiness-score-wrap.compact .readiness-score-num{font-size:15px;}
+  .readiness-score-target{font-size:10.5px;color:var(--ink-soft);font-weight:600;}
+  .readiness-score-track{height:12px;background:var(--line);border-radius:999px;position:relative;overflow:hidden;}
+  .readiness-score-wrap.compact .readiness-score-track{height:8px;}
+  .readiness-score-fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.22,1,.36,1);}
+  .readiness-score-target-line{position:absolute;top:-2px;bottom:-2px;width:2px;background:rgba(0,0,0,0.4);z-index:2;}
+  .readiness-score-breakdown{font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.4;}
+
   .recommend{border:none;border-radius:18px;padding:16px 18px;margin-top:22px;font-size:14px;background:linear-gradient(135deg,#FFF3D6,#FFE0EF);}
   .recommend b{font-size:11px;display:block;margin-bottom:8px;color:var(--orange);font-weight:800;letter-spacing:0.3px;}
   .confetti{position:relative;height:0;overflow:visible;}
@@ -406,8 +421,8 @@ const SUBJECT_OVERVIEWS = {
   }
 };
 
-const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏", chemistry:"🧪", physics:"⚛️" };
-const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D", chemistry:"#06B6D4", physics:"#6366F1" };
+const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏", chemistry:"🧪", physics:"⚛️", biology:"🧬" };
+const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D", chemistry:"#06B6D4", physics:"#6366F1", biology:"#10B981" };
 const READINESS_EMOJI = { "NOT STARTED":"🌱", "STARTED":"🚶", "DEVELOPING":"🔧", "COMPETENT":"👍", "STRONG":"🔥", "EXAM READY":"🌟" };
 function labelFun(label){ return (READINESS_EMOJI[label]||"") + " " + label; }
 
@@ -3371,6 +3386,251 @@ const SUBJECTS = [
         ]
       }
     ]
+  },
+  {
+    id:"biology", name:"Biology",
+    examFormat:"Paper 1 (1 hour, 50 marks) - 50 objective questions covering the entire syllabus. Paper 2 (2¼ hrs, 100 marks) - essay paper in three sections; Section A has 5 compulsory short-structured questions, Sections B and C offer a choice of longer essay questions. Paper 3 - a practical (or alternative-to-practical) paper testing laboratory and field skills; this app covers Papers 1 and 2 content only, since practical work needs an actual lab.",
+    topics:[
+      { id:"classification", name:"Classification of Living Things",
+        hook:"A mushroom looks nothing like a tree, yet biologists once lumped both under 'plants' simply because neither one moved, until a better system came along that classified organisms by genuine shared characteristics rather than a single superficial trait.",
+        obj:["Distinguish living from non-living things using characteristics of life","Explain the hierarchy of classification (kingdom to species)"],
+        exp:[
+          {t:"Characteristics of living things", b:"Living things share several defining characteristics: NUTRITION (obtaining and using food), RESPIRATION (releasing energy from food), EXCRETION (removing waste), GROWTH, MOVEMENT, REPRODUCTION, SENSITIVITY (responding to stimuli), and life eventually ending in DEATH. A virus is a genuinely tricky borderline case, often mentioned as a link between living and non-living, since it shows some but not all of these characteristics outside a host cell."},
+          {t:"The classification hierarchy", b:"Organisms are grouped into a nested hierarchy, from broadest to most specific: KINGDOM, PHYLUM, CLASS, ORDER, FAMILY, GENUS, SPECIES. Each level groups organisms sharing progressively more specific characteristics, members of the same SPECIES can interbreed to produce fertile offspring, the most specific and biologically meaningful grouping."}
+        ],
+        err:["Assuming movement alone is enough to prove something is alive (plants grow and respond without moving from place to place)","Mixing up the order of the classification hierarchy"],
+        qs:[
+          Q("Which of these is NOT one of the characteristics of living things?",["Crystallization","Nutrition","Respiration","Excretion"],0,"Crystallization is a physical/chemical process, not a characteristic of life.","Easy"),
+          Q("The process by which living things release energy from food is called",["respiration","excretion","nutrition","growth"],0,"Respiration specifically releases energy from food.","Easy"),
+          Q("The most specific level of biological classification, where members can interbreed to produce fertile offspring, is the",["species","genus","family","kingdom"],0,"Species is the most specific classification level.","Medium"),
+          Q("Arrange the following in the correct order from broadest to most specific: Class, Kingdom, Species, Phylum, Genus",["Kingdom, Phylum, Class, Genus, Species","Species, Genus, Class, Phylum, Kingdom","Kingdom, Class, Phylum, Species, Genus","Phylum, Kingdom, Class, Species, Genus"],0,"The correct hierarchy from broadest to narrowest is Kingdom, Phylum, Class, Order, Family, Genus, Species.","Medium",VP)
+        ]
+      },
+      { id:"cellbio", name:"Cell Structure and Organization",
+        hook:"Zoom in far enough on any living thing, a mushroom, a rose, you, and you eventually reach the exact same fundamental unit of life, the cell, just arranged and specialised in wildly different ways depending on the job it needs to do.",
+        obj:["Identify the structure and functions of major cell organelles","Distinguish plant cells from animal cells","Explain the levels of biological organisation"],
+        exp:[
+          {t:"Key cell organelles", b:"The CELL MEMBRANE controls what enters and leaves the cell. The NUCLEUS contains genetic material and controls cell activities. MITOCHONDRIA release energy through respiration, the cell's 'power plant'. In plant cells specifically, the CELL WALL provides rigid structural support, CHLOROPLASTS carry out photosynthesis, and a large central VACUOLE stores water and maintains turgor pressure, none of which animal cells typically have."},
+          {t:"Levels of organisation", b:"Life is organised in increasing complexity: CELLS group into TISSUES (cells of similar structure and function), tissues group into ORGANS (like the heart or a leaf), organs group into ORGAN SYSTEMS (like the digestive system), and organ systems work together in a complete ORGANISM."}
+        ],
+        err:["Assuming animal cells have a cell wall and chloroplasts, like plant cells do","Confusing 'tissue' with 'organ' in the organisation hierarchy"],
+        qs:[
+          Q("The organelle responsible for releasing energy through respiration is the",["mitochondrion","nucleus","cell wall","vacuole"],0,"Mitochondria are the site of aerobic respiration and energy release.","Easy"),
+          Q("Which structure is found in plant cells but NOT in animal cells?",["Cell wall","Cell membrane","Nucleus","Mitochondrion"],0,"The cell wall is a distinctly plant-cell structure.","Easy"),
+          Q("The correct order of increasing biological organisation is",["cell, tissue, organ, organ system, organism","tissue, cell, organ system, organ, organism","organ, tissue, cell, organism, organ system","organism, organ system, organ, tissue, cell"],0,"Cells group into tissues, tissues into organs, organs into organ systems, forming an organism.","Medium",VP),
+          Q("The organelle that controls the cell's activities and contains genetic material is the",["nucleus","mitochondrion","ribosome","cell membrane"],0,"The nucleus houses genetic material and directs cell activity.","Easy")
+        ]
+      },
+      { id:"cellenvironment", name:"The Cell and its Environment",
+        hook:"A wilted plant perks back up within hours of watering, not through any active pumping mechanism, but purely because water quietly moves itself across cell membranes toward wherever it's needed most.",
+        obj:["Distinguish diffusion from osmosis","Explain the effect of osmosis on plant and animal cells in different solutions"],
+        exp:[
+          {t:"Diffusion vs osmosis", b:"DIFFUSION is the movement of particles from a region of higher concentration to lower concentration, requiring no energy, like a drop of ink spreading through water. OSMOSIS is a specific type of diffusion, the movement of WATER MOLECULES specifically, across a selectively permeable membrane, from a region of higher water concentration (dilute solution) to lower water concentration (concentrated solution)."},
+          {t:"Osmosis and cells - the practical effects", b:"A plant cell placed in a dilute (hypotonic) solution absorbs water and becomes firm (turgid), the cell wall prevents it from bursting. An animal cell in the same situation would actually burst, since it has no protective wall. In a concentrated (hypertonic) solution, both plant and animal cells lose water and shrink, a plant cell becomes flaccid or plasmolysed, its membrane pulling away from the cell wall."}
+        ],
+        err:["Assuming osmosis and diffusion are entirely unrelated, when osmosis is really a specific case of diffusion involving water","Forgetting that only plant cells, with a protective cell wall, can become turgid without bursting"],
+        qs:[
+          Q("The movement of particles from a region of high concentration to low concentration is called",["diffusion","osmosis","active transport","transpiration"],0,"Diffusion describes general particle movement down a concentration gradient.","Easy"),
+          Q("Osmosis specifically refers to the movement of",["water molecules across a selectively permeable membrane","any dissolved particle across any membrane","only sugar molecules","gases only"],0,"Osmosis is specifically about water movement across a selectively permeable membrane.","Medium"),
+          Q("A plant cell placed in a concentrated salt solution will most likely",["lose water and become flaccid or plasmolysed","absorb water and become turgid","remain completely unchanged","immediately burst"],0,"A hypertonic (concentrated) external solution draws water out of the cell.","Medium",VP),
+          Q("An animal cell (e.g. a red blood cell) placed in pure water will most likely",["absorb water and burst, since it has no protective cell wall","become turgid but stay intact","shrink and become crenated","remain completely unaffected"],0,"Without a cell wall, excess water uptake can cause an animal cell to burst (lyse).","Hard",VP)
+        ]
+      },
+      { id:"nutrition_plant", name:"Nutrition in Plants",
+        hook:"A tiny seed, given only sunlight, water, air and soil, somehow builds itself into a towering tree, manufacturing its own food from scratch, a feat no factory on Earth can fully replicate.",
+        obj:["Explain the process of photosynthesis, including the word and balanced equation","Identify factors affecting the rate of photosynthesis"],
+        exp:[
+          {t:"Photosynthesis", b:"Green plants manufacture their own food through photosynthesis: carbon dioxide and water combine, using light energy captured by chlorophyll, to produce glucose and oxygen. Word equation: carbon dioxide + water --(light energy, chlorophyll)--> glucose + oxygen. Balanced equation: 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂."},
+          {t:"Factors affecting the rate", b:"Photosynthesis rate is limited by whichever factor is currently in shortest supply (the 'limiting factor'): LIGHT INTENSITY (more light generally means a faster rate, up to a point), CARBON DIOXIDE CONCENTRATION, and TEMPERATURE (enzymes controlling the reaction work best within an optimal range, too hot and they're damaged, too cold and they work slowly)."}
+        ],
+        err:["Forgetting chlorophyll and light are both required, not just carbon dioxide and water alone","Assuming increasing one factor (like light) always increases the rate, even when a different factor is actually limiting it"],
+        qs:[
+          Q("The word equation for photosynthesis produces glucose and",["oxygen","carbon dioxide","nitrogen","water only"],0,"Photosynthesis produces glucose and oxygen as products.","Easy"),
+          Q("The green pigment that captures light energy for photosynthesis is",["chlorophyll","haemoglobin","cellulose","starch"],0,"Chlorophyll captures light energy in photosynthesis.","Easy"),
+          Q("Which of these is NOT a factor affecting the rate of photosynthesis?",["Soil pH directly","Light intensity","Carbon dioxide concentration","Temperature"],0,"Light intensity, CO2 concentration and temperature are the classic limiting factors; soil pH is not directly one of them.","Medium"),
+          Q("The balanced chemical equation for photosynthesis is",["6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂","C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O","6CO₂ + 6O₂ → C₆H₁₂O₆","C₆H₁₂O₆ → 6CO₂ + 6H₂O"],0,"This is the correctly balanced photosynthesis equation.","Medium",VP)
+        ]
+      },
+      { id:"nutrition_animal", name:"Nutrition in Animals",
+        hook:"A sandwich swallowed whole is useless to the body until it's broken down piece by piece into molecules small enough to actually cross into the bloodstream, a whole digestive system exists purely to perform that breakdown.",
+        obj:["Distinguish the classes of food and their functions","Explain the process of digestion in humans"],
+        exp:[
+          {t:"Classes of food", b:"CARBOHYDRATES provide quick energy. PROTEINS build and repair tissues. FATS/LIPIDS store energy long-term and insulate. VITAMINS and MINERALS support specific body functions in small amounts (e.g. Vitamin C prevents scurvy, calcium builds bones). WATER and FIBRE (roughage) are also essential, water for nearly every body process, fibre for healthy digestion."},
+          {t:"Digestion", b:"Digestion breaks large, complex food molecules into smaller, simple, absorbable ones through both MECHANICAL means (chewing, churning) and CHEMICAL means (enzymes). Enzymes are specific: amylase breaks down starch, protease breaks down protein, lipase breaks down fat, each enzyme working on just one type of food molecule."}
+        ],
+        err:["Assuming all classes of food serve the exact same purpose in the body","Assuming any enzyme can break down any type of food, rather than each being specific to one food type"],
+        qs:[
+          Q("The class of food that provides the body's main quick energy source is",["carbohydrates","proteins","vitamins","minerals"],0,"Carbohydrates are the primary quick-energy food class.","Easy"),
+          Q("The enzyme that specifically breaks down starch is",["amylase","protease","lipase","catalase"],0,"Amylase specifically digests starch into simpler sugars.","Easy"),
+          Q("Proteins in the diet are mainly needed for",["growth and repair of body tissues","quick energy release only","insulation only","digestion of other foods"],0,"Proteins build and repair body tissue.","Medium"),
+          Q("A deficiency of Vitamin C in the diet is specifically linked to",["scurvy","rickets","night blindness","goitre"],0,"Vitamin C deficiency classically causes scurvy.","Medium",VP)
+        ]
+      },
+      { id:"transport_bio", name:"Transport Systems in Plants and Animals",
+        hook:"A giraffe's heart has to push blood roughly two metres straight up to reach its brain, a plumbing challenge nature solved with a genuinely powerful pump, the same basic organ, just scaled up, that keeps every human alive too.",
+        obj:["Explain the structure and function of the mammalian heart and blood vessels","Distinguish xylem from phloem in plant transport"],
+        exp:[
+          {t:"The heart and blood vessels", b:"The heart has four chambers (two atria, two ventricles) pumping blood in a double circuit, to the lungs for oxygen, then to the body. ARTERIES carry blood AWAY from the heart, generally oxygenated, with thick, elastic, muscular walls to handle high pressure. VEINS carry blood TOWARD the heart, generally deoxygenated, with valves to prevent backflow. CAPILLARIES are tiny vessels with walls just one cell thick, allowing actual exchange of substances with body tissues."},
+          {t:"Xylem vs phloem in plants", b:"XYLEM transports water and dissolved minerals UPWARD from roots to leaves, made of dead, hollow cells forming continuous tubes. PHLOEM transports manufactured food (mainly dissolved sugars) in BOTH directions, from leaves to wherever it's needed, made of living cells. Confusing which tissue does which job is a very common, testable mix-up."}
+        ],
+        err:["Assuming arteries always carry oxygenated blood (the pulmonary artery, going TO the lungs, actually carries deoxygenated blood)","Confusing xylem (water, upward only) with phloem (food, both directions)"],
+        qs:[
+          Q("Blood vessels that carry blood away from the heart are called",["arteries","veins","capillaries","lymph vessels"],0,"Arteries carry blood away from the heart.","Easy"),
+          Q("The plant tissue responsible for transporting water and minerals from roots to leaves is the",["xylem","phloem","cambium","epidermis"],0,"Xylem transports water and minerals upward.","Easy"),
+          Q("The plant tissue responsible for transporting manufactured food is the",["phloem","xylem","cortex","cambium"],0,"Phloem transports food (sugars) throughout the plant.","Easy"),
+          Q("Blood vessels with walls just one cell thick, allowing exchange of substances with body tissues, are",["capillaries","arteries","veins","the aorta"],0,"Capillaries' thin walls enable efficient exchange with tissues.","Medium",VP)
+        ]
+      },
+      { id:"respiration_bio", name:"Respiration",
+        hook:"A sprinter's muscles keep working even after they run out of oxygen mid-race, switching to a backup energy-release method that comes at a real cost: the burning ache of lactic acid building up.",
+        obj:["Distinguish aerobic from anaerobic respiration, including their equations","Explain the role of respiration in releasing energy"],
+        exp:[
+          {t:"Aerobic respiration", b:"Aerobic respiration uses oxygen to fully break down glucose, releasing a large amount of energy: C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + energy. This happens continuously in mitochondria and is far more energy-efficient than the alternative."},
+          {t:"Anaerobic respiration", b:"Without enough oxygen, cells can respire anaerobically instead, releasing far less energy. In human muscles: glucose → lactic acid + energy (the burning sensation during intense exercise). In yeast (fermentation): glucose → ethanol + carbon dioxide + energy, the basis of brewing and bread-making."}
+        ],
+        err:["Assuming anaerobic respiration releases the same amount of energy as aerobic respiration","Confusing the human muscle anaerobic pathway (lactic acid) with the yeast pathway (ethanol and CO2)"],
+        qs:[
+          Q("Aerobic respiration requires which gas to fully break down glucose?",["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],0,"Aerobic respiration specifically requires oxygen.","Easy"),
+          Q("The build-up of which substance causes the burning sensation in muscles during intense exercise?",["Lactic acid","Ethanol","Carbon dioxide only","Glucose"],0,"Anaerobic respiration in muscles produces lactic acid.","Medium"),
+          Q("Anaerobic respiration in yeast (fermentation) produces ethanol and",["carbon dioxide","oxygen","lactic acid","water only"],0,"Yeast fermentation produces ethanol and CO2.","Medium",VP),
+          Q("Compared to aerobic respiration, anaerobic respiration releases",["much less energy from the same amount of glucose","exactly the same amount of energy","more energy","no energy at all"],0,"Anaerobic respiration is far less energy-efficient than aerobic respiration.","Medium")
+        ]
+      },
+      { id:"excretion", name:"Excretion and Osmoregulation",
+        hook:"A desert animal and a freshwater fish face completely opposite water problems, one constantly fighting to conserve every drop, the other constantly fighting to pump excess water back out, yet both rely on the same basic organ system to survive.",
+        obj:["Explain the meaning of excretion, and distinguish it from egestion","Describe the structure and function of the kidney in excretion and osmoregulation"],
+        exp:[
+          {t:"Excretion vs egestion - a genuinely common mix-up", b:"EXCRETION is the removal of metabolic waste products actually made by the body's own cells (like urea, carbon dioxide). EGESTION is the removal of undigested food material that was never actually absorbed into the body at all (faeces). Confusing these two is one of the most common errors students make, egestion isn't excretion, since that waste was never truly part of the body's internal chemistry."},
+          {t:"The kidney's role", b:"The KIDNEY filters blood, removing urea (a nitrogenous waste product from protein breakdown) and excess water/salts, producing urine. This process also achieves OSMOREGULATION, maintaining the right water and salt balance in the blood, by adjusting exactly how much water is reabsorbed back into the body versus excreted as urine."}
+        ],
+        err:["Confusing excretion (removing metabolic waste) with egestion (removing undigested food, faeces)","Assuming the kidney only removes waste, forgetting its equally important osmoregulation role"],
+        qs:[
+          Q("The removal of metabolic waste products made by the body's own cells is called",["excretion","egestion","digestion","respiration"],0,"Excretion removes actual metabolic waste, unlike egestion.","Easy"),
+          Q("The removal of undigested food material (faeces) from the body is called",["egestion","excretion","secretion","absorption"],0,"Egestion removes undigested material never absorbed into the body.","Easy"),
+          Q("The main nitrogenous waste product removed by the kidney, from the breakdown of proteins, is",["urea","glucose","glycogen","starch"],0,"Urea is the main nitrogenous excretory product.","Medium"),
+          Q("The kidney's role in maintaining the correct water and salt balance in the blood is called",["osmoregulation","photosynthesis","transpiration","fermentation"],0,"Osmoregulation is the kidney's role in balancing water/salt levels.","Medium",VP)
+        ]
+      },
+      { id:"support_movement", name:"Support, Movement and Growth",
+        hook:"A sunflower slowly turning to track the sun across the sky, and a sprinter exploding off the blocks, are both technically 'movement', yet biology treats them as fundamentally different phenomena, one a growth response, one active muscular motion.",
+        obj:["Distinguish plant growth movements (tropisms) from animal locomotion","Explain the role of the skeleton in support and movement"],
+        exp:[
+          {t:"Tropisms - plant growth movements", b:"Plants respond to stimuli through TROPISMS, directional growth responses. PHOTOTROPISM is growth toward or away from light (shoots grow toward light, positively phototropic). GEOTROPISM is growth response to gravity (roots grow downward, positively geotropic; shoots grow upward, negatively geotropic). These are slow, growth-based responses, not muscular movement."},
+          {t:"The skeleton's role", b:"The skeleton provides SUPPORT (holding the body's shape), PROTECTION (the skull protecting the brain, ribs protecting the heart and lungs), and, working with muscles attached to it, enables MOVEMENT, muscles contract and pull on bones across joints to produce motion."}
+        ],
+        err:["Confusing phototropism (response to light) with geotropism (response to gravity)","Assuming plant tropisms and animal muscular movement work by the same mechanism"],
+        qs:[
+          Q("The growth response of a plant shoot toward light is called",["positive phototropism","negative phototropism","positive geotropism","negative geotropism"],0,"Shoots typically grow toward light, a positive phototropic response.","Easy"),
+          Q("The growth response of plant roots downward, in the direction of gravity, is called",["positive geotropism","negative geotropism","positive phototropism","photosynthesis"],0,"Roots growing downward, with gravity, show positive geotropism.","Easy"),
+          Q("A key function of the skeleton, alongside support and movement, is",["protection of vital organs","digestion of food","excretion of waste","photosynthesis"],0,"The skeleton also protects vital organs like the brain and heart.","Easy"),
+          Q("Muscles produce movement mainly by",["contracting and pulling on bones across a joint","expanding and pushing bones apart","dissolving bone tissue","growing continuously"],0,"Muscle contraction across a joint produces movement.","Medium",VP)
+        ]
+      },
+      { id:"nervous", name:"Nervous Coordination and Sense Organs",
+        hook:"Touch something scalding hot and your hand yanks back before you've even consciously registered the pain, a reflex so fast it bypasses deliberate thought entirely, showcasing the nervous system's fastest possible response pathway.",
+        obj:["Explain the structure and function of a neurone","Describe the reflex arc","Identify the sense organs and their specific functions"],
+        exp:[
+          {t:"Neurones and the reflex arc", b:"A NEURONE (nerve cell) transmits electrical impulses. A REFLEX ACTION is a rapid, automatic, involuntary response to a stimulus, following a specific pathway (the reflex arc): stimulus → receptor → sensory neurone → relay neurone (in the spinal cord) → motor neurone → effector (muscle). This bypasses the brain's conscious decision-making, making it faster than voluntary reaction."},
+          {t:"Sense organs", b:"Each sense organ contains receptors specific to one type of stimulus: the EYE detects light, the EAR detects sound (and also balance), the NOSE detects smell (chemicals in the air), the TONGUE detects taste (chemicals in food/drink), and the SKIN detects touch, pressure, temperature and pain."}
+        ],
+        err:["Assuming a reflex action involves the brain's conscious decision-making, when it specifically bypasses it via the spinal cord","Mixing up which sense organ detects which specific type of stimulus"],
+        qs:[
+          Q("A rapid, automatic, involuntary response to a stimulus is called a",["reflex action","voluntary action","tropism","reflex organ"],0,"Reflex actions are rapid and involuntary.","Easy"),
+          Q("The pathway of a reflex action is best described as",["stimulus, receptor, sensory neurone, relay neurone, motor neurone, effector","stimulus, effector, receptor, motor neurone","effector, receptor, stimulus, neurone","receptor, stimulus, effector only"],0,"This is the correct sequence of the reflex arc.","Medium",VP),
+          Q("The sense organ responsible for detecting light is the",["eye","ear","nose","skin"],0,"The eye detects light stimuli.","Easy"),
+          Q("Reflex actions are typically faster than voluntary actions mainly because they",["bypass the brain's conscious decision-making, being processed at the spinal cord","involve larger muscles","require more sensory input","use a completely different type of cell"],0,"Reflexes are processed at the spinal cord level, skipping conscious brain processing.","Medium")
+        ]
+      },
+      { id:"reproduction_bio", name:"Reproduction in Plants and Animals",
+        hook:"A single bee visiting a flower for nectar unknowingly performs one of the most important jobs in nature, carrying pollen that allows that plant, and countless others, to reproduce at all.",
+        obj:["Distinguish sexual from asexual reproduction","Explain pollination and fertilisation in flowering plants"],
+        exp:[
+          {t:"Sexual vs asexual reproduction", b:"SEXUAL reproduction involves the fusion of male and female gametes (sex cells), producing offspring with genetic variation from both parents. ASEXUAL reproduction involves only one parent, producing genetically identical offspring (clones), examples include binary fission in bacteria and vegetative propagation in plants (like a potato sprouting from a single tuber)."},
+          {t:"Pollination and fertilisation", b:"POLLINATION is the transfer of pollen from the anther (male part) to the stigma (female part) of a flower, which can happen via wind, insects, or other agents. FERTILISATION happens AFTER pollination, when the male gamete inside the pollen actually fuses with the female gamete (ovule), forming a zygote that develops into a seed. Pollination and fertilisation are NOT the same event, pollination is simply the delivery step; fertilisation is the actual genetic fusion."}
+        ],
+        err:["Assuming pollination and fertilisation are the same event, when pollination is only the delivery step before fertilisation actually occurs","Assuming asexual reproduction produces genetically varied offspring, when it actually produces genetic clones"],
+        qs:[
+          Q("Reproduction involving the fusion of male and female gametes is called",["sexual reproduction","asexual reproduction","binary fission","budding"],0,"Sexual reproduction involves gamete fusion.","Easy"),
+          Q("Reproduction involving only one parent, producing genetically identical offspring, is called",["asexual reproduction","sexual reproduction","fertilisation","pollination"],0,"Asexual reproduction produces genetic clones from a single parent.","Easy"),
+          Q("The transfer of pollen from the anther to the stigma of a flower is called",["pollination","fertilisation","germination","photosynthesis"],0,"Pollination is specifically pollen transfer from anther to stigma.","Easy"),
+          Q("Fertilisation in a flowering plant occurs when",["the male gamete from the pollen fuses with the female gamete (ovule)","pollen simply lands on the stigma","a seed is dispersed","a fruit ripens"],0,"Fertilisation is the actual fusion of male and female gametes, distinct from pollination.","Medium",VP)
+        ]
+      },
+      { id:"genetics", name:"Genetics and Heredity",
+        hook:"Two brown-eyed parents can, surprisingly, have a blue-eyed child, a genuine puzzle that genetics solves completely once you understand that a visible trait doesn't always reveal every gene a person is secretly carrying.",
+        obj:["Explain basic genetic terminology: gene, allele, dominant, recessive, genotype, phenotype","Solve simple monohybrid genetic crosses"],
+        exp:[
+          {t:"Basic genetic terms", b:"A GENE is a unit of heredity controlling a specific trait. An ALLELE is a specific version of a gene (e.g. the allele for brown eyes vs the allele for blue eyes). A DOMINANT allele is expressed whenever present, even with just one copy; a RECESSIVE allele is only expressed when TWO copies are present (no dominant allele masking it). GENOTYPE is an organism's actual genetic makeup; PHENOTYPE is its observable physical characteristic, the visible result of that genotype."},
+          {t:"Solving a monohybrid cross", b:"Using a Punnett square, crossing two heterozygous parents (Tt × Tt, where T=tall is dominant, t=short is recessive) produces offspring in a genotype ratio of 1 TT : 2 Tt : 1 tt, giving a PHENOTYPE ratio of 3 tall : 1 short. This is exactly how two brown-eyed parents (each secretly carrying one recessive blue-eye allele) can have a blue-eyed child, both parents' phenotype is brown, but their genotype includes a hidden recessive allele that can combine in their offspring."}
+        ],
+        err:["Confusing genotype (genetic makeup) with phenotype (observable trait)","Assuming a recessive allele has simply disappeared if it isn't visibly expressed, when it can still be silently carried and passed on"],
+        qs:[
+          Q("An organism's observable physical characteristic is called its",["phenotype","genotype","allele","gene"],0,"Phenotype is the observable expression of the genotype.","Easy"),
+          Q("An allele that is only expressed when two copies are present is called",["recessive","dominant","heterozygous","hybrid"],0,"Recessive alleles require two copies to be expressed.","Easy"),
+          Q("Crossing two heterozygous parents (Tt × Tt) for a trait where T is dominant produces a phenotype ratio of",["3 dominant : 1 recessive","1 dominant : 1 recessive","1 dominant : 3 recessive","all offspring identical to parents"],0,"The classic monohybrid cross ratio for Tt×Tt is 3:1 in phenotype.","Medium",VP),
+          Q("Two brown-eyed parents can have a blue-eyed child because",["both parents may carry a hidden recessive allele for blue eyes despite their own brown-eyed phenotype","blue eyes are actually dominant","genes can spontaneously change colour","this is biologically impossible"],0,"Both parents can be heterozygous carriers of the recessive blue-eye allele.","Hard")
+        ]
+      },
+      { id:"ecology", name:"Ecology: Ecosystems and Energy Flow",
+        hook:"Not a single calorie of energy in an entire forest food web was created there, all of it traces back to sunlight captured by plants, then passed link by link through every animal that eats, and is eaten in turn.",
+        obj:["Explain the concepts of food chains, food webs and trophic levels","Explain energy flow and nutrient cycling in an ecosystem"],
+        exp:[
+          {t:"Food chains and trophic levels", b:"A FOOD CHAIN shows a single line of who-eats-whom, starting with a PRODUCER (a plant, making its own food), then a PRIMARY CONSUMER (herbivore), then a SECONDARY CONSUMER (carnivore eating the herbivore), and so on. A FOOD WEB is a more realistic, interconnected network of many overlapping food chains. Each feeding level is called a TROPHIC LEVEL."},
+          {t:"Energy flow and nutrient cycling", b:"Energy flows in ONE DIRECTION through an ecosystem, from the sun, through producers, then consumers, with a significant amount lost as heat at each transfer (roughly 90% lost, only about 10% passed to the next level), which is exactly why food chains rarely extend beyond 4-5 levels. Nutrients, unlike energy, are RECYCLED continuously through the ecosystem (e.g. the nitrogen cycle, carbon cycle), passing between living organisms and the physical environment repeatedly."}
+        ],
+        err:["Assuming energy, like nutrients, is recycled in an ecosystem, when energy actually flows one-way and is progressively lost as heat","Confusing a food chain (one line) with a food web (an interconnected network)"],
+        qs:[
+          Q("An organism that makes its own food, forming the base of a food chain, is called a",["producer","primary consumer","secondary consumer","decomposer"],0,"Producers (plants) form the base of food chains.","Easy"),
+          Q("A network of interconnected, overlapping food chains is called a",["food web","food chain","trophic level","ecosystem pyramid"],0,"A food web interconnects multiple food chains.","Easy"),
+          Q("As energy flows through a food chain from one trophic level to the next, most of it is",["lost as heat","fully transferred with no loss","converted entirely into new biomass","stored permanently"],0,"Roughly 90% of energy is lost as heat at each trophic transfer.","Medium",VP),
+          Q("Unlike energy, nutrients in an ecosystem are",["recycled repeatedly between organisms and the environment","lost permanently after one use","created continuously from nothing","only used by producers"],0,"Nutrients cycle repeatedly, unlike the one-way flow of energy.","Medium")
+        ]
+      },
+      { id:"adaptation", name:"Adaptation and Evolution",
+        hook:"A polar bear's thick white fur and a cactus's spiny, water-storing body look nothing alike, yet both are answers to the exact same underlying biological challenge: surviving in a harsh, specific environment.",
+        obj:["Explain adaptation as a response to environmental conditions","Explain the basic concept of natural selection and evolution"],
+        exp:[
+          {t:"Adaptation", b:"An ADAPTATION is a specific feature (structural, behavioural, or physiological) that improves an organism's chance of survival in its specific environment. A cactus's thick, water-storing stem and reduced leaves (as spines, reducing water loss) are structural adaptations to desert life; a polar bear's thick fur and fat layer are structural adaptations to arctic cold."},
+          {t:"Natural selection", b:"NATURAL SELECTION is the process by which organisms with traits better suited to their environment survive and reproduce more successfully than those without, gradually increasing the frequency of helpful traits in a population over many generations, the basic mechanism driving EVOLUTION, gradual change in a species over long periods of time."}
+        ],
+        err:["Assuming an individual organism can 'evolve' a new trait during its own lifetime, when evolution happens at the population level over generations","Confusing adaptation (a beneficial trait) with the process of natural selection (how that trait becomes more common)"],
+        qs:[
+          Q("A feature that improves an organism's chance of survival in its environment is called an",["adaptation","evolution","mutation only","extinction"],0,"An adaptation is a survival-enhancing feature.","Easy"),
+          Q("The process by which better-suited organisms survive and reproduce more successfully, increasing helpful traits over generations, is",["natural selection","artificial selection only","genetic engineering","cloning"],0,"Natural selection is the mechanism driving evolutionary change.","Medium"),
+          Q("A cactus's reduced leaves (as spines) are best explained as an adaptation to",["reduce water loss in a dry desert environment","attract more pollinators","increase photosynthesis rate","provide extra structural support"],0,"Reduced leaf surface area minimises water loss, key for desert survival.","Medium",VP)
+        ]
+      },
+      { id:"microorganisms", name:"Microorganisms: Man and Health",
+        hook:"The same broad category of tiny organisms responsible for spoiling forgotten leftovers in the fridge is also responsible for making bread rise, yoghurt set, and penicillin exist, microorganisms are neither purely helpful nor purely harmful.",
+        obj:["Distinguish useful from harmful microorganisms, with examples","Explain basic methods of disease control and prevention"],
+        exp:[
+          {t:"Useful vs harmful microorganisms", b:"USEFUL microorganisms include yeast (used in baking and brewing, via fermentation) and certain bacteria (used in yoghurt production, and in producing antibiotics like penicillin from a mould). HARMFUL microorganisms (pathogens) cause disease, bacteria cause diseases like cholera and tuberculosis, viruses cause diseases like measles and influenza, and certain protozoa cause diseases like malaria."},
+          {t:"Disease control and prevention", b:"Methods include VACCINATION (introducing a weakened or inactive pathogen to trigger immune protection before real exposure), proper SANITATION and clean water supply (reducing pathogen spread), and PERSONAL HYGIENE (handwashing reducing the transfer of pathogens). Vector control (like reducing mosquito breeding sites for malaria prevention) is another key specific method."}
+        ],
+        err:["Assuming all microorganisms are harmful, overlooking their many beneficial uses","Confusing which specific type of organism causes which specific disease"],
+        qs:[
+          Q("Yeast is used in baking and brewing mainly because of its",["ability to ferment sugars, releasing carbon dioxide and alcohol","ability to cause disease","large physical size","photosynthetic ability"],0,"Yeast's fermentation process is exploited in baking and brewing.","Easy"),
+          Q("Malaria is caused by a",["protozoan parasite, transmitted by mosquitoes","bacterium","virus","fungus"],0,"Malaria is caused by a Plasmodium protozoan, transmitted via mosquito bite.","Medium"),
+          Q("Vaccination works by",["introducing a weakened or inactive pathogen to trigger immune protection before real exposure","killing all bacteria in the body permanently","providing vitamins to boost general health","removing the need for personal hygiene"],0,"Vaccination primes the immune system using a weakened/inactive pathogen.","Medium",VP),
+          Q("Which of the following is an effective method of controlling the spread of malaria?",["Reducing mosquito breeding sites","Increasing sugar consumption","Avoiding all fruits","Sleeping with windows fully open at night"],0,"Vector control (reducing mosquito breeding sites) directly reduces malaria transmission.","Medium")
+        ]
+      },
+      { id:"conservation", name:"Conservation of Natural Resources",
+        hook:"A fishing community that catches every last fish this season will have nothing left to catch next season, the same basic tension between short-term use and long-term survival plays out across every natural resource on Earth.",
+        obj:["Identify natural resources that need conservation","Explain methods and benefits of conservation"],
+        exp:[
+          {t:"Resources needing conservation", b:"Key natural resources requiring careful management include SOIL (vulnerable to erosion and nutrient depletion), WATER (a finite resource easily polluted or overused), FORESTS (providing timber, oxygen, and habitat, but slow to regrow once cleared), and WILDLIFE (vulnerable to overhunting and habitat loss)."},
+          {t:"Methods and benefits of conservation", b:"Conservation methods include AFFORESTATION (planting new forests) and REFORESTATION (replanting cleared ones), crop rotation and controlled grazing (protecting soil), and establishing protected wildlife reserves. Benefits include maintaining biodiversity, ensuring resources remain available for future generations, and preserving the ecological balance that supports human life itself."}
+        ],
+        err:["Assuming natural resources are unlimited and don't require active management","Confusing afforestation (planting NEW forest where none existed) with reforestation (replanting a previously cleared area)"],
+        qs:[
+          Q("The planting of trees on land that previously had no forest is called",["afforestation","reforestation","deforestation","irrigation"],0,"Afforestation specifically creates new forest cover.","Medium"),
+          Q("The replanting of trees on land that was previously deforested is called",["reforestation","afforestation","desertification","erosion"],0,"Reforestation replants a previously cleared forest area.","Medium"),
+          Q("A key benefit of conserving natural resources is",["ensuring resources remain available for future generations","immediate unlimited resource extraction","elimination of all wildlife","reduced biodiversity"],0,"Conservation preserves resources and biodiversity for the future.","Easy"),
+          Q("Soil erosion is best prevented by",["maintaining plant cover and practising controlled grazing","removing all vegetation","increasing overgrazing","clearing land right before heavy rains"],0,"Plant cover and controlled grazing protect soil from erosion.","Medium",VP)
+        ]
+      }
+    ]
   }
 ];
 
@@ -3660,7 +3920,8 @@ const UPLOAD_COVERAGE = {
   civic:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"},
   crs:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"},
   chemistry:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"},
-  physics:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"}
+  physics:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"},
+  biology:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"}
 };
 
 /* ======================= APP STATE ======================= */
@@ -4219,6 +4480,71 @@ function subjectAggregate(subjectId){
   const s = findSubject(subjectId); let attempted=0, correct=0;
   s.topics.forEach(t=>{ const st = topicStat(subjectId,t.id); attempted+=st.attempted; correct+=st.correct; });
   return {attempted, correct, accuracy: attempted? Math.round((correct/attempted)*100) : 0};
+}
+/* The real, holistic readiness benchmark: how close a student actually is to
+   exam-ready for ONE subject, out of 100. Three ingredients, each measuring
+   something the other two can't:
+     - COVERAGE (35%): topics touched ÷ total syllabus topics. Acing 6
+       questions from 1 topic out of 12 is not "ready" - the syllabus is wide,
+       and this term punishes narrow practice.
+     - ACCURACY (35%): correctness on whatever's actually been attempted.
+       Coverage without competence isn't readiness either.
+     - MOCK PERFORMANCE (30%): average score across timed readiness checks
+       taken for this subject. Topic-by-topic MCQs are lower-pressure than a
+       real, timed, whole-subject paper - mocks are the closest simulation
+       this app has to the actual exam, so they carry real weight. Taking
+       zero mocks scores 0 here on purpose: you haven't yet proven you can
+       perform under the real format, however well topic practice is going.
+   This is deliberately the SAME function called by both the student's own
+   dashboard and the guardian dashboard, from each side's own copy of the
+   same underlying data, so the two always show one identical number - never
+   two different "readiness" claims about the same student. */
+function computeSubjectReadiness(subject, topicsData, mocksArr){
+  topicsData = topicsData || {};
+  mocksArr = mocksArr || [];
+  const totalTopics = subject.topics.length;
+  const topicsAttempted = subject.topics.filter(t=>{
+    const st = topicsData[t.id];
+    return st && st.attempted > 0;
+  }).length;
+  const coveragePct = totalTopics ? Math.round(100*topicsAttempted/totalTopics) : 0;
+
+  let attempted=0, correct=0;
+  subject.topics.forEach(t=>{
+    const st = topicsData[t.id];
+    if(st){ attempted += (st.attempted||0); correct += (st.correct||0); }
+  });
+  const accuracyPct = attempted ? Math.round(100*correct/attempted) : 0;
+
+  const mocksTaken = mocksArr.length;
+  const mockPct = mocksTaken ? Math.round(mocksArr.reduce((sum,m)=>sum+(m.score/m.total*100),0)/mocksTaken) : 0;
+
+  const score = Math.round(0.35*coveragePct + 0.35*accuracyPct + 0.30*mockPct);
+  return { score, coveragePct, accuracyPct, mockPct, topicsAttempted, totalTopics, mocksTaken, totalAttempted: attempted, correct };
+}
+function readinessScoreLabel(r){
+  if(r.totalAttempted === 0 && r.mocksTaken === 0) return "NOT STARTED";
+  if(r.totalAttempted < 6 && r.mocksTaken === 0) return "STARTED";
+  if(r.score < 50) return "DEVELOPING";
+  if(r.score < 70) return "COMPETENT";
+  if(r.score < 85) return "STRONG";
+  return "EXAM READY";
+}
+function readinessScoreBar(r, compact){
+  const pct = Math.min(100, r.score);
+  const barColor = r.score>=85 ? "var(--green)" : r.score>=70 ? "#F59E0B" : "#EF4444";
+  return `
+  <div class="readiness-score-wrap ${compact?'compact':''}">
+    <div class="readiness-score-top">
+      <span class="readiness-score-num">${r.score}%</span>
+      <span class="readiness-score-target">target: 85%</span>
+    </div>
+    <div class="readiness-score-track">
+      <div class="readiness-score-fill" style="width:${pct}%;background:${barColor};"></div>
+      <div class="readiness-score-target-line" style="left:85%;"></div>
+    </div>
+    ${!compact ? `<div class="readiness-score-breakdown">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'no mocks yet'}</div>` : ""}
+  </div>`;
 }
 function readinessLabel(agg){
   if(agg.attempted === 0) return "NOT STARTED";
@@ -4867,17 +5193,20 @@ function renderGuardian(){
     // Cover every subject, not just ones the child has touched - a guardian needs to see gaps too.
     const allSubjectStats = SUBJECTS.map(subj=>{
       const sid = subj.id;
-      const topics = (c.progress[sid]&&c.progress[sid].topics)||{};
+      const childSubjProgress = c.progress[sid] || {};
+      const topics = childSubjProgress.topics || {};
+      const childMocks = childSubjProgress.mocks || [];
       let attempted=0, correct=0;
       Object.values(topics).forEach(t=>{ attempted+=(t.attempted||0); correct+=(t.correct||0); });
       const pct = attempted ? Math.round(100*correct/attempted) : null;
-      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid)};
+      const readiness = computeSubjectReadiness(subj, topics, childMocks);
+      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness};
     });
-    const touched = allSubjectStats.filter(s=>s.attempted>0);
-    const untouched = allSubjectStats.filter(s=>s.attempted===0);
-    const ranked = [...touched].sort((a,b)=>(a.pct??100)-(b.pct??100));
-    const weakest = ranked.slice(0,3);
-    const strongest = ranked.slice(-2).reverse();
+    const touched = allSubjectStats.filter(s=>s.attempted>0 || s.readiness.mocksTaken>0);
+    const untouched = allSubjectStats.filter(s=>s.attempted===0 && s.readiness.mocksTaken===0);
+    const ranked = [...touched].sort((a,b)=>a.readiness.score-b.readiness.score);
+    const weakest = ranked.filter(s=>!s.readiness.meetsTarget).slice(0,3);
+    const strongest = ranked.filter(s=>s.readiness.meetsTarget).slice(-2).reverse();
 
     const liveActivityBlock = (()=>{
       if(!c.last_active_at) return "";
@@ -4897,15 +5226,24 @@ function renderGuardian(){
     })();
 
     const subjRows = allSubjectStats.map(s=>{
+      const r = s.readiness;
+      const label = readinessScoreLabel(r);
+      const barColor = r.score>=85 ? "var(--green)" : r.score>=70 ? "#F59E0B" : "#EF4444";
       if(s.attempted===0){
-        return `<div class="admin-stat-row">
-          <span style="color:var(--ink-soft);">${s.name}</span>
-          <b style="color:var(--ink-soft);font-weight:600;">⚪ Never started</b>
+        return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--ink-soft);">${s.name}</span>
+            <b style="color:var(--ink-soft);font-weight:600;">⚪ Never started · 0% ready</b>
+          </div>
         </div>`;
       }
-      return `<div class="admin-stat-row">
-        <span>${s.name} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
-        <b style="color:${s.pct<50?'#EF4444':s.pct<75?'#F59E0B':'#22C55E'};">${s.pct}% <span style="color:var(--ink-soft);font-weight:400;">(${s.correct}/${s.attempted})</span></b>
+      return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+        <div style="display:flex;justify-content:space-between;">
+          <span>${s.name} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
+          <b style="color:${barColor};">${r.score}% ready <span style="color:var(--ink-soft);font-weight:400;">(target 85%)</span></b>
+        </div>
+        <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
+        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label}</div>
       </div>`;
     }).join("");
 
@@ -5012,7 +5350,8 @@ function renderLogin(){
 
 function renderHome(){
   let cards = SUBJECTS.map((s,i)=>{
-    const agg = subjectAggregate(s.id); const label = readinessLabel(agg);
+    const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+    const label = readinessScoreLabel(r);
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
     return `
     <div class="subject-card" style="border-top:7px solid ${color};">
@@ -5021,6 +5360,7 @@ function renderHome(){
       <h3>${s.name}</h3>
       <div class="topcount">${s.topics.length} syllabus topics · ${allSubjectQuestions(s).length} practice questions</div>
       <div class="readiness-chip ${readinessClass(label)}">${labelFun(label)}</div>
+      ${readinessScoreBar(r, true)}
       <button class="enter-btn" onclick="go('subject',{subjectId:'${s.id}'})"><span>Open</span><span>→</span></button>
     </div>`;
   }).join("");
@@ -5038,7 +5378,8 @@ function renderHome(){
 
 function renderSubjectView(){
   const s = findSubject(state.subjectId);
-  const agg = subjectAggregate(s.id); const label = readinessLabel(agg);
+  const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+  const label = readinessScoreLabel(r);
   const pool = allSubjectQuestions(s);
   const mocks = state.progress[s.id].mocks;
   const lastMock = mocks.length ? mocks[mocks.length-1] : null;
@@ -5064,9 +5405,10 @@ function renderSubjectView(){
     </div>
   </div>` : "";
   const panel = `
-    <h4>YOUR STANDING</h4>
-    <p class="big-note">${agg.attempted ? agg.correct+"/"+agg.attempted+" correct across topic practice so far (" + agg.accuracy + "% accuracy)." : "You haven't practised this subject yet - pick a topic on the left to begin."}</p>
-    ${lastMock ? `<p class="big-note">Last readiness check: <b>${lastMock.score}/${lastMock.total}</b> (${Math.round(lastMock.score/lastMock.total*100)}%).</p>` : ""}
+    <h4>YOUR READINESS BENCHMARK</h4>
+    ${readinessScoreBar(r, false)}
+    <p class="big-note" style="margin-top:10px;">${r.totalAttempted ? r.correct+"/"+r.totalAttempted+" correct across topic practice so far." : "You haven't practised this subject yet - pick a topic on the left to begin."}</p>
+    ${lastMock ? `<p class="big-note">Last readiness check: <b>${lastMock.score}/${lastMock.total}</b> (${Math.round(lastMock.score/lastMock.total*100)}%).</p>` : `<p class="big-note">No readiness check (mock exam) taken yet for this subject - that's 30% of your benchmark score, so it's worth attempting one soon.</p>`}
     <h4 style="margin-top:16px;">SOURCE COVERAGE</h4>
     <p class="big-note"><b>Syllabus:</b> ${cov.syllabus}.</p>
     <p class="big-note"><b>Past exam questions:</b> ${cov.pastPapers}.</p>
@@ -5520,14 +5862,15 @@ function renderRemediation(){
 
 function renderDashboard(){
   const rows = SUBJECTS.map(s=>{
-    const agg = subjectAggregate(s.id); const label = readinessLabel(agg);
+    const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+    const label = readinessScoreLabel(r);
     const mocks = state.progress[s.id].mocks; const lastMock = mocks.length ? mocks[mocks.length-1] : null;
     const lastMockText = lastMock ? Math.round(lastMock.score/lastMock.total*100)+"%" : "-";
-    const barClass = agg.accuracy<50 ? "low" : (agg.accuracy>=80 ? "high" : "");
+    const barClass = r.score<50 ? "low" : (r.score>=85 ? "high" : "");
     return `<div class="dash-row">
       <span class="sname">${s.name}</span>
-      <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${agg.accuracy}%"></div></div>
-      <span class="mono">${agg.accuracy}%</span>
+      <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${r.score}%"></div><div class="bar-target-line" style="left:85%;" title="85% target"></div></div>
+      <span class="mono">${r.score}%</span>
       <span class="readiness-chip ${readinessClass(label)}">${labelFun(label)} ${lastMock?"· last check "+lastMockText:""}</span>
     </div>`;
   }).join("");
