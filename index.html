@@ -202,6 +202,12 @@
 
   /* ---------- READINESS SCORE (per-subject benchmark) ---------- */
   .readiness-score-wrap{margin-top:10px;}
+  .overall-readiness-hero{border-radius:28px;padding:32px 28px;text-align:center;margin:20px 0;box-shadow:0 8px 24px rgba(43,35,80,0.10);}
+  .orh-label{font-size:13px;font-weight:800;letter-spacing:1.5px;color:var(--ink-soft);margin-bottom:6px;}
+  .orh-number{font-family:var(--font-display);font-size:68px;font-weight:800;line-height:1;margin:4px 0;}
+  .orh-target{font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:12px;}
+  .orh-meaning{font-size:14px;color:var(--ink);max-width:56ch;margin:0 auto;line-height:1.5;}
+  @media (max-width:600px){ .orh-number{font-size:52px;} }
   .readiness-score-wrap.compact{margin-top:8px;margin-bottom:10px;}
   .readiness-score-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
   .readiness-score-num{font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink);}
@@ -4568,6 +4574,22 @@ function computeSubjectReadiness(subject, topicsData, mocksArr){
   const score = Math.round(0.35*coveragePct + 0.35*accuracyPct + 0.30*mockPct);
   return { score, coveragePct, accuracyPct, mockPct, topicsAttempted, totalTopics, mocksTaken, totalAttempted: attempted, correct };
 }
+
+/* The single, honest headline number: a student's or guardian's OVERALL readiness
+   across every subject on the syllabus, not just the ones going well. A subject
+   never even opened still contributes its true score (0) to this average, exactly
+   on purpose - a few strong subjects can't quietly carry an otherwise unready
+   overall picture. Built from the exact same computeSubjectReadiness() used
+   everywhere else, so this headline number is always consistent with every
+   per-subject bar shown alongside it. */
+function computeOverallReadiness(progressData){
+  const perSubject = SUBJECTS.map(s=>({
+    id: s.id, name: s.name,
+    readiness: computeSubjectReadiness(s, (progressData[s.id]||{}).topics||{}, (progressData[s.id]||{}).mocks||[])
+  }));
+  const overall = perSubject.length ? Math.round(perSubject.reduce((sum,p)=>sum+p.readiness.score,0)/perSubject.length) : 0;
+  return { overall, target: 85, meetsTarget: overall>=85, perSubject };
+}
 function readinessScoreLabel(r){
   if(r.totalAttempted === 0 && r.mocksTaken === 0) return "NOT STARTED";
   if(r.totalAttempted < 6 && r.mocksTaken === 0) return "STARTED";
@@ -4592,6 +4614,45 @@ function readinessScoreBar(r, compact){
     ${!compact ? `<div class="readiness-score-breakdown">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'no mocks yet'}</div>` : ""}
   </div>`;
 }
+
+/* The big, unmissable headline number - shown identically on the student's own
+   dashboard and on the guardian's view of that same student, so both sides are
+   looking at one honest overall picture, not a flattering per-subject best-case. */
+function renderOverallReadinessHero(overallData, displayName, options){
+  options = options || {};
+  const o = overallData.overall;
+  const color = o>=85 ? "#22C55E" : o>=70 ? "#F59E0B" : "#EF4444";
+  const bg = o>=85 ? "linear-gradient(135deg,#DCFCE7,#BBF7D0)" : o>=70 ? "linear-gradient(135deg,#FEF3C7,#FDE68A)" : "linear-gradient(135deg,#FEE2E2,#FECACA)";
+  const untouched = overallData.perSubject.filter(p=>p.readiness.totalAttempted===0 && p.readiness.mocksTaken===0);
+  const meaning = o>=85
+    ? `${displayName} is genuinely exam-ready overall, averaged honestly across all ${overallData.perSubject.length} subjects, not just the strongest ones.`
+    : untouched.length
+      ? `This average includes ${untouched.length} subject${untouched.length>1?'s':''} not started yet (${untouched.map(p=>p.name).join(", ")}), which is exactly why it's lower than any single strong subject alone - real overall readiness has to cover the whole course load.`
+      : `${displayName} is making progress, but isn't yet averaging 85% across every subject. Some subjects are pulling the overall number down - check the breakdown below to see exactly which ones need more work.`;
+  return `
+  <div class="overall-readiness-hero" style="background:${bg};" id="overallReadinessCard">
+    <div class="orh-label">OVERALL READINESS ${options.subtitle ? "· "+options.subtitle : ""}</div>
+    <div class="orh-number" style="color:${color};">${o}%</div>
+    <div class="orh-target">target for exam-ready: 85%</div>
+    <div class="orh-meaning">${meaning}</div>
+    ${options.showShare!==false ? `<button class="ghost-btn" style="margin-top:14px;" onclick="shareReadiness(${o},'${displayName.replace(/'/g,"")}')">📤 Share this readiness score</button>` : ""}
+  </div>`;
+}
+
+/* Native share sheet where available (covers WhatsApp, Instagram, everything else
+   installed on the device); falls back to a direct wa.me link on desktop browsers
+   that don't support the Web Share API at all. */
+function shareReadiness(score, displayName){
+  const origin = (typeof window!=="undefined" && window.location && window.location.origin) ? window.location.origin : "";
+  const text = `🎯 ${displayName} is at ${score}% Overall Readiness for WAEC GCE exam prep on BuildNET Academy! (Target: 85%)\n\nPractice smarter, not just harder - check it out:`;
+  if(typeof navigator !== "undefined" && navigator.share){
+    navigator.share({ text, url: origin }).catch(()=>{});
+  } else if(typeof window !== "undefined"){
+    window.open("https://wa.me/?text=" + encodeURIComponent(text + " " + origin), "_blank");
+  }
+}
+window.shareReadiness = shareReadiness;
+
 function readinessLabel(agg){
   if(agg.attempted === 0) return "NOT STARTED";
   if(agg.attempted < 6) return "STARTED";
@@ -5253,6 +5314,7 @@ function renderGuardian(){
     const ranked = [...touched].sort((a,b)=>a.readiness.score-b.readiness.score);
     const weakest = ranked.filter(s=>!s.readiness.meetsTarget).slice(0,3);
     const strongest = ranked.filter(s=>s.readiness.meetsTarget).slice(-2).reverse();
+    const overallData = computeOverallReadiness(c.progress);
 
     const liveActivityBlock = (()=>{
       if(!c.last_active_at) return "";
@@ -5295,6 +5357,7 @@ function renderGuardian(){
 
     return `
     <div class="guardian-child-card">
+      ${renderOverallReadinessHero(overallData, c.username, {subtitle:"for "+c.username})}
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
         <div style="flex-shrink:0;">${weekRingSVG(c.last_7_days, c.studied_today, c.username)}</div>
         <div style="flex:1;min-width:200px;">
@@ -5416,6 +5479,7 @@ function renderHome(){
     <h2>Hey ${state.user}! ${SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
   </div>
+  ${!state.guest ? renderOverallReadinessHero(computeOverallReadiness(state.progress), state.user, {subtitle:"across all "+SUBJECTS.length+" subjects"}) : ""}
   ${!state.guest ? renderGamifiedHeader() : ""}
   <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format now comes from an official WAEC syllabus you provided. That's separate from <em>past exam questions</em> - where you've also uploaded real past papers, questions adapted from them are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span> with the answer independently re-checked. Past-paper coverage so far - Mathematics: ${UPLOAD_COVERAGE.math.pastPapers}; English: ${UPLOAD_COVERAGE.english.pastPapers}; Economics: ${UPLOAD_COVERAGE.economics.pastPapers}; Government: ${UPLOAD_COVERAGE.government.pastPapers}; Literature, Civic Education and CRS: ${UPLOAD_COVERAGE.crs.pastPapers}. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
   <div class="subject-grid">${cards}</div>
@@ -5959,6 +6023,7 @@ function renderRemediation(){
 }
 
 function renderDashboard(){
+  const overallData = computeOverallReadiness(state.progress);
   const rows = SUBJECTS.map(s=>{
     const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
     const label = readinessScoreLabel(r);
@@ -5983,6 +6048,7 @@ function renderDashboard(){
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / Readiness Dashboard</div>
   <h2>Readiness Dashboard</h2>
   <p style="color:var(--ink-soft);max-width:60ch;margin-top:6px;">Overall accuracy per subject, based on every topic practice attempt and readiness check you've completed.</p>
+  ${renderOverallReadinessHero(overallData, state.user)}
   <div style="margin-top:18px;">${rows}</div>
   <div class="weak-list"><div class="breakdown-title">WEAKEST TOPICS ACROSS ALL SUBJECTS</div>${weakHtml}</div>
   `;
