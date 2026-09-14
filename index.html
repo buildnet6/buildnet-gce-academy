@@ -281,6 +281,10 @@
   .admin-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:opacity .15s;}
   .admin-bar-wrap:hover .admin-bar{opacity:0.7;}
   .guardian-child-card{background:#fff;border:2px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(43,35,80,0.06);}
+  .live-activity-badge{display:inline-block;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:8px;}
+  .live-activity-on{background:#DCFCE7;color:#166534;animation:pulseGlow 2s ease-in-out infinite;}
+  .live-activity-off{background:#F1F0F7;color:var(--ink-soft);}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.35);}50%{box-shadow:0 0 0 6px rgba(34,197,94,0);}}
 
   /* ---------- GAMIFICATION ---------- */
   .xp-bar-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,#FFF3D6,#FFE8F3);border-radius:18px;padding:14px 20px;margin:16px 0 22px;cursor:pointer;transition:transform .15s;box-shadow:0 4px 12px rgba(124,58,237,0.10);}
@@ -3736,6 +3740,8 @@ function weekRingSVG(last7Days, studiedToday, uid){
   </svg>`;
 }
 
+let guardianAutoRefreshHandle = null;
+
 async function guardianAuth(mode){
   const uEl = document.getElementById("guUsername");
   const pEl = document.getElementById("guPasskey");
@@ -3753,6 +3759,7 @@ async function guardianAuth(mode){
       state.guardianUsername = result.username;
       state.guardianPasskey = p;
       await guardianRefresh();
+      startGuardianAutoRefresh();
     }
   }catch(e){
     state.guardianError = "Couldn't reach the server (" + (e && e.message ? e.message : "network error") + ").";
@@ -3762,6 +3769,17 @@ async function guardianAuth(mode){
 }
 window.guardianAuth = guardianAuth;
 
+function startGuardianAutoRefresh(){
+  if(guardianAutoRefreshHandle) clearInterval(guardianAutoRefreshHandle);
+  guardianAutoRefreshHandle = setInterval(async ()=>{
+    if(!state.guardianAuthed || state.view !== "guardian"){ clearInterval(guardianAutoRefreshHandle); guardianAutoRefreshHandle = null; return; }
+    try{
+      const result = await supabaseRPC("gce_guardian_dashboard", { p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey });
+      if(result && result.success){ state.guardianData = result.children || []; if(state.view === "guardian") render(); }
+    }catch(e){ /* silent - a missed background refresh isn't worth alarming the guardian over */ }
+  }, 30000);
+}
+
 function guardianLogout(){
   state.guardianAuthed = false;
   state.guardianUsername = "";
@@ -3769,6 +3787,7 @@ function guardianLogout(){
   state.guardianData = null;
   state.guardianError = null;
   state.guardianShowLinkForm = false;
+  if(guardianAutoRefreshHandle){ clearInterval(guardianAutoRefreshHandle); guardianAutoRefreshHandle = null; }
   render();
 }
 window.guardianLogout = guardianLogout;
@@ -4261,8 +4280,14 @@ function startTopicPractice(subjectId, topicId){
   const questions = shuffle(topic.qs.map((q,i)=>shuffleQuestionOptions({...q, topicId, topicName:topic.name, qIndex:i})));
   state.quiz = { mode:"topic", subjectId, topicId, questions, index:0, picks:{}, revealed:{}, timedSeconds:null };
   go("quiz", {subjectId, topicId});
+  pushLiveActivity(subjectId, topicId, "topic");
 }
 window.startTopicPractice = startTopicPractice;
+
+function pushLiveActivity(subjectId, topicId, mode){
+  if(state.guest || !state.user) return; // guests aren't real profiles - nothing to update
+  supabaseRPC("gce_update_activity", { p_username: state.user, p_subject: subjectId, p_topic: topicId||null, p_mode: mode }).catch(()=>{});
+}
 
 function startMock(subjectId){
   const subject = findSubject(subjectId);
@@ -4272,6 +4297,7 @@ function startMock(subjectId){
   const seconds = size * 75;
   state.quiz = { mode:"mock", subjectId, questions, index:0, picks:{}, revealed:{}, timedSeconds:seconds, secondsLeft:seconds };
   go("quiz", {subjectId});
+  pushLiveActivity(subjectId, null, "mock");
   timerHandle = setInterval(()=>{
     if(!state.quiz) { clearInterval(timerHandle); return; }
     state.quiz.secondsLeft--;
@@ -4403,7 +4429,7 @@ function getChatSession(sid,tid){
 function buildSystemPrompt(subject, topic){
   const objs = topic.obj.join("; ");
   const concepts = topic.exp.map(e=>e.t).join(", ");
-  return "You are a warm, patient WAEC GCE study buddy helping a private-candidate student in Nigeria understand the topic '" + topic.name + "' in " + subject.name + ". " +
+  return "You are a warm, patient WAEC exam study buddy helping a private-candidate student in Nigeria understand the topic '" + topic.name + "' in " + subject.name + ". " +
     "Learning objectives for this topic: " + objs + ". Key ideas involved: " + concepts + ". " +
     "Explain things using simple, fun, relatable, real-life analogies a 10-year-old could follow, then connect the analogy back to how WAEC actually tests it. " +
     "Keep replies short and conversational (roughly 80-150 words) unless the student clearly asks for more depth. Be encouraging, never condescending. " +
@@ -4461,6 +4487,7 @@ function startTheoryAttempt(subjectId, index){
   const question = list[index];
   if(!question) return;
   theoryAttempt = { subjectId, index, question, typedAnswer:"", images:[], grading:false, result:null, error:null };
+  pushLiveActivity(subjectId, question.topicId||null, "theory");
 }
 
 function addTheoryImages(fileInput){
@@ -4852,6 +4879,23 @@ function renderGuardian(){
     const weakest = ranked.slice(0,3);
     const strongest = ranked.slice(-2).reverse();
 
+    const liveActivityBlock = (()=>{
+      if(!c.last_active_at) return "";
+      const subj = c.current_subject ? findSubject(c.current_subject) : null;
+      const subjName = subj ? subj.name : c.current_subject;
+      const topicName = (subj && c.current_topic) ? (findTopic(c.current_subject, c.current_topic)||{}).name : null;
+      const secs = c.seconds_since_active ?? 99999;
+      const modeLabel = c.current_mode === "mock" ? "a timed readiness check"
+        : c.current_mode === "theory" ? "a theory/essay answer" + (topicName ? " on "+topicName : "")
+        : (topicName ? topicName : "a topic");
+      if(secs < 300){
+        return `<div class="live-activity-badge live-activity-on">🟢 Studying RIGHT NOW: <b>${subjName}</b> - ${modeLabel}</div>`;
+      }
+      const mins = Math.round(secs/60);
+      const ago = mins < 60 ? mins+" min ago" : Math.round(mins/60)+" hr ago";
+      return `<div class="live-activity-badge live-activity-off">⚪ Last seen ${ago}, studying <b>${subjName}</b></div>`;
+    })();
+
     const subjRows = allSubjectStats.map(s=>{
       if(s.attempted===0){
         return `<div class="admin-stat-row">
@@ -4872,6 +4916,7 @@ function renderGuardian(){
         <div style="flex:1;min-width:200px;">
           <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);">${c.username}</div>
           <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">Joined ${new Date(c.joined).toLocaleDateString()}</div>
+          ${liveActivityBlock}
           ${c.studied_today
             ? `<div style="font-size:13px;color:#166534;">✅ Studied today: <b>${(c.subjects_today||[]).map(sid=>{const s=findSubject(sid);return s?s.name:sid;}).join(", ")}</b></div>`
             : `<div style="font-size:13px;color:#92400E;">🕒 Hasn't opened a subject yet today.</div>`}
