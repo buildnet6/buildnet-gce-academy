@@ -4576,14 +4576,19 @@ function computeSubjectReadiness(subject, topicsData, mocksArr){
 }
 
 /* The single, honest headline number: a student's or guardian's OVERALL readiness
-   across every subject on the syllabus, not just the ones going well. A subject
-   never even opened still contributes its true score (0) to this average, exactly
-   on purpose - a few strong subjects can't quietly carry an otherwise unready
-   overall picture. Built from the exact same computeSubjectReadiness() used
-   everywhere else, so this headline number is always consistent with every
-   per-subject bar shown alongside it. */
-function computeOverallReadiness(progressData){
-  const perSubject = SUBJECTS.map(s=>({
+   across every subject they're ACTUALLY enrolled in (their real exam combination),
+   not just the ones going well. A subject never even opened still contributes its
+   true score (0) to this average, exactly on purpose - a few strong subjects can't
+   quietly carry an otherwise unready overall picture. Built from the exact same
+   computeSubjectReadiness() used everywhere else, so this headline number is
+   always consistent with every per-subject bar shown alongside it.
+   subjectIds: which subjects to average over. Pass the student's own enrolled
+   subject list for a real, paying student; omit it (or pass null) to fall back
+   to averaging across the full catalogue, which is only appropriate for guest
+   preview mode, where nothing is actually "enrolled" yet. */
+function computeOverallReadiness(progressData, subjectIds){
+  const activeSubjects = (subjectIds && subjectIds.length) ? SUBJECTS.filter(s=>subjectIds.includes(s.id)) : SUBJECTS;
+  const perSubject = activeSubjects.map(s=>({
     id: s.id, name: s.name,
     readiness: computeSubjectReadiness(s, (progressData[s.id]||{}).topics||{}, (progressData[s.id]||{}).mocks||[])
   }));
@@ -5307,14 +5312,17 @@ function renderGuardian(){
       Object.values(topics).forEach(t=>{ attempted+=(t.attempted||0); correct+=(t.correct||0); });
       const pct = attempted ? Math.round(100*correct/attempted) : null;
       const readiness = computeSubjectReadiness(subj, topics, childMocks);
-      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness};
+      const enrolled = (c.entitled_subjects||[]).includes(sid);
+      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness, enrolled};
     });
-    const touched = allSubjectStats.filter(s=>s.attempted>0 || s.readiness.mocksTaken>0);
-    const untouched = allSubjectStats.filter(s=>s.attempted===0 && s.readiness.mocksTaken===0);
+    const enrolledStats = allSubjectStats.filter(s=>s.enrolled);
+    const touched = enrolledStats.filter(s=>s.attempted>0 || s.readiness.mocksTaken>0);
+    const untouched = enrolledStats.filter(s=>s.attempted===0 && s.readiness.mocksTaken===0);
+    const notEnrolled = allSubjectStats.filter(s=>!s.enrolled);
     const ranked = [...touched].sort((a,b)=>a.readiness.score-b.readiness.score);
     const weakest = ranked.filter(s=>!s.readiness.meetsTarget).slice(0,3);
     const strongest = ranked.filter(s=>s.readiness.meetsTarget).slice(-2).reverse();
-    const overallData = computeOverallReadiness(c.progress);
+    const overallData = computeOverallReadiness(c.progress, c.entitled_subjects||[]);
 
     const liveActivityBlock = (()=>{
       if(!c.last_active_at) return "";
@@ -5333,7 +5341,7 @@ function renderGuardian(){
       return `<div class="live-activity-badge live-activity-off">⚪ Last seen ${ago}, studying <b>${subjName}</b></div>`;
     })();
 
-    const subjRows = allSubjectStats.map(s=>{
+    const subjRows = enrolledStats.map(s=>{
       const r = s.readiness;
       const label = readinessScoreLabel(r);
       const barColor = r.score>=85 ? "var(--green)" : r.score>=70 ? "#F59E0B" : "#EF4444";
@@ -5341,7 +5349,7 @@ function renderGuardian(){
         return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
           <div style="display:flex;justify-content:space-between;">
             <span style="color:var(--ink-soft);">${s.name}</span>
-            <b style="color:var(--ink-soft);font-weight:600;">⚪ Never started · 0% ready</b>
+            <b style="color:var(--ink-soft);font-weight:600;">⚪ Enrolled, not started yet · 0% ready</b>
           </div>
         </div>`;
       }
@@ -5353,7 +5361,13 @@ function renderGuardian(){
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
         <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label}</div>
       </div>`;
-    }).join("");
+    }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">Not enrolled in any subjects yet.</span></div>`;
+
+    const notEnrolledHtml = notEnrolled.length ? `
+      <div style="margin-top:14px;padding:12px 14px;background:#F9FAFB;border-radius:12px;border:1px dashed var(--line);">
+        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">NOT YET ENROLLED (${notEnrolled.length})</div>
+        <div style="font-size:13px;color:var(--ink);">${notEnrolled.map(s=>s.name).join(", ")}</div>
+      </div>` : "";
 
     return `
     <div class="guardian-child-card">
@@ -5373,6 +5387,7 @@ function renderGuardian(){
         </div>
       </div>
       <div style="margin-top:14px;">${subjRows}</div>
+      ${notEnrolledHtml}
     </div>`;
   }).join("");
 
@@ -5458,7 +5473,10 @@ function renderLogin(){
 }
 
 function renderHome(){
-  let cards = SUBJECTS.map((s,i)=>{
+  const enrolledSubjects = state.guest ? SUBJECTS : SUBJECTS.filter(s=>isSubjectUnlocked(s.id));
+  const enrolledIds = enrolledSubjects.map(s=>s.id);
+
+  let cards = enrolledSubjects.map((s,i)=>{
     const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
     const label = readinessScoreLabel(r);
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
@@ -5474,15 +5492,25 @@ function renderHome(){
     </div>`;
   }).join("");
 
+  const enrollMoreBanner = !state.guest ? `
+    <div class="section-block" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);border:2px dashed var(--purple);text-align:center;">
+      <h4 style="color:var(--purple-dark);">${enrolledSubjects.length ? "WANT TO ADD MORE SUBJECTS?" : "YOU HAVEN'T ENROLLED IN ANY SUBJECTS YET"}</h4>
+      <p style="color:var(--ink-soft);font-size:13.5px;max-width:56ch;margin:6px auto 14px;">${enrolledSubjects.length
+        ? "Pick up any of the other subjects on the syllabus whenever you're ready - your dashboard only ever shows what you're actually enrolled in, kept clean and focused on your real exam combination."
+        : "Your dashboard stays empty until you pick which subjects you're actually sitting for. Browse all "+SUBJECTS.length+" subjects, see a free preview of each, and enroll in exactly the ones you need."}</p>
+      <button class="stampbtn" onclick="go('pricing')">${enrolledSubjects.length ? "Browse more subjects →" : "Choose your subjects →"}</button>
+    </div>` : "";
+
   return `
   <div class="intro">
-    <h2>Hey ${state.user}! ${SUBJECTS.length} subjects. One desk. 🎉</h2>
+    <h2>Hey ${state.user}! ${enrolledSubjects.length || SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
   </div>
-  ${!state.guest ? renderOverallReadinessHero(computeOverallReadiness(state.progress), state.user, {subtitle:"across all "+SUBJECTS.length+" subjects"}) : ""}
+  ${(!state.guest && enrolledSubjects.length) ? renderOverallReadinessHero(computeOverallReadiness(state.progress, enrolledIds), state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : ""}
   ${!state.guest ? renderGamifiedHeader() : ""}
-  <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format now comes from an official WAEC syllabus you provided. That's separate from <em>past exam questions</em> - where you've also uploaded real past papers, questions adapted from them are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span> with the answer independently re-checked. Past-paper coverage so far - Mathematics: ${UPLOAD_COVERAGE.math.pastPapers}; English: ${UPLOAD_COVERAGE.english.pastPapers}; Economics: ${UPLOAD_COVERAGE.economics.pastPapers}; Government: ${UPLOAD_COVERAGE.government.pastPapers}; Literature, Civic Education and CRS: ${UPLOAD_COVERAGE.crs.pastPapers}. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
+  ${state.guest ? `<div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format now comes from an official WAEC syllabus you provided. That's separate from <em>past exam questions</em> - where you've also uploaded real past papers, questions adapted from them are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span> with the answer independently re-checked. Past-paper coverage so far - Mathematics: ${UPLOAD_COVERAGE.math.pastPapers}; English: ${UPLOAD_COVERAGE.english.pastPapers}; Economics: ${UPLOAD_COVERAGE.economics.pastPapers}; Government: ${UPLOAD_COVERAGE.government.pastPapers}; Literature, Civic Education and CRS: ${UPLOAD_COVERAGE.crs.pastPapers}. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>` : enrollMoreBanner}
   <div class="subject-grid">${cards}</div>
+  ${(!state.guest && enrolledSubjects.length) ? enrollMoreBanner : ""}
   `;
 }
 
@@ -6023,8 +6051,10 @@ function renderRemediation(){
 }
 
 function renderDashboard(){
-  const overallData = computeOverallReadiness(state.progress);
-  const rows = SUBJECTS.map(s=>{
+  const enrolledSubjects = state.guest ? SUBJECTS : SUBJECTS.filter(s=>isSubjectUnlocked(s.id));
+  const enrolledIds = enrolledSubjects.map(s=>s.id);
+  const overallData = computeOverallReadiness(state.progress, enrolledIds);
+  const rows = enrolledSubjects.map(s=>{
     const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
     const label = readinessScoreLabel(r);
     const mocks = state.progress[s.id].mocks; const lastMock = mocks.length ? mocks[mocks.length-1] : null;
@@ -6036,10 +6066,10 @@ function renderDashboard(){
       <span class="mono">${r.score}%</span>
       <span class="readiness-chip ${readinessClass(label)}">${labelFun(label)} ${lastMock?"· last check "+lastMockText:""}</span>
     </div>`;
-  }).join("");
+  }).join("") || `<div class="dash-row"><span class="sname" style="color:var(--ink-soft);">You haven't enrolled in any subjects yet.</span></div>`;
 
   let weakTopics = [];
-  SUBJECTS.forEach(s=>{ s.topics.forEach(t=>{ const st = topicStat(s.id, t.id); if(st.attempted>0){ weakTopics.push({subject:s.name, subjectId:s.id, topicId:t.id, name:t.name, acc: Math.round((st.correct/st.attempted)*100), attempted:st.attempted}); } }); });
+  enrolledSubjects.forEach(s=>{ s.topics.forEach(t=>{ const st = topicStat(s.id, t.id); if(st.attempted>0){ weakTopics.push({subject:s.name, subjectId:s.id, topicId:t.id, name:t.name, acc: Math.round((st.correct/st.attempted)*100), attempted:st.attempted}); } }); });
   weakTopics.sort((a,b)=>a.acc-b.acc);
   const weakHtml = weakTopics.slice(0,5).map(w=>`<div class="weak-item"><span>${w.name} <span class="wsubj">· ${w.subject}</span></span><span class="mono">${w.acc}%</span></div>`).join("") ||
     `<div class="weak-item"><span>No practice attempts recorded yet. Open a subject and start a topic to build your profile.</span></div>`;
@@ -6047,10 +6077,10 @@ function renderDashboard(){
   return `
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / Readiness Dashboard</div>
   <h2>Readiness Dashboard</h2>
-  <p style="color:var(--ink-soft);max-width:60ch;margin-top:6px;">Overall accuracy per subject, based on every topic practice attempt and readiness check you've completed.</p>
-  ${renderOverallReadinessHero(overallData, state.user)}
+  <p style="color:var(--ink-soft);max-width:60ch;margin-top:6px;">Overall accuracy per subject you're enrolled in, based on every topic practice attempt and readiness check you've completed.</p>
+  ${enrolledSubjects.length ? renderOverallReadinessHero(overallData, state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : `<div class="disclaimer">Enroll in at least one subject to start building your Readiness Dashboard. <a onclick="go('pricing')" style="color:var(--purple);text-decoration:underline;cursor:pointer;">Browse subjects →</a></div>`}
   <div style="margin-top:18px;">${rows}</div>
-  <div class="weak-list"><div class="breakdown-title">WEAKEST TOPICS ACROSS ALL SUBJECTS</div>${weakHtml}</div>
+  <div class="weak-list"><div class="breakdown-title">WEAKEST TOPICS ACROSS YOUR ENROLLED SUBJECTS</div>${weakHtml}</div>
   `;
 }
 
