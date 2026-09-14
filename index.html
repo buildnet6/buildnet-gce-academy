@@ -165,6 +165,13 @@
   .quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .quiz-progress{display:flex;gap:6px;}
   .dot{width:11px;height:11px;border-radius:50%;border:2px solid #E3DCFB;background:transparent;transition:transform .15s ease;}
+  .dot.locked{border-color:#D1D5DB;background:repeating-linear-gradient(45deg,#D1D5DB,#D1D5DB 2px,#F3F4F6 2px,#F3F4F6 4px);}
+  .paywall-card{background:linear-gradient(135deg,#FFF3D6,#F3E8FF);border:2px dashed var(--purple);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
+  .paywall-lock{font-size:34px;margin-bottom:8px;}
+  .paywall-title{font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--ink);margin-bottom:8px;}
+  .paywall-body{font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;}
+  .explain-card-locked{opacity:0.75;position:relative;}
+  .locked-teaser-text{filter:blur(2.5px);user-select:none;}
   .dot.answered{background:var(--blue);border-color:var(--blue);} .dot.correct{background:var(--green);border-color:var(--green);transform:scale(1.15);} .dot.incorrect{background:var(--red);border-color:var(--red);}
   .timer{font-weight:700;font-size:14px;color:#fff;background:linear-gradient(90deg,var(--orange),var(--red));border-radius:999px;padding:6px 14px;}
   .qcard{border:none;border-radius:22px;padding:24px;background:var(--card);box-shadow:0 8px 22px rgba(43,35,80,0.10);animation:popIn .3s ease both;}
@@ -3951,7 +3958,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0 };
+  studentStreak:0, entitlements:[] };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -4297,6 +4304,7 @@ async function loginSuccess(username){
   state.navStack = [];
   chatSessions = {};
   await loadAllProgress();
+  await loadEntitlements();
   await loadStreak();
   saveLastUsername(username);
   go("home");
@@ -4307,6 +4315,7 @@ function logout(){
   state.progress = {};
   state.loaded = false;
   state.studentStreak = 0;
+  state.entitlements = [];
   state.navStack = [];
   chatSessions = {};
   clearInterval(timerHandle);
@@ -4321,6 +4330,7 @@ async function continueAsGuest(){
   state.navStack = [];
   chatSessions = {};
   await loadAllProgress();
+  state.entitlements = [];
   state.studentStreak = 0;
   go("home");
 }
@@ -4370,6 +4380,20 @@ async function loadAllProgress(){
   }
   state.loaded = true;
 }
+async function loadEntitlements(){
+  if(state.guest){ state.entitlements = []; return; }
+  try{
+    const result = await supabaseRPC("gce_get_entitlements", { p_username: state.user });
+    state.entitlements = (result && result.subjects) ? result.subjects : [];
+  }catch(e){
+    console.error("Could not load entitlements", e);
+    state.entitlements = [];
+  }
+}
+function isSubjectUnlocked(subjectId){
+  return state.entitlements && state.entitlements.includes(subjectId);
+}
+window.isSubjectUnlocked = isSubjectUnlocked;
 async function saveProgress(subjectId){
   if(state.guest) return; // guest/preview mode never persists - avoids polluting the database with test data
   try{ await supabaseRPC("gce_save_progress", { p_username: state.user, p_subject: subjectId, p_data: state.progress[subjectId] }); }
@@ -5560,6 +5584,7 @@ function renderTopicView(){
   const st = topicStat(s.id, t.id);
   const acc = st.attempted ? Math.round((st.correct/st.attempted)*100) : null;
   const session = getChatSession(s.id, t.id);
+  const unlocked = t.legacy || state.guest || isSubjectUnlocked(s.id); // legacy bonus topics and guest preview stay fully free
 
   const chatLogHtml = session.messages.length
     ? session.messages.map(m=>{
@@ -5569,6 +5594,21 @@ function renderTopicView(){
         return `<div class="chat-msg ${m.role}">${escapeHtml(m.content)}</div>`;
       }).join("")
     : `<div class="chat-empty">Ask anything about "${t.name}" - a confusing concept, a past question you're stuck on, or "explain it like I'm 10". Your study buddy knows the objectives and key ideas for this exact topic.</div>`;
+
+  const paywallCTA = `
+    <div class="paywall-card">
+      <div class="paywall-lock">🔒</div>
+      <div class="paywall-title">Unlock the rest of ${s.name}</div>
+      <p class="paywall-body">You've seen a free taste of this topic. Enrolling in ${s.name} unlocks every explanation, common mistake, worked solution, theory question and study buddy chat across all ${s.topics.length} topics, plus full-length practice and readiness checks.</p>
+      <button class="stampbtn" onclick="go('pricing',{preselect:'${s.id}'})">See enrollment options →</button>
+    </div>`;
+
+  const expCardsHtml = unlocked
+    ? t.exp.map(e=>`<div class="explain-card"><div class="etitle">${e.t.toUpperCase()}</div><p>${e.b}</p>${e.diagram?`<div class="q-diagram" style="background:#fff;margin-top:12px;">${e.diagram}</div>`:""}</div>`).join("")
+    : t.exp.map((e,i)=> i===0
+        ? `<div class="explain-card"><div class="etitle">${e.t.toUpperCase()}</div><p>${e.b}</p>${e.diagram?`<div class="q-diagram" style="background:#fff;margin-top:12px;">${e.diagram}</div>`:""}</div>`
+        : `<div class="explain-card explain-card-locked"><div class="etitle">🔒 ${e.t.toUpperCase()}</div><p class="locked-teaser-text">${e.b.slice(0,70)}…</p></div>`
+      ).join("") + (t.exp.length>1 ? paywallCTA : "");
 
   return `
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / <button onclick="go('subject',{subjectId:'${s.id}'})">${s.name}</button> / ${t.name}</div>
@@ -5584,7 +5624,8 @@ function renderTopicView(){
   <div class="section-block">
     <h4>📖 THE STORY AT A GLANCE - READ THIS FIRST</h4>
     <p style="color:var(--ink-soft);font-size:13px;margin-bottom:14px;">Before diving into analysis or attempting any questions, get familiar with what actually happens. You'll understand everything else on this page far more easily once the story itself is clear in your head.</p>
-    ${t.summary.map(bk=>`<div class="explain-card" style="background:#FFF9EE;"><div class="etitle" style="color:var(--orange);">${bk.t.toUpperCase()}</div><p>${bk.b}</p></div>`).join("")}
+    ${unlocked ? t.summary.map(bk=>`<div class="explain-card" style="background:#FFF9EE;"><div class="etitle" style="color:var(--orange);">${bk.t.toUpperCase()}</div><p>${bk.b}</p></div>`).join("")
+      : `<div class="explain-card" style="background:#FFF9EE;"><div class="etitle" style="color:var(--orange);">${t.summary[0].t.toUpperCase()}</div><p>${t.summary[0].b}</p></div>` + (t.summary.length>1 ? paywallCTA : "")}
   </div>` : ""}
 
   <div class="section-block">
@@ -5594,15 +5635,16 @@ function renderTopicView(){
 
   <div class="section-block">
     <h4>KEY IDEAS, EXPLAINED SIMPLY</h4>
-    ${t.exp.map(e=>`<div class="explain-card"><div class="etitle">${e.t.toUpperCase()}</div><p>${e.b}</p>${e.diagram?`<div class="q-diagram" style="background:#fff;margin-top:12px;">${e.diagram}</div>`:""}</div>`).join("")}
+    ${expCardsHtml}
   </div>
 
+  ${unlocked ? `
   <div class="section-block">
     <h4>COMMON MISTAKES TO AVOID</h4>
     <ul class="bullets">${t.err.map(e=>`<li>${e}</li>`).join("")}</ul>
-  </div>
+  </div>` : ""}
 
-  ${t.worked ? `
+  ${(t.worked && unlocked) ? `
   <div class="section-block">
     <h4>SEE HOW IT'S SOLVED - STEP BY STEP</h4>
     <div class="worked-solution">
@@ -5629,7 +5671,7 @@ function renderTopicView(){
 
   <div class="section-block">
     <h4>✍️ THEORY &amp; ESSAY PRACTICE FOR THIS TOPIC</h4>
-    ${(()=>{
+    ${unlocked ? (()=>{
       const linked = topicTheoryQuestions(s.id, t.id);
       if(linked.length){
         return linked.map(({q:tq, idx})=>`
@@ -5640,9 +5682,10 @@ function renderTopicView(){
           </div>`).join("");
       }
       return `<p style="color:var(--ink-soft);font-size:13.5px;">No theory question tagged to this specific topic yet - browse the full <a onclick="go('theorylist',{subjectId:'${s.id}'})" style="color:var(--purple);text-decoration:underline;cursor:pointer;">${s.name} Theory &amp; Essay bank</a> for practice covering the wider syllabus.</p>`;
-    })()}
+    })() : paywallCTA}
   </div>
 
+  ${unlocked ? `
   <div class="buddy-box">
     <div class="buddy-head"><h4>ASK THE STUDY BUDDY</h4><span>SCOPED TO THIS TOPIC</span></div>
     <div class="chat-log" id="chatLog">${chatLogHtml}${session.busy ? `<div class="typing">Study buddy is thinking…</div>` : ""}</div>
@@ -5651,7 +5694,12 @@ function renderTopicView(){
       <input id="chatInput" type="text" placeholder="Type a question about this topic…" onkeydown="handleChatKey(event)" ${session.busy?"disabled":""}>
       <button onclick="sendChat()" ${session.busy?"disabled":""}>Ask</button>
     </div>
+  </div>` : `
+  <div class="buddy-box">
+    <div class="buddy-head"><h4>ASK THE STUDY BUDDY</h4><span>LOCKED</span></div>
+    ${paywallCTA}
   </div>
+  `}
   `;
 }
 
@@ -5672,12 +5720,40 @@ function renderQuiz(){
   const picked = quiz.picks[quiz.index];
   const revealed = !!quiz.revealed[quiz.index];
 
+  // Free-tier rule: unpurchased subjects get the first 10% of any quiz/mock free (minimum
+  // 1 question), then the rest is paywalled. Legacy bonus topics and guest preview stay
+  // fully free regardless, matching the same exemptions used on the topic page itself.
+  const topicForLock = quiz.topicId ? findTopic(quiz.subjectId, quiz.topicId) : null;
+  const quizIsGated = !state.guest && !(topicForLock && topicForLock.legacy) && !isSubjectUnlocked(quiz.subjectId);
+  const freeQuestionCount = Math.max(1, Math.ceil(quiz.questions.length * 0.1));
+  const isLockedHere = quizIsGated && quiz.index >= freeQuestionCount;
+
   const dots = quiz.questions.map((qq,i)=>{
     let cls="dot";
-    if((quiz.mode==="topic"||quiz.mode==="mastery") && quiz.revealed[i]){ cls += (quiz.picks[i]===qq.c) ? " correct" : " incorrect"; }
+    if(quizIsGated && i>=freeQuestionCount) cls += " locked";
+    else if((quiz.mode==="topic"||quiz.mode==="mastery") && quiz.revealed[i]){ cls += (quiz.picks[i]===qq.c) ? " correct" : " incorrect"; }
     else if(quiz.picks[i]!==undefined){ cls += " answered"; }
     return `<div class="${cls}"></div>`;
   }).join("");
+
+  if(isLockedHere){
+    const s = findSubject(quiz.subjectId);
+    return `
+    <div class="quiz-top">
+      <div class="quiz-progress">${dots}</div>
+      ${quiz.timedSeconds!=null ? `<div class="timer" id="timerDisplay">--:--</div>` : `<div></div>`}
+    </div>
+    <div class="qcard">
+      <div class="paywall-card" style="margin:0;">
+        <div class="paywall-lock">🔒</div>
+        <div class="paywall-title">You've used your ${freeQuestionCount} free question${freeQuestionCount>1?'s':''} for this ${quiz.mode==="mock"?"readiness check":"practice set"}</div>
+        <p class="paywall-body">Enrolling in ${s.name} unlocks all ${quiz.questions.length} questions here, every topic's full content, and unlimited theory grading and study buddy chat.</p>
+        <button class="stampbtn" onclick="go('pricing',{preselect:'${s.id}'})">See enrollment options →</button>
+      </div>
+    </div>
+    <div class="quiz-nav">${quiz.index>0 ? `<button class="ghost-btn" onclick="quizPrev()">Back</button>` : `<span></span>`}<span></span></div>
+    `;
+  }
 
   const optionsHtml = q.o.map((opt,i)=>{
     let cls="opt";
