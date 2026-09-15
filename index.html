@@ -4005,16 +4005,16 @@ const THEORY_QUESTIONS = {
    - syllabus: the official confirmed topic/paper structure (now in for all 7 subjects)
    - pastPapers: real WAEC past EXAM QUESTIONS reviewed and adapted (still uneven) */
 const UPLOAD_COVERAGE = {
-  math:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"strong - many years of objective and theory papers reviewed"},
-  english:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"good - recent objective, comprehension and essay papers reviewed"},
-  economics:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"good - objective and theory papers with worked answers reviewed"},
-  government:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"light - only a couple of pages of theory answers were in the upload"},
-  literature:{syllabus:"official WAEC syllabus and the 2026-2030 harmonized prescribed text list received", pastPapers:"none yet - practice questions below are AI-generated only"},
-  civic:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"},
-  crs:{syllabus:"official WAEC syllabus received and used to build the topic list and exam format above", pastPapers:"none yet - practice questions below are AI-generated only"},
-  chemistry:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"},
-  physics:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"},
-  biology:{syllabus:"official WAEC syllabus received and used to build the topic list above", pastPapers:"none yet - all practice questions below are AI-generated only, built from the syllabus content"}
+  math:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"strong - drawn from many years of real past WAEC objective and theory papers"},
+  english:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"good - drawn from recent real objective, comprehension and essay papers"},
+  economics:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"good - drawn from real objective and theory papers with worked answers"},
+  government:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"limited - only a small sample of real past theory answers available so far"},
+  literature:{syllabus:"built directly from the official WAEC syllabus and the 2026-2030 prescribed text list", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  civic:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  crs:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  chemistry:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  physics:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  biology:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"}
 };
 
 /* ======================= APP STATE ======================= */
@@ -4400,16 +4400,11 @@ function logout(){
 }
 window.logout = logout;
 
-async function continueAsGuest(){
-  state.user = "Guest";
-  state.guest = true;
-  state.authError = null;
-  state.navStack = [];
-  chatSessions = {};
-  await loadAllProgress();
-  state.entitlements = [];
-  state.studentStreak = 0;
-  go("home");
+// Guest/free-preview mode has been retired - every visitor now creates a real
+// (free) profile before seeing anything beyond the welcome page, so even a stale
+// cached button calling this safely lands them on signup instead of skipping it.
+function continueAsGuest(){
+  go("signup");
 }
 window.continueAsGuest = continueAsGuest;
 
@@ -5736,7 +5731,7 @@ function renderGuardian(){
 }
 
 function renderFooter(){
-  return `<div class="footer-note">Verified past-paper items are adapted from your uploaded WAEC materials, with answers independently re-checked. Everything else is AI-generated, WAEC-style practice content. The study buddy is an AI assistant and can make mistakes - always cross-check against your own notes and the syllabus. Usernames and passkeys are a simple way to keep each student's own dashboard separate, not a secure login - never reuse a real password as your passkey.</div>`;
+  return `<div class="footer-note">Verified past-paper items are adapted from real WAEC materials, with answers independently re-checked. Everything else is AI-generated, WAEC-style practice content. The study buddy is an AI assistant and can make mistakes - always cross-check against your own notes and the syllabus. Usernames and passkeys are a simple way to keep each student's own dashboard separate, not a secure login - never reuse a real password as your passkey.</div>`;
 }
 
 function renderWelcome(){
@@ -5765,7 +5760,6 @@ function renderWelcome(){
       <button class="ghost-btn" onclick="go('login')">I already have a profile - Log in</button>
     </div>
     <div class="welcome-note">No email needed. Just pick a username and a 4-digit passkey, and you're in.</div>
-    <div class="welcome-note" style="margin-top:14px;"><a onclick="continueAsGuest()" style="color:var(--pink);text-decoration:underline;cursor:pointer;font-weight:700;">👀 Just looking around? Continue as guest (preview only, nothing is saved)</a></div>
   </div>
   `;
 }
@@ -5865,11 +5859,11 @@ function renderHome(){
     <h2>Hey ${state.user}! ${enrolledSubjects.length || SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
   </div>
-  ${(!state.guest && enrolledSubjects.length) ? renderOverallReadinessHero(computeOverallReadiness(state.progress, enrolledIds), state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : ""}
-  ${!state.guest ? renderGamifiedHeader() : ""}
-  ${state.guest ? `<div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format now comes from an official WAEC syllabus you provided. That's separate from <em>past exam questions</em> - where you've also uploaded real past papers, questions adapted from them are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span> with the answer independently re-checked. Past-paper coverage so far - Mathematics: ${UPLOAD_COVERAGE.math.pastPapers}; English: ${UPLOAD_COVERAGE.english.pastPapers}; Economics: ${UPLOAD_COVERAGE.economics.pastPapers}; Government: ${UPLOAD_COVERAGE.government.pastPapers}; Literature, Civic Education and CRS: ${UPLOAD_COVERAGE.crs.pastPapers}. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>` : enrollMoreBanner}
+  ${enrolledSubjects.length ? renderOverallReadinessHero(computeOverallReadiness(state.progress, enrolledIds), state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : ""}
+  ${renderGamifiedHeader()}
+  <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format follows the official WAEC syllabus. Questions adapted from real past exam papers are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span>, with the answer independently re-checked. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
   <div class="subject-grid">${cards}</div>
-  ${(!state.guest && enrolledSubjects.length) ? enrollMoreBanner : ""}
+  ${enrollMoreBanner}
   `;
 }
 
@@ -5890,7 +5884,6 @@ function renderSubjectView(){
     </div>`;
   }).join("");
 
-  const cov = UPLOAD_COVERAGE[s.id];
   const ov = SUBJECT_OVERVIEWS[s.id];
   const overviewBlock = ov ? `
   <div class="subject-overview">
@@ -5906,9 +5899,6 @@ function renderSubjectView(){
     ${readinessScoreBar(r, false)}
     <p class="big-note" style="margin-top:10px;">${r.totalAttempted ? r.correct+"/"+r.totalAttempted+" correct across topic practice so far." : "You haven't practised this subject yet - pick a topic on the left to begin."}</p>
     ${lastMock ? `<p class="big-note">Last readiness check: <b>${lastMock.score}/${lastMock.total}</b> (${Math.round(lastMock.score/lastMock.total*100)}%).</p>` : `<p class="big-note">No readiness check (mock exam) taken yet for this subject - that's 30% of your benchmark score, so it's worth attempting one soon.</p>`}
-    <h4 style="margin-top:16px;">SOURCE COVERAGE</h4>
-    <p class="big-note"><b>Syllabus:</b> ${cov.syllabus}.</p>
-    <p class="big-note"><b>Past exam questions:</b> ${cov.pastPapers}.</p>
     `;
 
   const examFormatBlock = s.examFormat ? `
@@ -6118,7 +6108,7 @@ function renderTopicView(){
     <button class="ghost-btn" onclick="go('subject',{subjectId:'${s.id}'})">Back to ${s.name}</button>
   </div>
   <div class="topic-stats">${st.attempted ? "Your accuracy on this topic so far: "+acc+"% ("+st.correct+"/"+st.attempted+")" : "No attempts yet on this topic."}</div>
-  ${topicHasVerified(t) ? `<div class="confirmed-note">✓ This topic includes items adapted from your uploaded WAEC past papers.</div>` : ""}
+  ${topicHasVerified(t) ? `<div class="confirmed-note">✓ This topic includes items adapted from real WAEC past papers.</div>` : ""}
 
   <div class="section-block">
     <h4>✍️ THEORY &amp; ESSAY PRACTICE FOR THIS TOPIC</h4>
