@@ -4100,7 +4100,12 @@ let guardianAutoRefreshHandle = null;
 // PLACEHOLDER — replace with the real per-subject price once confirmed. Everything
 // downstream (the checkout total, the Flutterwave charge amount) reads from this one
 // constant, so changing the actual price is a single-line edit.
-const SUBJECT_PRICE_NGN = 1500;
+const SUBJECT_PRICE_NGN = 2000;
+// English and Math are locked in as compulsory for every enrollment - a student can
+// still only pick, say, Chemistry, but Math and English are automatically added to
+// their cart alongside it and cannot be unchecked, since real WAEC candidates need
+// them regardless and it gives the business a guaranteed floor per new enrollment.
+const COMPULSORY_SUBJECTS = ["math", "english"];
 const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK_TEST-0fce70805b61257616cb0efe3476871d-X";
 let pricingSelected = new Set();
 
@@ -4591,18 +4596,22 @@ function renderPricing(){
   const enrolledIds = state.guest ? [] : (state.entitlements||[]);
   const preselect = state.pricingPreselect;
   if(preselect && !enrolledIds.includes(preselect) && !pricingSelected.has(preselect)){ pricingSelected.add(preselect); state.pricingPreselect = null; }
+  // Math and English are compulsory: auto-add them to the cart the moment this page
+  // renders (unless already paid for), and their checkboxes stay locked on below.
+  COMPULSORY_SUBJECTS.forEach(id=>{ if(!enrolledIds.includes(id)) pricingSelected.add(id); });
 
   const cards = SUBJECTS.map(s=>{
     const already = enrolledIds.includes(s.id);
+    const compulsory = COMPULSORY_SUBJECTS.includes(s.id) && !already;
     const checked = already || pricingSelected.has(s.id);
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
     return `
     <label class="pricing-card ${already?'already-owned':''}" style="border-color:${checked?color:'var(--line)'};">
-      <input type="checkbox" ${checked?"checked":""} ${already?"disabled":""} onchange="togglePricingSubject('${s.id}')">
+      <input type="checkbox" ${checked?"checked":""} ${(already||compulsory)?"disabled":""} onchange="togglePricingSubject('${s.id}')">
       <div class="pricing-card-emoji">${SUBJECT_EMOJI[s.id]||"📘"}</div>
       <div class="pricing-card-name">${s.name}</div>
       <div class="pricing-card-meta">${s.topics.length} topics · ${allSubjectQuestions(s).length} questions</div>
-      <div class="pricing-card-price">${already ? "✓ Already enrolled" : "₦"+SUBJECT_PRICE_NGN.toLocaleString()}</div>
+      <div class="pricing-card-price">${already ? "✓ Already enrolled" : compulsory ? "Required · ₦"+SUBJECT_PRICE_NGN.toLocaleString() : "₦"+SUBJECT_PRICE_NGN.toLocaleString()}</div>
     </label>`;
   }).join("");
 
@@ -4613,6 +4622,7 @@ function renderPricing(){
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / Choose your subjects</div>
   <h2>Enroll in the subjects you're sitting for</h2>
   <p style="color:var(--ink-soft);max-width:62ch;margin-top:6px;">Every subject shows you a free taste before you pay - the first key idea in every topic, and a small slice of every practice set and readiness check. Tick what you need below; your dashboard only ever shows what you've actually enrolled in.</p>
+  <div class="disclaimer" style="margin-top:10px;">General Mathematics and English Language are required for every enrollment (WAEC's own compulsory pair), so they're automatically included below and can't be unchecked. Everything else is entirely your choice.</div>
 
   <div class="pricing-grid">${cards}</div>
 
@@ -4635,6 +4645,8 @@ function renderPricing(){
 window.renderPricing = renderPricing;
 
 function togglePricingSubject(subjectId){
+  const enrolledIds = state.guest ? [] : (state.entitlements||[]);
+  if(COMPULSORY_SUBJECTS.includes(subjectId) && !enrolledIds.includes(subjectId)) return; // can't be unchecked
   if(pricingSelected.has(subjectId)) pricingSelected.delete(subjectId);
   else pricingSelected.add(subjectId);
   render();
@@ -5398,6 +5410,12 @@ function renderHeader(){
   ${inMock ? `<div class="ai-grading-disclaimer" style="margin-top:14px;background:#FEF2F2;border-color:#EF4444;">🔒 <b>Readiness check in progress:</b> navigation and the Study Buddy are locked until you submit, so this feels like the real thing. Focus up!</div>` : ""}
   `;
 }
+function adminToggleUserDetail(username){
+  state.adminExpandedUser = state.adminExpandedUser === username ? null : username;
+  render();
+}
+window.adminToggleUserDetail = adminToggleUserDetail;
+
 function renderAdmin(){
   if(!state.adminAuthed){
     return `
@@ -5429,13 +5447,26 @@ function renderAdmin(){
       return sum + Object.values(topics).reduce((s,t)=>s+(t.attempted||0),0);
     },0);
     const totalMocks = subjEntries.reduce((sum,sid)=> sum + ((u.progress[sid]&&u.progress[sid].mocks)||[]).length, 0);
-    return `<tr>
-      <td>${u.username}</td>
+    const expanded = state.adminExpandedUser === u.username;
+    const detailRow = expanded ? `<tr><td colspan="6" style="padding:0;">
+      <div style="padding:16px 20px;background:#FAFAFF;border-top:2px solid var(--line);">
+        ${SUBJECTS.map(s=>{
+          const topics = (u.progress[s.id]&&u.progress[s.id].topics)||{};
+          const mocks = (u.progress[s.id]&&u.progress[s.id].mocks)||[];
+          const attempted = Object.values(topics).reduce((sum,t)=>sum+(t.attempted||0),0);
+          if(!attempted && !mocks.length) return "";
+          const r = computeSubjectReadiness(s, topics, mocks);
+          return `<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">${s.name}</div>${readinessScoreBar(r, true)}</div>`;
+        }).join("") || `<div style="color:var(--ink-soft);font-size:13px;">No practice activity recorded for this student yet.</div>`}
+      </div>
+    </td></tr>` : "";
+    return `<tr style="cursor:pointer;" onclick="adminToggleUserDetail('${u.username}')">
+      <td>${u.username} <span style="color:var(--purple);font-size:11px;">${expanded?'▲ hide':'▼ view progress'}</span></td>
       <td>${new Date(u.created_at).toLocaleDateString()}</td>
       <td>${subjEntries.length}</td>
       <td>${totalAttempted}</td>
       <td>${totalMocks}</td>
-    </tr>`;
+    </tr>${detailRow}`;
   }).join("") || `<tr><td colspan="5" style="color:var(--ink-soft);text-align:center;padding:20px;">No users have signed up yet.</td></tr>`;
 
   const trendsBlock = (() => {
