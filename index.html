@@ -167,6 +167,17 @@
   .dot{width:11px;height:11px;border-radius:50%;border:2px solid #E3DCFB;background:transparent;transition:transform .15s ease;}
   .dot.locked{border-color:#D1D5DB;background:repeating-linear-gradient(45deg,#D1D5DB,#D1D5DB 2px,#F3F4F6 2px,#F3F4F6 4px);}
   .paywall-card{background:linear-gradient(135deg,#FFF3D6,#F3E8FF);border:2px dashed var(--purple);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
+  .pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:22px 0;}
+  .pricing-card{position:relative;display:block;border:2.5px solid var(--line);border-radius:18px;padding:18px 16px 16px;cursor:pointer;background:#fff;transition:transform .12s ease;}
+  .pricing-card:has(input:checked){transform:translateY(-2px);box-shadow:0 6px 18px rgba(43,35,80,0.10);}
+  .pricing-card.already-owned{background:#F0FDF4;cursor:default;}
+  .pricing-card input{position:absolute;top:14px;right:14px;width:20px;height:20px;}
+  .pricing-card-emoji{font-size:30px;margin-bottom:6px;}
+  .pricing-card-name{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:4px;padding-right:26px;}
+  .pricing-card-meta{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;}
+  .pricing-card-price{font-weight:800;font-size:16px;color:var(--purple);}
+  .pricing-card.already-owned .pricing-card-price{color:#16A34A;}
+  .pricing-checkout-bar{position:sticky;bottom:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#fff;border-radius:20px;padding:18px 22px;box-shadow:0 8px 28px rgba(43,35,80,0.16);border:2px solid var(--line);margin-top:10px;}
   .paywall-lock{font-size:34px;margin-bottom:8px;}
   .paywall-title{font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--ink);margin-bottom:8px;}
   .paywall-body{font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;}
@@ -364,6 +375,7 @@
   .review-explain{color:var(--ink-soft);font-size:12.5px;}
 </style>
 </style>
+<script src="https://checkout.flutterwave.com/v3.js"></script>
 </head>
 <body>
 <div id="app"><div class="loading">Opening the register…</div></div>
@@ -4038,6 +4050,14 @@ function weekRingSVG(last7Days, studiedToday, uid){
 
 let guardianAutoRefreshHandle = null;
 
+/* ======================= PRICING & CHECKOUT ======================= */
+// PLACEHOLDER — replace with the real per-subject price once confirmed. Everything
+// downstream (the checkout total, the Flutterwave charge amount) reads from this one
+// constant, so changing the actual price is a single-line edit.
+const SUBJECT_PRICE_NGN = 1500;
+const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK_TEST-0fce70805b61257616cb0efe3476871d-X";
+let pricingSelected = new Set();
+
 async function guardianAuth(mode){
   const uEl = document.getElementById("guUsername");
   const pEl = document.getElementById("guPasskey");
@@ -4521,6 +4541,135 @@ function renderRewards(){
   </div>`;
 }
 
+function renderPricing(){
+  const enrolledIds = state.guest ? [] : (state.entitlements||[]);
+  const preselect = state.pricingPreselect;
+  if(preselect && !enrolledIds.includes(preselect) && !pricingSelected.has(preselect)){ pricingSelected.add(preselect); state.pricingPreselect = null; }
+
+  const cards = SUBJECTS.map(s=>{
+    const already = enrolledIds.includes(s.id);
+    const checked = already || pricingSelected.has(s.id);
+    const color = SUBJECT_COLOR[s.id] || "#7C3AED";
+    return `
+    <label class="pricing-card ${already?'already-owned':''}" style="border-color:${checked?color:'var(--line)'};">
+      <input type="checkbox" ${checked?"checked":""} ${already?"disabled":""} onchange="togglePricingSubject('${s.id}')">
+      <div class="pricing-card-emoji">${SUBJECT_EMOJI[s.id]||"📘"}</div>
+      <div class="pricing-card-name">${s.name}</div>
+      <div class="pricing-card-meta">${s.topics.length} topics · ${allSubjectQuestions(s).length} questions</div>
+      <div class="pricing-card-price">${already ? "✓ Already enrolled" : "₦"+SUBJECT_PRICE_NGN.toLocaleString()}</div>
+    </label>`;
+  }).join("");
+
+  const newlySelected = [...pricingSelected].filter(id=>!enrolledIds.includes(id));
+  const total = newlySelected.length * SUBJECT_PRICE_NGN;
+
+  return `
+  <div class="crumbs"><button onclick="go('home')">Subjects</button> / Choose your subjects</div>
+  <h2>Enroll in the subjects you're sitting for</h2>
+  <p style="color:var(--ink-soft);max-width:62ch;margin-top:6px;">Every subject shows you a free taste before you pay - the first key idea in every topic, and a small slice of every practice set and readiness check. Tick what you need below; your dashboard only ever shows what you've actually enrolled in.</p>
+
+  <div class="pricing-grid">${cards}</div>
+
+  <div class="pricing-checkout-bar">
+    <div>
+      <div style="font-size:13px;color:var(--ink-soft);">${newlySelected.length} subject${newlySelected.length!==1?'s':''} selected</div>
+      <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--ink);">₦${total.toLocaleString()}</div>
+    </div>
+    <div style="flex:1;min-width:220px;">
+      <input id="pricingEmail" type="email" placeholder="Your email (for payment receipt)" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
+    </div>
+    <button class="stampbtn" ${newlySelected.length===0?"disabled":""} onclick="startCheckout()">
+      ${newlySelected.length===0 ? "Select a subject to continue" : "Pay ₦"+total.toLocaleString()+" now →"}
+    </button>
+  </div>
+  ${state.pricingError ? `<div class="auth-error" style="margin-top:14px;">${state.pricingError}</div>` : ""}
+  <div class="welcome-note" style="margin-top:16px;">Payments are processed securely by Flutterwave. BuildNET Academy never sees or stores your card details.</div>
+  `;
+}
+window.renderPricing = renderPricing;
+
+function togglePricingSubject(subjectId){
+  if(pricingSelected.has(subjectId)) pricingSelected.delete(subjectId);
+  else pricingSelected.add(subjectId);
+  render();
+}
+window.togglePricingSubject = togglePricingSubject;
+
+function startCheckout(){
+  state.pricingError = null;
+  if(state.guest){ state.pricingError = "Create a free account first (it takes 10 seconds) so we know whose subjects to unlock."; render(); return; }
+  const enrolledIds = state.entitlements||[];
+  const newlySelected = [...pricingSelected].filter(id=>!enrolledIds.includes(id));
+  if(!newlySelected.length){ return; }
+  const emailEl = document.getElementById("pricingEmail");
+  const email = emailEl ? emailEl.value.trim() : "";
+  if(!email || !email.includes("@")){ state.pricingError = "Please enter a valid email address for your payment receipt."; render(); return; }
+
+  const total = newlySelected.length * SUBJECT_PRICE_NGN;
+  const txRef = "buildnet-" + state.user + "-" + Date.now();
+
+  if(typeof FlutterwaveCheckout !== "function"){
+    state.pricingError = "Payment isn't available right now (checkout script failed to load). Please refresh and try again.";
+    render();
+    return;
+  }
+
+  FlutterwaveCheckout({
+    public_key: FLUTTERWAVE_PUBLIC_KEY,
+    tx_ref: txRef,
+    amount: total,
+    currency: "NGN",
+    payment_options: "card, banktransfer, ussd, mobilemoney",
+    customer: { email, name: state.user },
+    customizations: {
+      title: "BuildNET Academy",
+      description: newlySelected.length+" subject(s): "+newlySelected.map(id=>{const s=findSubject(id);return s?s.name:id;}).join(", "),
+      logo: APP_LOGO
+    },
+    meta: { username: state.user, subject_ids: newlySelected.join(",") },
+    callback: function(data){
+      handleCheckoutCallback(data, newlySelected, total, txRef);
+    },
+    onclose: function(){ /* user closed the payment modal without completing - nothing to do */ }
+  });
+}
+window.startCheckout = startCheckout;
+
+/* Client-side callback fires the instant Flutterwave reports success, but that
+   report alone is never trusted to unlock content - it's trivial to fake from the
+   browser. The actual unlock only happens after /api/verify-payment independently
+   confirms the charge with Flutterwave's own server-side API using the secret key,
+   then calls gce_grant_entitlements itself. This function just kicks that off and
+   shows the right waiting/](confirmed state to the student meanwhile. */
+async function handleCheckoutCallback(data, subjectIds, expectedAmount, txRef){
+  state.pricingBusy = true; render();
+  try{
+    const res = await fetch("/api/verify-payment", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        transaction_id: data.transaction_id, tx_ref: txRef,
+        expected_amount: expectedAmount, username: state.user, subject_ids: subjectIds
+      })
+    });
+    const result = await res.json();
+    if(result && result.success){
+      pricingSelected.clear();
+      await loadEntitlements();
+      state.pricingBusy = false;
+      go("home");
+    } else {
+      state.pricingBusy = false;
+      state.pricingError = "We received your payment but couldn't confirm it automatically (" + (result&&result.error?result.error:"unknown issue") + "). Contact support with reference " + txRef + " and we'll sort it out.";
+      render();
+    }
+  }catch(e){
+    state.pricingBusy = false;
+    state.pricingError = "Payment went through, but we couldn't reach our server to confirm it. Contact support with reference " + txRef + ".";
+    render();
+  }
+}
+
 function recordAnswer(subjectId, topicId, correct){
   const p = state.progress[subjectId];
   if(!p.topics[topicId]) p.topics[topicId] = {attempted:0, correct:0};
@@ -4640,21 +4789,106 @@ function renderOverallReadinessHero(overallData, displayName, options){
     <div class="orh-number" style="color:${color};">${o}%</div>
     <div class="orh-target">target for exam-ready: 85%</div>
     <div class="orh-meaning">${meaning}</div>
-    ${options.showShare!==false ? `<button class="ghost-btn" style="margin-top:14px;" onclick="shareReadiness(${o},'${displayName.replace(/'/g,"")}')">📤 Share this readiness score</button>` : ""}
+    ${options.showShare!==false ? `<button class="ghost-btn" style="margin-top:14px;" onclick="shareReadiness(${o},'${displayName.replace(/'/g,"")}',${overallData.perSubject.length})">📤 Share this readiness score</button>` : ""}
   </div>`;
 }
 
-/* Native share sheet where available (covers WhatsApp, Instagram, everything else
-   installed on the device); falls back to a direct wa.me link on desktop browsers
-   that don't support the Web Share API at all. */
-function shareReadiness(score, displayName){
-  const origin = (typeof window!=="undefined" && window.location && window.location.origin) ? window.location.origin : "";
-  const text = `🎯 ${displayName} is at ${score}% Overall Readiness for WAEC GCE exam prep on BuildNET Academy! (Target: 85%)\n\nPractice smarter, not just harder - check it out:`;
-  if(typeof navigator !== "undefined" && navigator.share){
-    navigator.share({ text, url: origin }).catch(()=>{});
-  } else if(typeof window !== "undefined"){
-    window.open("https://wa.me/?text=" + encodeURIComponent(text + " " + origin), "_blank");
-  }
+/* Draws a rounded rectangle path - a small canvas helper used by the readiness card. */
+function roundRectPath(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+/* Renders a polished, portrait-format achievement card (1080x1350 - sharp on
+   WhatsApp status, Instagram stories, and regular chat) as a PNG blob. This is
+   the actual image that gets shared - deliberately branded and graphic, not a
+   plain text message, so it reads as a serious, professional product the
+   moment someone else sees it land in their feed or chat. */
+function generateReadinessCardBlob(score, displayName, subjectCount){
+  return new Promise((resolve)=>{
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080; canvas.height = 1350;
+    const ctx = canvas.getContext("2d");
+
+    const grad = ctx.createLinearGradient(0,0,1080,1350);
+    grad.addColorStop(0, "#7C3AED"); grad.addColorStop(0.55, "#FF4FA3"); grad.addColorStop(1, "#FF8A3D");
+    ctx.fillStyle = grad; ctx.fillRect(0,0,1080,1350);
+
+    ctx.fillStyle = "rgba(255,255,255,0.10)";
+    ctx.beginPath(); ctx.arc(920,140,210,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(90,1230,230,0,Math.PI*2); ctx.fill();
+
+    ctx.fillStyle = "rgba(255,255,255,0.97)";
+    roundRectPath(ctx, 55, 170, 970, 1010, 42); ctx.fill();
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#2B2350";
+    ctx.font = "800 46px Arial, sans-serif";
+    ctx.fillText("🎓 BuildNET Academy", 540, 270);
+    ctx.font = "600 24px Arial, sans-serif";
+    ctx.fillStyle = "#7C7591";
+    ctx.fillText("WAEC GCE EXAM READINESS REPORT", 540, 312);
+
+    ctx.strokeStyle = "#EDE9FE"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(150,352); ctx.lineTo(930,352); ctx.stroke();
+
+    ctx.font = "700 32px Arial, sans-serif";
+    ctx.fillStyle = "#7C7591";
+    ctx.fillText("OVERALL READINESS", 540, 440);
+
+    const color = score>=85 ? "#22C55E" : score>=70 ? "#F59E0B" : "#EF4444";
+    ctx.font = "800 230px Arial, sans-serif";
+    ctx.fillStyle = color;
+    ctx.fillText(score+"%", 540, 680);
+
+    const barW = 780, barX = 540-barW/2, barY = 745, barH = 38;
+    ctx.fillStyle = "#F3F0FF"; roundRectPath(ctx, barX, barY, barW, barH, 19); ctx.fill();
+    ctx.fillStyle = color; roundRectPath(ctx, barX, barY, barW*Math.min(1,score/100), barH, 19); ctx.fill();
+    const targetX = barX + barW*0.85;
+    ctx.strokeStyle = "#2B2350"; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(targetX, barY-12); ctx.lineTo(targetX, barY+barH+12); ctx.stroke();
+    ctx.font = "600 24px Arial, sans-serif"; ctx.fillStyle = "#2B2350";
+    ctx.fillText("Target for exam-ready: 85%", 540, barY+90);
+
+    ctx.font = "700 38px Arial, sans-serif"; ctx.fillStyle = "#2B2350";
+    ctx.fillText(displayName, 540, 940);
+    ctx.font = "500 26px Arial, sans-serif"; ctx.fillStyle = "#7C7591";
+    ctx.fillText(subjectCount + " subject" + (subjectCount!==1?"s":"") + " enrolled", 540, 980);
+
+    ctx.font = "italic 600 28px Arial, sans-serif"; ctx.fillStyle = "#7C3AED";
+    ctx.fillText("\u201cPracticing smart, not just hard.\u201d 🎯", 540, 1070);
+
+    ctx.font = "600 24px Arial, sans-serif"; ctx.fillStyle = "#FFFFFF";
+    ctx.fillText("BuildNET Academy · Private Candidate Exam Prep", 540, 1300);
+
+    canvas.toBlob((blob)=>resolve(blob), "image/png");
+  });
+}
+
+/* Shares the actual GRAPHIC card, not plain text - native share sheet with the
+   image file where the device supports it (covers WhatsApp, Instagram, every
+   other installed app), falling back to a direct download so it can still be
+   shared manually wherever native file-sharing isn't available. */
+async function shareReadiness(score, displayName, subjectCount){
+  try{
+    const blob = await generateReadinessCardBlob(score, displayName, subjectCount||1);
+    if(!blob) return;
+    const file = new File([blob], "buildnet-readiness-score.png", {type:"image/png"});
+    if(typeof navigator!=="undefined" && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({ files:[file], title:"My WAEC GCE Readiness Score", text: `🎯 ${displayName} is at ${score}% Overall Readiness on BuildNET Academy!` });
+    } else if(typeof document!=="undefined"){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "my-readiness-score.png";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }catch(e){ console.error("Could not generate/share readiness card", e); }
 }
 window.shareReadiness = shareReadiness;
 
@@ -4674,7 +4908,7 @@ function topicHasVerified(t){ return t.qs.some(q=>q.src); }
 /* ======================= NAVIGATION ======================= */
 function go(view, params, skipHistory){
   params = params || {};
-  if(!state.user && ["home","subject","topic","quiz","results","dashboard","theorylist","theoryattempt","remediate","rewards"].includes(view)){ view = "welcome"; }
+  if(!state.user && ["home","subject","topic","quiz","results","dashboard","theorylist","theoryattempt","remediate","rewards","pricing"].includes(view)){ view = "welcome"; }
   if(!skipHistory && state.view && state.view !== view && !["welcome","signup","login"].includes(state.view)){
     state.navStack.push({ view: state.view, subjectId: state.subjectId, topicId: state.topicId });
     if(state.navStack.length > 20) state.navStack.shift();
@@ -4682,6 +4916,7 @@ function go(view, params, skipHistory){
   state.view = view;
   state.subjectId = params.subjectId !== undefined ? params.subjectId : state.subjectId;
   state.topicId = params.topicId !== undefined ? params.topicId : null;
+  if(view==="pricing" && params.preselect){ state.pricingPreselect = params.preselect; }
   if(view!=="quiz" && view!=="results"){ clearInterval(timerHandle); }
   if(view==="theoryattempt" && params.theoryIndex !== undefined){ startTheoryAttempt(state.subjectId, params.theoryIndex); }
   render();
@@ -5083,6 +5318,7 @@ function render(){
     else if(state.view==="theoryattempt") html += renderTheoryAttempt();
     else if(state.view==="remediate") html += renderRemediation();
     else if(state.view==="rewards") html += renderRewards();
+    else if(state.view==="pricing") html += renderPricing();
   }
   html += renderFooter();
   app.innerHTML = '<div class="view-anim">' + html + '</div>';
@@ -5313,16 +5549,27 @@ function renderGuardian(){
       const pct = attempted ? Math.round(100*correct/attempted) : null;
       const readiness = computeSubjectReadiness(subj, topics, childMocks);
       const enrolled = (c.entitled_subjects||[]).includes(sid);
-      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness, enrolled};
+      const hasActivity = attempted>0 || readiness.mocksTaken>0;
+      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness, enrolled, hasActivity};
     });
-    const enrolledStats = allSubjectStats.filter(s=>s.enrolled);
-    const touched = enrolledStats.filter(s=>s.attempted>0 || s.readiness.mocksTaken>0);
-    const untouched = enrolledStats.filter(s=>s.attempted===0 && s.readiness.mocksTaken===0);
-    const notEnrolled = allSubjectStats.filter(s=>!s.enrolled);
+    // The guardian's whole purpose is watching real progress and celebrating it - that
+    // must never depend on payment status. Every subject with genuine activity gets its
+    // full progress bar shown, whether formally purchased or engaged with during a free
+    // preview. Payment status is shown separately, as context, never as a filter here.
+    const touched = allSubjectStats.filter(s=>s.hasActivity);
+    const untouched = allSubjectStats.filter(s=>!s.hasActivity && s.enrolled);
+    const notEnrolled = allSubjectStats.filter(s=>!s.enrolled && !s.hasActivity);
     const ranked = [...touched].sort((a,b)=>a.readiness.score-b.readiness.score);
     const weakest = ranked.filter(s=>!s.readiness.meetsTarget).slice(0,3);
     const strongest = ranked.filter(s=>s.readiness.meetsTarget).slice(-2).reverse();
-    const overallData = computeOverallReadiness(c.progress, c.entitled_subjects||[]);
+    // Overall Readiness: use real paid enrollment once it exists; until then (or for any
+    // subject engaged with for free before purchase), fall back to whatever the child has
+    // genuinely been active in, so this number is never artificially stuck at 0 during
+    // early access or before the enrollment flow has been used yet.
+    const effectiveSubjectIds = (c.entitled_subjects && c.entitled_subjects.length)
+      ? c.entitled_subjects
+      : allSubjectStats.filter(s=>s.hasActivity).map(s=>s.sid);
+    const overallData = computeOverallReadiness(c.progress, effectiveSubjectIds);
 
     const liveActivityBlock = (()=>{
       if(!c.last_active_at) return "";
@@ -5341,27 +5588,27 @@ function renderGuardian(){
       return `<div class="live-activity-badge live-activity-off">⚪ Last seen ${ago}, studying <b>${subjName}</b></div>`;
     })();
 
-    const subjRows = enrolledStats.map(s=>{
+    const subjRows = allSubjectStats.filter(s=>s.hasActivity || s.enrolled).map(s=>{
       const r = s.readiness;
       const label = readinessScoreLabel(r);
       const barColor = r.score>=85 ? "var(--green)" : r.score>=70 ? "#F59E0B" : "#EF4444";
-      if(s.attempted===0){
+      if(s.attempted===0 && r.mocksTaken===0){
         return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
           <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--ink-soft);">${s.name}</span>
-            <b style="color:var(--ink-soft);font-weight:600;">⚪ Enrolled, not started yet · 0% ready</b>
+            <span style="color:var(--ink-soft);">${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':''}</span>
+            <b style="color:var(--ink-soft);font-weight:600;">⚪ Not started yet · 0% ready</b>
           </div>
         </div>`;
       }
       return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
         <div style="display:flex;justify-content:space-between;">
-          <span>${s.name} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
+          <span>${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':'<span style="color:#92400E;font-weight:600;font-size:11px;">· free preview</span>'} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
           <b style="color:${barColor};">${r.score}% ready <span style="color:var(--ink-soft);font-weight:400;">(target 85%)</span></b>
         </div>
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
         <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label}</div>
       </div>`;
-    }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">Not enrolled in any subjects yet.</span></div>`;
+    }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No activity or enrollment recorded yet.</span></div>`;
 
     const notEnrolledHtml = notEnrolled.length ? `
       <div style="margin-top:14px;padding:12px 14px;background:#F9FAFB;border-radius:12px;border:1px dashed var(--line);">
