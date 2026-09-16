@@ -6,20 +6,20 @@
 // Required Vercel environment variables (Project Settings -> Environment Variables):
 //   FLW_SECRET_KEY        - your Flutterwave SECRET key (FLWSECK_TEST-... or FLWSECK-...)
 //   SUPABASE_URL          - same value already used by chat.js / the app
-//   SUPABASE_SERVICE_KEY  - a Supabase SERVICE ROLE key (NOT the anon key used client-side -
-//                           this endpoint calls gce_grant_entitlements, which is safe to expose
-//                           via anon too, but using the service key here keeps this endpoint
-//                           consistent with "server-only secrets never touch the browser")
+//   SUPABASE_SERVICE_KEY  - a Supabase SERVICE ROLE key
 //
-// What this endpoint does, and why each step matters:
-//   1. Receives the Flutterwave transaction_id the browser got back from FlutterwaveCheckout.
-//   2. NEVER trusts that value alone - a browser can fake "success" trivially. Instead it
-//      calls Flutterwave's own server-side Verify Transaction endpoint using the SECRET key,
-//      which only Flutterwave and this server can produce a genuine answer for.
-//   3. Cross-checks the verified amount, currency, and status against what was actually
-//      supposed to be charged (expected_amount) before granting anything.
-//   4. Only then calls gce_grant_entitlements, which is itself idempotent on payment_ref,
-//      so even a retried/duplicated call here can never double-grant.
+// TWO WAYS THIS GETS CALLED:
+//   1. transaction_id present (the normal, instant path): the browser just got this
+//      back from FlutterwaveCheckout's own callback, moments after paying.
+//   2. transaction_id absent, tx_ref only (the recovery path): the student started
+//      a bank transfer, closed the tab before it cleared, and came back later to
+//      click "Check my payment" - all we have saved is the reference we generated
+//      ourselves, not a Flutterwave-assigned ID. Flutterwave's verify_by_reference
+//      endpoint looks a transaction up by that reference instead.
+//   Either way, nothing is ever trusted from the browser alone - both paths end by
+//   independently confirming the charge directly with Flutterwave's own API using
+//   the secret key, then cross-checking amount/currency/status before granting
+//   anything via the idempotent gce_grant_entitlements RPC.
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
   const { transaction_id, tx_ref, expected_amount, username, subject_ids } = req.body || {};
 
-  if (!transaction_id || !tx_ref || !expected_amount || !username || !Array.isArray(subject_ids) || !subject_ids.length) {
+  if (!tx_ref || !expected_amount || !username || !Array.isArray(subject_ids) || !subject_ids.length) {
     return res.status(400).json({ success: false, error: "Missing required fields" });
   }
 
@@ -42,22 +42,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Step 1: verify the transaction directly with Flutterwave's servers.
-    const verifyRes = await fetch(
-      `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`,
-      { headers: { Authorization: `Bearer ${FLW_SECRET_KEY}` } }
-    );
+    // Step 1: verify the transaction directly with Flutterwave's servers - by ID
+    // when we have it (the fast path), or by our own reference when we don't
+    // (the recovery path, e.g. a bank transfer confirmed after the tab was closed).
+    const verifyUrl = transaction_id
+      ? `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`
+      : `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(tx_ref)}`;
+
+    const verifyRes = await fetch(verifyUrl, { headers: { Authorization: `Bearer ${FLW_SECRET_KEY}` } });
     const verifyData = await verifyRes.json();
 
     if (!verifyRes.ok || verifyData.status !== "success") {
-      return res.status(400).json({ success: false, error: "Could not verify transaction with Flutterwave" });
+      return res.status(400).json({ success: false, error: "Could not verify transaction with Flutterwave", pending: true });
     }
 
     const tx = verifyData.data;
 
     // Step 2: cross-check everything that matters before trusting this transaction at all.
     if (tx.status !== "successful") {
-      return res.status(400).json({ success: false, error: "Transaction was not successful (status: " + tx.status + ")" });
+      // For the recovery path specifically, "not successful yet" often just means the
+      // bank transfer is still pending, not failed - the caller should be told that's
+      // a normal "keep waiting" state, not a hard error.
+      return res.status(200).json({ success: false, pending: tx.status === "pending", error: "Transaction status: " + tx.status });
     }
     if (tx.tx_ref !== tx_ref) {
       return res.status(400).json({ success: false, error: "Transaction reference mismatch" });
