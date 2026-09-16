@@ -492,8 +492,8 @@ const SUBJECT_OVERVIEWS = {
   }
 };
 
-const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏", chemistry:"🧪", physics:"⚛️", biology:"🧬" };
-const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D", chemistry:"#06B6D4", physics:"#6366F1", biology:"#10B981" };
+const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏", chemistry:"🧪", physics:"⚛️", biology:"🧬", geography:"🌍", commerce:"🛒", finacc:"📊" };
+const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D", chemistry:"#06B6D4", physics:"#6366F1", biology:"#10B981", geography:"#0EA5E9", commerce:"#D97706", finacc:"#475569" };
 const READINESS_EMOJI = { "NOT STARTED":"🌱", "STARTED":"🚶", "DEVELOPING":"🔧", "COMPETENT":"👍", "STRONG":"🔥", "EXAM READY":"🌟" };
 function labelFun(label){ return (READINESS_EMOJI[label]||"") + " " + label; }
 
@@ -3724,6 +3724,740 @@ const SUBJECTS = [
         ]
       }
     ]
+  },
+  {
+    id:"geography", name:"Geography",
+    examFormat:"Paper 1 (2 hrs 40 min) - Section A: 50 objective questions covering the whole syllabus (1¼ hrs); Section B: 8 structured questions on practical/physical geography, answer 4 including the compulsory map reading question (1¾ hrs). Paper 2 (2 hrs) - 9 essay questions across Human Geography, Regional Geography of your home country, and Geography of Africa; answer 4, at least one from each section.",
+    topics:[
+      { id:"mapwork_geo", name:"Map Reading and Interpretation",
+        hook:"Hand two people the exact same topographic map, and one sees a meaningless tangle of brown squiggles while the other reads it like a story, where the hills rise, which way the river flows, where a town would sensibly grow up. The entire difference is knowing what the map's own symbols and scale are quietly telling you.",
+        obj:["Interpret scale, distance and direction on a map","Identify physical and cultural features from map symbols","Explain gradient, cross-sections and inter-visibility"],
+        exp:[
+          {t:"Scale and measuring distance", b:"A map's SCALE (e.g. 1:50,000) tells you how much real-world distance one unit on the map represents, here, 1cm on the map equals 50,000cm (500m) in reality. Measuring straight-line distance is simple ruler work multiplied by the scale; measuring a winding road or river is done by laying a piece of string along its curves, then straightening the string against the scale."},
+          {t:"Direction, bearing and features", b:"Direction is normally read using the map's own north arrow and a compass, expressed as a BEARING, an angle measured clockwise from north (0°-360°). Physical features (spurs, valleys, hills) are read from CONTOUR LINES, closely-spaced contours mean steep slopes, widely-spaced contours mean gentle slopes. Cultural features (settlements, roads, city walls) are read from the map's specific symbol key."},
+          {t:"Gradient and inter-visibility", b:"GRADIENT (steepness) is calculated as vertical height difference ÷ horizontal distance between two points. A CROSS-SECTION is a side-on 'slice' drawn along a line on the map, showing the actual shape of the land's rise and fall. INTER-VISIBILITY asks whether two points can actually see each other, checked by drawing a cross-section between them and seeing if any higher ground blocks the line of sight."}
+        ],
+        err:["Forgetting to multiply the map measurement by the scale to get real-world distance","Assuming closely-spaced contours mean flat land, when they actually indicate a steep slope","Measuring a winding feature with a straight ruler instead of following its curve with string"],
+        qs:[
+          Q("On a map with a scale of 1:50,000, a distance of 4cm on the map represents an actual distance of",["2km","4km","0.5km","20km"],0,"4cm × 50,000 = 200,000cm = 2000m = 2km.","Medium",VP),
+          Q("Closely-spaced contour lines on a map indicate",["a steep slope","a gentle slope","completely flat land","a river"],0,"Closely-spaced contours mean height changes rapidly over a short distance - a steep slope.","Easy"),
+          Q("A bearing is measured as an angle",["clockwise from north, from 0° to 360°","anticlockwise from south","only ever between 0° and 90°","clockwise from the nearest road"],0,"Bearings are measured clockwise from north.","Easy"),
+          Q("The gradient between two points is calculated as",["vertical height difference divided by horizontal distance","horizontal distance divided by vertical height","vertical height multiplied by horizontal distance","the total distance walked"],0,"Gradient = rise/run, i.e. height difference over horizontal distance.","Medium"),
+          Q("Whether two points on a map can see each other directly is determined by",["drawing a cross-section between them to check for blocking higher ground","measuring the straight-line distance between them only","checking if they are the same colour on the map","counting the number of roads between them"],0,"Inter-visibility requires checking the profile of land between two points for obstructions.","Hard")
+        ]
+      },
+      { id:"surveying", name:"Elementary Surveying",
+        hook:"Long before satellites could pin down a location to the metre, surveyors mapped entire coastlines and cities using nothing more than a compass, a chain, and careful, patient walking, exactly the skills this topic introduces.",
+        obj:["Explain the use of chain and prismatic compass surveying","Distinguish open from closed traverse"],
+        exp:[
+          {t:"Chain and prismatic compass surveying", b:"CHAIN SURVEYING measures distances directly along the ground using a graduated chain or tape, suited to small, relatively flat areas. PRISMATIC COMPASS surveying measures both distance and the BEARING (direction) between points, useful over larger or more irregular areas where straight-line chain measurement alone isn't practical."},
+          {t:"Open vs closed traverse, and avoiding obstacles", b:"A TRAVERSE is a connected series of survey lines. A CLOSED traverse returns to its starting point, forming a loop, useful for surveying an enclosed area like a field's boundary. An OPEN traverse does not return to the start, tracing a route from one point to a different end point, like surveying a road. When an obstacle (a building, a pond) blocks a straight survey line, surveyors offset around it using right-angled diversions, then continue the original line beyond the obstacle."}
+        ],
+        err:["Assuming chain surveying alone captures direction, when it only measures distance","Confusing an open traverse (start and end differ) with a closed traverse (returns to start)"],
+        qs:[
+          Q("A survey method that measures distances directly along the ground using a graduated chain is called",["chain surveying","prismatic compass surveying","aerial surveying","satellite surveying"],0,"Chain surveying uses a physical chain/tape to measure ground distance.","Easy"),
+          Q("A traverse that returns to its starting point, forming a closed loop, is called a",["closed traverse","open traverse","linear traverse","radial traverse"],0,"A closed traverse forms a complete loop back to its start.","Medium"),
+          Q("Prismatic compass surveying, unlike simple chain surveying, additionally measures",["bearing (direction) between points","only distance","only height","only area"],0,"The prismatic compass adds bearing measurement to distance measurement.","Medium",VP)
+        ]
+      },
+      { id:"stats_maps", name:"Statistical Maps and Diagrams",
+        hook:"A page of raw population numbers for twenty towns tells you almost nothing at a glance; the same numbers turned into proportional circles on a map instantly show you, without reading a single figure, exactly where the crowds are.",
+        obj:["Identify appropriate statistical diagrams for different types of data","Interpret bar graphs, line graphs, pie charts and choropleth (density) maps"],
+        exp:[
+          {t:"Choosing the right diagram", b:"BAR GRAPHS compare separate categories (e.g. rainfall by month). LINE GRAPHS show a trend over continuous time (e.g. temperature change through the year). PIE CHARTS show how a whole is divided into proportional parts (e.g. land use percentages). PROPORTIONAL CIRCLES use circle size to represent a quantity, and are placed directly on a map to show where larger or smaller values occur geographically."},
+          {t:"Density and isopleth maps", b:"A DENSITY (choropleth) MAP shades different areas according to how much of something they contain (e.g. darker shading for higher population density), letting patterns across a whole region be seen at a glance. An ISOPLETH MAP uses lines connecting points of EQUAL VALUE (similar to contour lines for height, but for other data like rainfall or temperature), showing how a variable changes continuously across space."}
+        ],
+        err:["Using a pie chart for data that isn't parts of one whole (e.g. comparing separate countries' populations)","Confusing a density/choropleth map (shaded areas) with an isopleth map (connecting lines of equal value)"],
+        qs:[
+          Q("A diagram best suited to showing how a whole quantity is divided into proportional parts is a",["pie chart","line graph","bar graph","isopleth map"],0,"Pie charts show proportional division of a whole.","Easy"),
+          Q("A diagram best suited to showing a continuous trend over time, such as monthly temperature, is a",["line graph","pie chart","proportional circle","dot map"],0,"Line graphs are ideal for showing continuous trends over time.","Easy"),
+          Q("A map that shades different areas according to the density of a variable (e.g. population) is called a",["density (choropleth) map","isopleth map","dot map","proportional circle map"],0,"Density/choropleth maps use shading intensity to represent quantity by area.","Medium"),
+          Q("A map using lines to connect points of equal value (e.g. equal rainfall) is called a(n)",["isopleth map","choropleth map","dot map","bar map"],0,"Isopleth maps connect points sharing the same value.","Medium",VP)
+        ]
+      },
+      { id:"earth_latlong", name:"The Earth, Latitude, Longitude and Time",
+        hook:"Fly from Lagos to London and your watch needs adjusting, not because time itself sped up, but because you crossed invisible lines that the whole world quietly agreed would mark out the hours.",
+        obj:["Explain latitude and longitude as a coordinate system","Calculate time differences between places using longitude"],
+        exp:[
+          {t:"Latitude and longitude", b:"LATITUDE lines run east-west, measuring position NORTH or SOUTH of the Equator (0°) up to 90° at the poles. LONGITUDE lines run north-south (pole to pole), measuring position EAST or WEST of the Prime Meridian (0°, through Greenwich) up to 180°. Together, a latitude and longitude pinpoint any exact location on Earth."},
+          {t:"Calculating time from longitude", b:"Since the Earth rotates 360° in 24 hours, it turns 15° every hour (360÷24=15). This means every 15° of longitude difference equals exactly 1 hour of time difference. Places EAST of a reference point have a LATER time (ahead); places WEST have an EARLIER time (behind). A place 45°E of Greenwich is 45÷15 = 3 hours ahead of Greenwich time."}
+        ],
+        err:["Confusing latitude (measures north-south position) with longitude (measures east-west position)","Getting east/west backwards when deciding whether to ADD or SUBTRACT time"],
+        qs:[
+          Q("Lines of latitude measure position",["north or south of the Equator","east or west of the Prime Meridian","only at the poles","only along the Equator itself"],0,"Latitude measures north-south position from the Equator.","Easy"),
+          Q("Lines of longitude measure position",["east or west of the Prime Meridian","north or south of the Equator","only in the Southern Hemisphere","the height above sea level"],0,"Longitude measures east-west position from the Prime Meridian.","Easy"),
+          Q("Every 15° of longitude difference corresponds to a time difference of",["1 hour","15 minutes","1 minute","4 hours"],0,"360° ÷ 24 hours = 15° per hour.","Medium",VP),
+          Q("If it is 12 noon in London (0° longitude), the time at a location 45°E is",["3:00 pm","9:00 am","12 noon","6:00 pm"],0,"45° ÷ 15 = 3 hours ahead (east is later): 12 noon + 3 = 3:00 pm.","Hard",VP),
+          Q("A place located west of Greenwich will generally have a time that is",["earlier than Greenwich time","later than Greenwich time","identical to Greenwich time always","impossible to determine"],0,"Places west of Greenwich are behind (earlier than) Greenwich time.","Medium")
+        ]
+      },
+      { id:"rocks_geo", name:"Rocks",
+        hook:"The gritty sand on a beach, the smooth marble of a countertop, and the glassy black rock beside a volcano are all, in the strictest sense, just 'rock' - yet each formed through a completely different process, which is exactly what this topic sorts out.",
+        obj:["Classify rocks into igneous, sedimentary and metamorphic types","Explain the formation and characteristics of each rock type"],
+        exp:[
+          {t:"Igneous rocks", b:"IGNEOUS rocks form when molten magma or lava cools and solidifies. Cooling slowly underground produces large crystals (e.g. granite); cooling quickly at the surface (from lava) produces small or no visible crystals (e.g. basalt)."},
+          {t:"Sedimentary and metamorphic rocks", b:"SEDIMENTARY rocks form from compressed and cemented layers of sediment (sand, mud, shell fragments) built up over long periods, often showing visible LAYERING, and are the main type where fossils are found (e.g. sandstone, limestone). METAMORPHIC rocks form when existing rock (of any type) is transformed by intense heat and/or pressure without fully melting, e.g. limestone becomes marble, and shale becomes slate."}
+        ],
+        err:["Assuming all rocks form the same way, rather than through three genuinely distinct processes","Forgetting that metamorphic rocks form WITHOUT fully melting, unlike igneous rocks which form FROM melted material"],
+        qs:[
+          Q("Rocks formed from the cooling and solidifying of molten magma or lava are called",["igneous rocks","sedimentary rocks","metamorphic rocks","organic rocks"],0,"Igneous rocks form from cooled magma/lava.","Easy"),
+          Q("Rocks formed from compressed and cemented layers of sediment, often containing fossils, are called",["sedimentary rocks","igneous rocks","metamorphic rocks","volcanic rocks"],0,"Sedimentary rocks form from compacted sediment layers and commonly contain fossils.","Easy"),
+          Q("Marble is formed when limestone undergoes",["metamorphism under heat and pressure","melting and re-solidifying as an igneous rock","compression into a sedimentary rock","no change at all"],0,"Marble is the metamorphic form of limestone.","Medium",VP),
+          Q("Igneous rock that cools slowly underground typically develops",["large, visible crystals","no crystals at all","visible layering","fossils"],0,"Slow cooling underground allows large crystals to form, as in granite.","Medium")
+        ]
+      },
+      { id:"landforms", name:"Major Landforms",
+        hook:"A jagged mountain range and a flat, featureless plain look like they belong to different planets, yet both are shaped by the exact same slow forces, uplift, erosion, deposition, just balanced in wildly different proportions.",
+        obj:["Identify major landform types: mountains, plateaus, plains","Explain agencies that modify landforms: weathering, running water, wind, waves"],
+        exp:[
+          {t:"Mountains, plateaus and plains", b:"MOUNTAINS are high, steep-sided landforms rising sharply from surrounding land. PLATEAUS are elevated, relatively FLAT-TOPPED areas, high but without a mountain's sharp peak. PLAINS are large, low-lying, relatively flat stretches of land, often formed by rivers depositing sediment over time."},
+          {t:"Agencies that modify landforms", b:"WEATHERING breaks down rock in place (through temperature changes, water, or plant roots) without moving it. RUNNING WATER (rivers) erodes valleys and carries sediment to build plains and deltas elsewhere. WIND erodes and deposits material especially in dry regions (forming features like sand dunes). WAVES continuously erode and reshape coastlines, cutting cliffs and building beaches."}
+        ],
+        err:["Confusing a plateau (flat-topped, elevated) with a mountain (sharp peak)","Assuming weathering and erosion are the same process, when weathering breaks rock down IN PLACE while erosion also transports the resulting material away"],
+        qs:[
+          Q("An elevated area with a relatively flat top, distinct from a sharp mountain peak, is called a",["plateau","plain","valley","delta"],0,"Plateaus are flat-topped elevated landforms.","Easy"),
+          Q("The breakdown of rock in place, without it being transported elsewhere, is called",["weathering","erosion","deposition","transportation"],0,"Weathering breaks down rock without moving it.","Medium"),
+          Q("Coastal cliffs and beaches are primarily shaped by the action of",["waves","wind only","underground water only","volcanic activity only"],0,"Wave action is the primary force shaping coastlines.","Easy"),
+          Q("Large, low-lying, flat stretches of land often formed by river-deposited sediment are called",["plains","mountains","plateaus","ridges"],0,"Plains are typically flat, low-lying areas built up by sediment deposition.","Medium",VP)
+        ]
+      },
+      { id:"oceans", name:"Oceans and Ocean Currents",
+        hook:"Britain and parts of Canada sit at similar latitudes, yet one has noticeably milder winters, largely thanks to a specific, named river of warm water quietly flowing through the ocean beside it.",
+        obj:["Explain the causes and types of ocean currents","Explain the effect of ocean currents on coastal climates"],
+        exp:[
+          {t:"Types and causes of ocean currents", b:"Ocean currents are large-scale movements of ocean water, driven mainly by wind patterns, differences in water temperature and salinity (density), and the Earth's rotation. WARM currents (like the Gulf Stream) flow from tropical toward polar regions; COLD currents (like the Benguela current) flow from polar toward tropical regions."},
+          {t:"Effect on coastal climates", b:"Warm currents flowing past a coastline raise nearby air temperatures and increase rainfall, giving milder, wetter winters than the latitude alone would suggest, exactly why parts of Western Europe (warmed by the Gulf Stream/North Atlantic Drift) enjoy noticeably milder winters than similar latitudes elsewhere. Cold currents have the opposite effect, cooling and drying nearby coastal air, and are linked to coastal desert formation in some regions."}
+        ],
+        err:["Assuming ocean currents have no real effect on land climate","Confusing warm currents (flowing toward the poles, warming coasts) with cold currents (flowing toward the equator, cooling coasts)"],
+        qs:[
+          Q("Ocean currents are mainly driven by",["wind patterns, temperature and salinity differences, and the Earth's rotation","tidal pull from the moon alone","human activity","volcanic eruptions"],0,"Currents result from wind, density differences, and Earth's rotation.","Medium"),
+          Q("A warm ocean current flowing along a coastline typically",["raises nearby air temperature and increases rainfall","lowers nearby air temperature","has no effect on climate","only affects marine life, never climate"],0,"Warm currents warm and moisten nearby coastal air.","Medium",VP),
+          Q("Parts of Western Europe have milder winters than their latitude alone would suggest mainly due to the influence of the",["Gulf Stream / North Atlantic Drift (a warm current)","Benguela current (a cold current)","trade winds alone","Earth's tilt alone"],0,"The Gulf Stream/North Atlantic Drift warms Western Europe's coastal climate.","Hard")
+        ]
+      },
+      { id:"weather_climate", name:"Weather and Climate",
+        hook:"Someone visiting the equatorial rainforest and someone visiting the Sahara desert would both, technically, be checking the 'weather' every single day, yet describe two entirely different long-term climate stories.",
+        obj:["Distinguish weather from climate","Identify elements of climate and factors affecting them","Classify major climate types"],
+        exp:[
+          {t:"Weather vs climate", b:"WEATHER is the day-to-day (or even hour-to-hour) state of the atmosphere at a specific place. CLIMATE is the AVERAGE weather pattern of a place over a long period (typically 30+ years). A single rainy day doesn't change a region's climate classification, that's just weather."},
+          {t:"Elements and factors of climate", b:"The main ELEMENTS of climate are temperature, pressure, wind, and precipitation. These are shaped by FACTORS including altitude (higher = colder), latitude (closer to equator = warmer), ocean currents, distance from the sea (continentality), and land/sea breezes."},
+          {t:"Major climate types", b:"Hot climates include EQUATORIAL (hot and wet all year), TROPICAL (hot with distinct wet/dry seasons), and DESERT (hot, very dry). Temperate climates include WARM temperate and COOL temperate zones, generally milder with more moderate seasonal variation than the tropics."}
+        ],
+        err:["Using 'weather' and 'climate' interchangeably, when climate specifically refers to long-term average patterns","Assuming altitude has no effect on temperature, when higher altitude generally means cooler temperatures regardless of latitude"],
+        qs:[
+          Q("The day-to-day state of the atmosphere at a specific place is called",["weather","climate","an element","a factor"],0,"Weather is the short-term, day-to-day atmospheric state.","Easy"),
+          Q("The long-term average weather pattern of a region, typically over 30+ years, is called",["climate","weather","a season","a forecast"],0,"Climate is the long-term average, unlike day-to-day weather.","Easy"),
+          Q("Which of these is a factor affecting climate, rather than an element of climate itself?",["Altitude","Temperature","Precipitation","Wind"],0,"Altitude is a factor influencing climate; temperature, precipitation and wind are elements of climate.","Medium",VP),
+          Q("A climate type that is hot and wet throughout the year, with no distinct dry season, is called",["equatorial","tropical","desert","temperate"],0,"Equatorial climates are consistently hot and wet year-round.","Medium")
+        ]
+      },
+      { id:"soils_geo", name:"Soils",
+        hook:"The same tropical rainstorm that helps crops grow can, over years of poor land use, strip away the very soil those crops depend on, a reminder that soil is a genuinely limited resource, not an endless given.",
+        obj:["Explain factors and processes of soil formation","Describe the soil profile","Explain the effects of human activities on soil"],
+        exp:[
+          {t:"Soil formation", b:"Soil forms through the gradual weathering of parent rock, combined with the slow accumulation of decayed organic matter (humus), influenced by climate, living organisms, and time. Tropical regions often produce deep, heavily-weathered soils due to intense heat and rainfall speeding up the process."},
+          {t:"The soil profile", b:"A soil PROFILE is a vertical cross-section showing distinct layers (horizons): the TOPSOIL (rich in organic matter, where most plant roots and nutrients are), the SUBSOIL (less organic matter, more weathered rock fragments), and the PARENT ROCK/bedrock beneath, from which the soil above ultimately formed."},
+          {t:"Human impact on soil", b:"Poor farming practices (overgrazing, continuous cropping without rest, deforestation) accelerate soil EROSION and nutrient depletion, while practices like crop rotation, terracing, and maintaining plant cover help protect and preserve soil fertility over time."}
+        ],
+        err:["Assuming soil is an unlimited, endlessly renewable resource","Confusing topsoil (nutrient-rich, upper layer) with subsoil (less fertile, deeper layer)"],
+        qs:[
+          Q("The nutrient-rich upper layer of soil, where most plant roots grow, is called the",["topsoil","subsoil","parent rock","bedrock"],0,"Topsoil is the nutrient-rich uppermost soil layer.","Easy"),
+          Q("A vertical cross-section showing the distinct layers of soil is called a soil",["profile","texture","horizon type","density map"],0,"A soil profile shows the layered structure of soil.","Easy"),
+          Q("Which farming practice would most likely accelerate soil erosion?",["Overgrazing and continuous cropping without rest","Crop rotation","Terracing on slopes","Maintaining plant cover"],0,"Overgrazing and continuous cropping strip protective vegetation, accelerating erosion.","Medium",VP)
+        ]
+      },
+      { id:"vegetation_geo", name:"Vegetation Belts",
+        hook:"Travel from the equator toward the Sahara and the plant life around you visibly transforms, from dense rainforest, to open grassland, to almost nothing at all, a living map of how rainfall shapes what can grow.",
+        obj:["Identify major vegetation types and their distribution","Explain factors affecting vegetation distribution"],
+        exp:[
+          {t:"Major vegetation types", b:"TROPICAL RAINFOREST occurs in hot, consistently wet equatorial regions, with dense, multi-layered vegetation. TROPICAL GRASSLAND (savanna) occurs where rainfall is more seasonal, tall grasses with scattered trees. TEMPERATE GRASSLAND and COOL TEMPERATE WOODLAND occur in cooler, moderate-rainfall regions."},
+          {t:"Factors affecting distribution", b:"Vegetation distribution is mainly shaped by RAINFALL amount and seasonality, TEMPERATURE, and SOIL type. Moving away from the equator, decreasing and increasingly seasonal rainfall explains the shift from rainforest, to savanna grassland, to desert with almost no vegetation at all."}
+        ],
+        err:["Assuming vegetation distribution depends only on temperature, overlooking rainfall's central role","Confusing tropical rainforest (consistently wet) with tropical grassland/savanna (seasonal rainfall)"],
+        qs:[
+          Q("Dense, multi-layered vegetation found in hot, consistently wet equatorial regions is called",["tropical rainforest","tropical grassland","temperate grassland","desert vegetation"],0,"Tropical rainforest thrives in consistently hot, wet conditions.","Easy"),
+          Q("Tall grasses with scattered trees, found where rainfall is markedly seasonal, describe",["tropical grassland (savanna)","tropical rainforest","cool temperate woodland","desert"],0,"Savanna/tropical grassland features seasonal rainfall with grass and scattered trees.","Medium"),
+          Q("The single most important factor shaping the general distribution of vegetation belts is",["rainfall amount and seasonality","the presence of animals","soil colour alone","distance from the nearest ocean current only"],0,"Rainfall is the primary driver of major vegetation belt distribution.","Medium",VP)
+        ]
+      },
+      { id:"env_hazards", name:"Environmental Hazards",
+        hook:"A patch of land that once fed a village can, within a single generation, turn to bare, cracked earth, not through any single dramatic disaster, but through the slow, compounding effects of hazards this topic names precisely.",
+        obj:["Identify major environmental hazards: soil erosion, drought, desert encroachment, deforestation, pollution","Explain causes, effects and prevention of each"],
+        exp:[
+          {t:"Soil erosion, drought and desert encroachment", b:"SOIL EROSION is the wearing away of topsoil, worsened by removing plant cover. DROUGHT is a prolonged period of abnormally low rainfall, damaging agriculture and water supply. DESERT ENCROACHMENT (desertification) is the gradual expansion of desert-like conditions into previously productive land, often driven by a combination of drought, overgrazing, and poor land management."},
+          {t:"Deforestation and pollution", b:"DEFORESTATION (large-scale forest clearing) removes protective vegetation cover, worsening both soil erosion and local climate change. POLLUTION (air, water, soil) degrades environmental quality and public health, caused by industrial waste, vehicle emissions, and improper waste disposal, among other sources. Prevention across all these hazards generally centres on maintaining vegetation cover, sustainable land management, and proper waste/resource management."}
+        ],
+        err:["Treating these hazards as unrelated, when they frequently reinforce each other (deforestation worsens erosion, which worsens desertification)","Assuming desert encroachment only happens through natural climate change, overlooking human land-management causes"],
+        qs:[
+          Q("The gradual expansion of desert-like conditions into previously productive land is called",["desert encroachment (desertification)","soil erosion only","deforestation only","drought only"],0,"Desertification is the expansion of desert conditions into once-productive land.","Easy"),
+          Q("A prolonged period of abnormally low rainfall is called",["drought","desertification","deforestation","erosion"],0,"Drought specifically refers to prolonged low rainfall.","Easy"),
+          Q("Large-scale forest clearing, which worsens both soil erosion and local climate, is called",["deforestation","afforestation","reforestation","cultivation"],0,"Deforestation is large-scale forest removal.","Easy"),
+          Q("A key shared prevention strategy across most environmental hazards discussed here is",["maintaining vegetation cover and sustainable land management","increasing overgrazing","removing all plant cover","ignoring waste disposal practices"],0,"Vegetation cover and sustainable management help prevent multiple hazards at once.","Medium",VP)
+        ]
+      },
+      { id:"population_geo", name:"World Population",
+        hook:"Some regions of the world are so densely packed that neighbours can hear each other's conversations through the wall, while others stretch for miles with barely a soul in sight, and geography has real, specific reasons for both extremes.",
+        obj:["Explain factors affecting population growth, distribution and density","Identify problems associated with rapid population growth"],
+        exp:[
+          {t:"Distribution and density factors", b:"Population DISTRIBUTION (where people live) and DENSITY (how crowded an area is) are shaped by climate (favourable climates attract settlement), relief (flat, fertile land supports more people than mountains), resources (mineral wealth, fertile soil, water access), and economic opportunity (cities and industrial areas draw large populations)."},
+          {t:"Problems of rapid population growth", b:"Areas with very high growth rates face pressure on housing, food supply, healthcare, education, and employment, sometimes outpacing the ability of infrastructure and the economy to keep up. Named regions historically associated with distinctive growth patterns and pressures include the Amazon Basin (low density, difficult terrain) and parts of India and Japan (very high density, resource pressure)."}
+        ],
+        err:["Assuming population distribution is random, rather than shaped by identifiable climate, relief and resource factors","Assuming rapid population growth is purely negative, without considering it can also expand available labour and markets"],
+        qs:[
+          Q("Which of the following would most likely support HIGH population density?",["Flat, fertile land with a favourable climate","Steep, mountainous terrain","Extremely arid desert","Dense, resource-poor rainforest"],0,"Flat, fertile, climatically favourable land attracts and supports dense settlement.","Easy"),
+          Q("A key challenge commonly associated with very rapid population growth is",["pressure on housing, food supply and infrastructure","an automatic decrease in unemployment","guaranteed improvement in living standards","reduced demand for public services"],0,"Rapid growth often strains infrastructure and services faster than they can expand.","Medium",VP)
+        ]
+      },
+      { id:"settlement", name:"Settlement Patterns",
+        hook:"A cluster of houses gathered tightly around a single water source and a scattering of isolated farms spread far apart are both, geographically speaking, valid 'settlement patterns' - the difference simply comes down to what the land and available resources allowed.",
+        obj:["Distinguish rural from urban settlements","Explain factors affecting the location, growth and pattern of settlements"],
+        exp:[
+          {t:"Rural vs urban settlements", b:"RURAL settlements are typically small, dispersed, and focused on primary activities like farming. URBAN settlements are larger, denser, and centred on secondary/tertiary activities like manufacturing, trade and services. Urbanisation, the growing share of people living in urban areas, is a major ongoing trend in West Africa and globally."},
+          {t:"Factors affecting settlement location and pattern", b:"Settlements typically form where water is available, land is fertile or resource-rich, defense is favourable (historically), and transport routes converge. These factors also explain settlement PATTERN: NUCLEATED (clustered tightly, e.g. around a water source), DISPERSED (spread out, e.g. across farmland), or LINEAR (strung along a route, e.g. a road or river)."}
+        ],
+        err:["Assuming settlement location is arbitrary, rather than shaped by specific, identifiable factors","Confusing a nucleated pattern (tightly clustered) with a dispersed pattern (spread out)"],
+        qs:[
+          Q("A settlement pattern where houses are tightly clustered together, often around a water source, is called",["nucleated","dispersed","linear","urban only"],0,"Nucleated settlements are tightly clustered.","Easy"),
+          Q("A settlement pattern where houses are spread out across the landscape, common in farming areas, is called",["dispersed","nucleated","linear","urban"],0,"Dispersed settlements are spread out rather than clustered.","Easy"),
+          Q("The growing share of a population living in urban areas over time is called",["urbanisation","ruralisation","industrialisation","migration only"],0,"Urbanisation describes the shift of population toward urban areas.","Medium",VP)
+        ]
+      },
+      { id:"transport_geo", name:"Transportation",
+        hook:"A cocoa farmer's harvest is worthless sitting in a warehouse if there's no reliable way to actually get it to a port, which is exactly why transportation infrastructure is treated as its own serious topic in economic geography, not just an afterthought.",
+        obj:["Identify types of transport and their relative advantages","Explain the role of transportation in economic development"],
+        exp:[
+          {t:"Types of transport", b:"Major transport types include ROAD (flexible, reaches most areas, but limited capacity per vehicle), RAILWAY (efficient for large, heavy loads over long distances), WATER (very cost-effective for bulk goods, but limited to navigable routes), and AIR (fastest, but most expensive, generally used for high-value, urgent, or passenger transport)."},
+          {t:"Transportation and economic development", b:"Reliable transportation enables the movement of goods to markets, connects producers to consumers, supports both national and international trade, and helps diffuse ideas and technology between regions. Poor transportation infrastructure is a genuine, recurring problem limiting economic development in parts of West Africa, since goods can spoil or lose value before ever reaching a market."}
+        ],
+        err:["Assuming one transport type is always 'best', rather than recognising each suits different situations","Overlooking that transportation problems can directly cause economic losses (spoiled goods, missed markets), not just inconvenience"],
+        qs:[
+          Q("The transport type generally most cost-effective for moving bulk goods over water routes is",["water transport","air transport","road transport only","rail transport only"],0,"Water transport is highly cost-effective for bulk cargo.","Easy"),
+          Q("The fastest but generally most expensive transport type is",["air transport","road transport","water transport","rail transport"],0,"Air transport is the fastest but typically the most costly option.","Easy"),
+          Q("Poor transportation infrastructure can directly harm agricultural economies by",["causing perishable goods to spoil before reaching market","increasing crop yields automatically","eliminating the need for storage","improving farmer income automatically"],0,"Inadequate transport can cause real economic loss through spoiled or delayed goods.","Medium",VP)
+        ]
+      },
+      { id:"manufacturing_geo", name:"Manufacturing Industry",
+        hook:"A factory doesn't spring up randomly, it lands exactly where raw materials, power, labour and markets happen to line up conveniently enough to make production worthwhile, and reading that logic backwards is basically the whole of industrial geography.",
+        obj:["Distinguish heavy from light industry","Explain factors influencing the location of industry"],
+        exp:[
+          {t:"Heavy vs light industry", b:"HEAVY industry processes bulky raw materials into large, heavy products (e.g. steel, cement), typically requiring large amounts of raw material, power and space. LIGHT industry produces smaller, often consumer-focused goods (e.g. textiles, electronics assembly), generally needing less raw material and space per unit of output."},
+          {t:"Factors influencing industrial location", b:"Industries tend to locate near raw materials (especially if bulky/heavy to transport), available power supply, a suitable labour force, transport links, and access to markets. A steel plant might locate near iron ore and coal specifically to minimise the cost of moving heavy raw materials, while a light consumer-goods factory might prioritise proximity to its urban customer market instead."}
+        ],
+        err:["Assuming all industries choose their location for the same reason, when heavy and light industries often weigh these factors very differently","Confusing heavy industry (bulky raw materials, large-scale) with light industry (smaller-scale, consumer-focused)"],
+        qs:[
+          Q("An industry that processes bulky raw materials into large products like steel or cement is classified as",["heavy industry","light industry","tertiary industry","primary industry only"],0,"Heavy industry deals with bulky materials and large-scale output.","Easy"),
+          Q("A steel plant is most likely to locate near",["sources of iron ore and coal","the nearest coastal tourist area","a region with no available labour","the smallest possible market"],0,"Proximity to raw materials minimises transport costs for heavy industry.","Medium",VP),
+          Q("Light industry, compared to heavy industry, generally",["requires less raw material and space per unit of output","always requires more raw material","can only be located near ports","never depends on location factors"],0,"Light industry has generally lighter raw material and space requirements.","Medium")
+        ]
+      },
+      { id:"trade_geo", name:"World Trade",
+        hook:"A bar of chocolate on a Lagos supermarket shelf has likely already crossed at least one ocean, changed hands multiple times, and passed through several countries' worth of regulations, an entire invisible journey behind one small purchase.",
+        obj:["Identify major commodities and patterns of world trade","Explain factors influencing trade routes and relationships"],
+        exp:[
+          {t:"Major trade commodities", b:"World trade moves AGRICULTURAL commodities (cocoa, coffee, cotton), MANUFACTURED GOODS (machinery, electronics, textiles), and MINERAL PRODUCTS (oil, gold, iron ore) between countries, generally flowing from where a commodity is produced most efficiently to where it's most needed or valued."},
+          {t:"Trade routes and relationships", b:"Trade patterns are shaped by what a country actually produces (its resource base), transportation links (especially ports and shipping routes), and historical/political relationships between countries (former colonial ties, regional trade blocs like ECOWAS). A country's home region's trade routes to the rest of the world reflect this same underlying logic, historical links and available transport infrastructure."}
+        ],
+        err:["Assuming trade patterns are random, rather than shaped by resource base, transport links and historical/political relationships","Confusing raw agricultural/mineral exports with manufactured goods, when a country's trade profile often shows a specific pattern of one flowing out and the other flowing in"],
+        qs:[
+          Q("A country's world trade commodities are generally shaped most by",["its own resource base and what it can produce efficiently","random chance","only its population size","only its physical size"],0,"Trade commodities reflect what a country's resources and industries can actually supply.","Medium"),
+          Q("Regional trade blocs, such as ECOWAS, primarily aim to",["strengthen economic cooperation and trade among member countries","eliminate all trade between member countries","restrict trade to only non-member countries","replace individual countries' currencies immediately"],0,"Regional trade blocs like ECOWAS aim to boost cooperation and trade among members.","Medium",VP)
+        ]
+      },
+      { id:"nigeria_regional", name:"Regional Geography of Nigeria",
+        hook:"Nigeria isn't one uniform landscape, it's a patchwork of genuinely distinct regions, each with its own physical setting, peoples, and economic story, and WAEC specifically expects candidates to know these regions as real, distinguishable places, not just a single green blob on a map.",
+        obj:["Identify Nigeria's broad geographical regions","Describe the physical setting, population and economic activities of Nigeria's regions"],
+        exp:[
+          {t:"Nigeria's geographical regions", b:"Nigeria is commonly divided into distinct geographical regions including the Eastern Highlands, Eastern Scarplands, North-central Highlands, Western Highlands, Sokoto Plains, Chad Basin, Niger-Benue Trough, Cross River Basin and Southern Coastlands, each with its own characteristic relief, drainage and land use."},
+          {t:"What each region is examined on", b:"For any given region, WAEC typically expects a candidate to discuss: its PHYSICAL SETTING (relief, drainage), PEOPLES AND POPULATION, RESOURCES AND ECONOMIC ACTIVITIES specific to that area, TRANSPORTATION, and PROBLEMS OF DEVELOPMENT it faces. Learning this consistent structure matters more than memorising isolated facts about each region individually, since the same analytical framework applies across all of them."}
+        ],
+        err:["Treating Nigeria as geographically uniform, rather than made up of genuinely distinct regions","Answering a regional question with random facts rather than the specific expected structure (physical setting, population, resources, transportation, development problems)"],
+        qs:[
+          Q("Nigeria's geographical regions are typically distinguished from one another based on",["differences in relief, drainage, population and economic activity","identical characteristics across the whole country","political party affiliation only","language alone"],0,"Regions are distinguished by genuine physical and economic differences.","Medium"),
+          Q("When answering an exam question on a specific Nigerian geographical region, a strong answer would typically address",["physical setting, peoples/population, resources/economic activities, transportation and development problems","only the region's population figure","only its major city's name","only its distance from Lagos"],0,"WAEC expects this specific structured coverage for regional geography answers.","Hard",VP),
+          Q("The Niger-Benue Trough is an example of one of Nigeria's recognised",["geographical regions","ocean currents","climate types","trade routes"],0,"The Niger-Benue Trough is one of Nigeria's named geographical regions.","Medium")
+        ]
+      },
+      { id:"africa_geo", name:"Geography of Africa",
+        hook:"From gold mines in South Africa to oil fields in the Niger Delta to irrigation along the Nile, Africa's economic geography is a genuine patchwork of very different activities, each shaped by very specific local resources and history.",
+        obj:["Identify Africa's broad physical setting and distribution of major minerals","Describe selected named economic activities across specific African regions"],
+        exp:[
+          {t:"Africa's broad outline", b:"Africa's physical setting spans a huge range of relief, drainage and climate, from the Sahara desert to equatorial rainforest to southern temperate zones, with major mineral resources distributed unevenly across the continent (e.g. gold in South Africa, copper in Zambia/DR Congo, oil in Nigeria/Algeria/Libya)."},
+          {t:"Selected named economic activities", b:"WAEC's syllabus specifically names several economic activities tied to particular places: lumbering in equatorial Africa (Côte d'Ivoire, DR Congo), irrigation agriculture in the Nile and Niger river basins, plantation agriculture in West and East Africa, fruit farming in Mediterranean Africa, gold mining in South Africa, copper mining in Zambia/DR Congo, and oil production in Nigeria, Algeria and Libya. Being able to name the SPECIFIC activity AND its SPECIFIC location, rather than describing 'African industry' vaguely, is exactly what stronger answers do."}
+        ],
+        err:["Describing Africa's economic activities in vague, general terms rather than naming the specific activity and specific country/region it's associated with","Assuming mineral resources are evenly distributed across the whole continent"],
+        qs:[
+          Q("Gold mining is a specifically named major economic activity associated with",["South Africa","Nigeria","Kenya","Senegal"],0,"South Africa is specifically named for gold mining in the syllabus.","Medium",VP),
+          Q("Oil production is a specifically named major economic activity associated with",["Nigeria, Algeria and Libya","South Africa only","Ghana only","Kenya only"],0,"Nigeria, Algeria and Libya are the specifically named oil-producing countries.","Medium"),
+          Q("Irrigation agriculture is specifically associated with which river basins in Africa?",["The Nile and Niger basins","The Zambezi basin only","The Congo basin only","The Orange river basin only"],0,"The Nile and Niger basins are specifically named for irrigation agriculture.","Hard",VP)
+        ]
+      }
+    ]
+  },
+  {
+    id:"commerce", name:"Commerce",
+    examFormat:"Paper 1 (1 hour, 25% of total marks) - 50 compulsory objective questions covering the entire syllabus. Paper 2 (2½ hours, 75% of total marks) - 10 essay questions, answer any 5, all questions carrying equal marks.",
+    topics:[
+      { id:"intro_comm", name:"Introduction to Commerce",
+        hook:"A farmer growing yams in Benue and a family eating them in Lagos will never actually meet, yet somehow the yams get from one to the other, fresh, priced fairly, and available exactly when needed. That entire invisible chain of activity making it possible has a name: Commerce.",
+        obj:["Explain the meaning and scope of Commerce","Explain the functions of Commerce"],
+        exp:[
+          {t:"Meaning and scope", b:"COMMERCE is the whole process of buying, selling and exchanging goods and services, together with all the activities that make trade actually possible, transport, banking, insurance, warehousing, communication. It's broader than just 'shops selling things', it's the entire support system behind getting a product from producer to consumer efficiently."},
+          {t:"Functions of Commerce", b:"Commerce solves specific practical problems standing between production and consumption: the problem of PLACE (goods aren't made where they're needed, solved by trade and transport), the problem of TIME (goods aren't always available when needed, solved by warehousing), the problem of RISK (goods can be lost or damaged in transit, solved by insurance), and the problem of EXCHANGE (buyers and sellers need a trusted way to pay each other, solved by banking and finance)."}
+        ],
+        err:["Assuming Commerce means only 'shops' or 'trading', overlooking the supporting activities (banking, insurance, transport) that make trade possible","Being unable to name the SPECIFIC problems Commerce solves (place, time, risk, exchange), only describing it vaguely as 'buying and selling'"],
+        qs:[
+          Q("Commerce is best defined as",["the whole process of buying, selling and exchanging goods and services, plus the activities supporting trade","only the activity of shops selling directly to customers","only international trade between countries","only the manufacture of goods"],0,"Commerce is broader than retail, including transport, banking, insurance and other supporting activities.","Easy"),
+          Q("The problem of goods not being available where they are needed is specifically solved by",["trade and transport","insurance","banking alone","advertising"],0,"Trade and transport solve the 'place' problem, moving goods to where they're needed.","Medium"),
+          Q("The problem of goods not being available exactly when needed is specifically solved by",["warehousing","insurance","banking","trade associations"],0,"Warehousing stores goods until they're actually needed, solving the 'time' problem.","Medium",VP)
+        ]
+      },
+      { id:"occupations", name:"Occupations",
+        hook:"A farmer growing rice, a factory worker assembling radios, and a bank teller processing withdrawals are all clearly 'working', yet Commerce sorts these jobs into genuinely distinct categories based on exactly what kind of value each one adds.",
+        obj:["Classify occupations into industry, commerce, and direct/indirect services"],
+        exp:[
+          {t:"Industry and Commerce as occupation types", b:"INDUSTRY covers occupations that EXTRACT or MANUFACTURE goods (farming, mining, factory production). COMMERCE covers occupations involved in DISTRIBUTING goods and supporting trade (trading, banking, insurance, transport)."},
+          {t:"Direct and indirect services", b:"DIRECT SERVICES are occupations providing a service straight to the person needing it (a doctor, a teacher, a hairdresser). INDIRECT SERVICES support commerce and industry rather than serving an individual directly (a bank clerk, an insurance broker, a warehouse manager), the service exists to keep TRADE running smoothly, not to directly serve one particular end customer."}
+        ],
+        err:["Confusing direct services (serving an individual customer directly) with indirect services (supporting trade/industry in the background)","Assuming 'occupation' only refers to industry, overlooking commerce and service categories"],
+        qs:[
+          Q("An occupation involved in extracting or manufacturing goods, such as farming or factory production, falls under",["industry","commerce","direct services","indirect services"],0,"Industry covers extraction and manufacturing occupations.","Easy"),
+          Q("A bank clerk's occupation, which supports trade rather than serving one individual customer's personal needs, is classified as",["an indirect service","a direct service","industry","agriculture"],0,"Indirect services support commerce/industry rather than serving individuals directly.","Medium",VP),
+          Q("A doctor providing medical care directly to a patient is an example of",["a direct service","an indirect service","industry","commerce only"],0,"Direct services serve an individual's needs directly.","Easy")
+        ]
+      },
+      { id:"production_comm", name:"Production",
+        hook:"Growing cotton, weaving it into fabric, and selling the finished shirt in a shop are three completely different kinds of work, yet all three genuinely count as 'production', just at different stages of the same journey.",
+        obj:["Explain the meaning and factors of production","Distinguish primary, secondary and tertiary production","Explain the relationship between production and exchange"],
+        exp:[
+          {t:"Meaning and factors of production", b:"PRODUCTION is the creation of goods and services that satisfy human wants. It requires four FACTORS: land (natural resources), labour (human effort), capital (tools, machinery, money invested), and entrepreneurship (organising the other three factors to actually produce something)."},
+          {t:"Primary, secondary and tertiary production", b:"PRIMARY production extracts raw materials directly from nature (farming, mining, fishing). SECONDARY production processes or manufactures those raw materials into finished/semi-finished goods (turning cotton into fabric). TERTIARY production provides services supporting the first two stages (transport, banking, retailing the finished shirt)."},
+          {t:"Production and exchange", b:"Production alone isn't enough, goods must actually reach the people who want them, which requires EXCHANGE (trade). This inter-relationship is exactly why Commerce (which enables exchange) and production are treated as two halves of the same overall economic process, one creates value, the other delivers it."}
+        ],
+        err:["Assuming production only means manufacturing, overlooking that primary (extraction) and tertiary (services) are also genuine production stages","Confusing which stage (primary/secondary/tertiary) a specific activity belongs to"],
+        qs:[
+          Q("The extraction of raw materials directly from nature, such as farming or mining, is called",["primary production","secondary production","tertiary production","exchange"],0,"Primary production extracts raw materials from nature.","Easy"),
+          Q("The processing of raw materials into finished or semi-finished goods is called",["secondary production","primary production","tertiary production","distribution only"],0,"Secondary production manufactures/processes raw materials.","Easy"),
+          Q("Which of these is NOT one of the four factors of production?",["Advertising","Land","Labour","Capital"],0,"The four factors are land, labour, capital and entrepreneurship - advertising is not one of them.","Medium",VP),
+          Q("Services supporting production and consumption, such as transport and banking, represent",["tertiary production","primary production","secondary production","capital only"],0,"Tertiary production covers supporting services.","Medium")
+        ]
+      },
+      { id:"business_units", name:"Business Units",
+        hook:"One person selling bread from a single stall and a public company with thousands of shareholders are both, legally speaking, 'business units' - just organised in completely different ways, with completely different consequences if something goes wrong.",
+        obj:["Identify forms of business units and their characteristics","Explain formation, advantages, disadvantages and dissolution of each form"],
+        exp:[
+          {t:"Sole proprietorship and partnership", b:"SOLE PROPRIETORSHIP is a business owned and run by one person, easy and cheap to set up, but the owner has UNLIMITED LIABILITY (personally responsible for all business debts). PARTNERSHIP involves two or more people sharing ownership, capital and profits, still generally with unlimited liability for each partner, though responsibilities can be divided by agreement."},
+          {t:"Limited liability companies and other forms", b:"PRIVATE and PUBLIC LIMITED LIABILITY COMPANIES are owned by shareholders whose liability is LIMITED to what they invested, protecting personal assets if the business fails, a public company can sell shares to the general public, a private company cannot. PUBLIC ENTERPRISES are owned and run by government. COOPERATIVE SOCIETIES are owned collectively by their members, operating for members' mutual benefit rather than pure profit."},
+          {t:"Dissolution/liquidation", b:"DISSOLUTION (or liquidation) is the formal winding-up of a business, settling debts and distributing any remaining assets among owners, whether voluntary (owners choose to close) or compulsory (forced by creditors or law when a business can't meet its obligations)."}
+        ],
+        err:["Assuming all business forms carry the same liability risk, when sole proprietorships/partnerships typically have UNLIMITED liability while companies have LIMITED liability","Confusing a private limited company (cannot sell shares to the public) with a public limited company (can)"],
+        qs:[
+          Q("A business owned and run by one person, who is personally liable for all business debts, is called a",["sole proprietorship","partnership","private limited company","cooperative society"],0,"Sole proprietorship is single ownership with unlimited personal liability.","Easy"),
+          Q("A business form in which shareholders' liability is limited to their investment is a",["limited liability company","sole proprietorship","partnership","none of the above"],0,"Limited liability companies protect shareholders beyond their investment.","Easy"),
+          Q("A business form that can sell shares to members of the general public is a",["public limited company","private limited company","sole proprietorship","partnership"],0,"Only public limited companies can offer shares to the general public.","Medium",VP),
+          Q("The formal winding-up of a business, settling debts and distributing remaining assets, is called",["dissolution (liquidation)","incorporation","registration","partnership formation"],0,"Dissolution/liquidation is the formal closing-down process of a business.","Medium")
+        ]
+      },
+      { id:"capital_profit", name:"Business Capital and Profits",
+        hook:"Two shop owners can have the exact same amount of money sitting in the till, yet one is thriving and one is quietly going bankrupt, the real difference almost always comes down to how well they understand their own capital and profit figures.",
+        obj:["Distinguish types of business capital","Calculate working capital, profit and turnover"],
+        exp:[
+          {t:"Types of capital", b:"AUTHORISED (or registered/nominal) CAPITAL is the maximum amount a company is legally permitted to raise by selling shares. ISSUED capital is the portion actually sold to shareholders. PAID-UP capital is what shareholders have actually paid so far. CAPITAL OWNED (equity) comes from the owners themselves; CAPITAL BORROWED comes from loans. LIQUID (circulating) capital is cash or assets easily convertible to cash for day-to-day operations."},
+          {t:"Working capital, profit and turnover", b:"WORKING CAPITAL = current assets minus current liabilities, the money available for day-to-day operations; healthy working capital is genuinely important since a business can be profitable on paper yet still fail if it runs out of cash to pay immediate bills. PROFIT = total revenue minus total costs. TURNOVER is the total value of sales made in a given period, not the same as profit, since turnover doesn't yet subtract costs."}
+        ],
+        err:["Confusing turnover (total sales value) with profit (sales minus costs) - turnover can be high while profit is low or negative","Assuming a business with strong sales (turnover) automatically has strong working capital, when the two measure genuinely different things"],
+        qs:[
+          Q("The maximum amount of capital a company is legally permitted to raise by selling shares is called its",["authorised (registered) capital","issued capital","paid-up capital","working capital"],0,"Authorised capital is the legal ceiling on capital that can be raised.","Medium"),
+          Q("Working capital is calculated as",["current assets minus current liabilities","total assets minus total liabilities","total revenue minus total costs","issued capital minus paid-up capital"],0,"Working capital specifically measures short-term operational liquidity.","Medium",VP),
+          Q("The total value of sales made by a business in a given period, before subtracting costs, is called its",["turnover","profit","working capital","authorised capital"],0,"Turnover is total sales value, distinct from profit.","Easy"),
+          Q("A business can have high turnover but still report low or negative",["profit","authorised capital","registered capital","business name"],0,"High sales (turnover) doesn't guarantee profit once costs are subtracted.","Medium")
+        ]
+      },
+      { id:"trade_assoc", name:"Trade Associations",
+        hook:"A single small trader shouting for fairer treatment gets ignored; a thousand traders speaking with one unified voice through an organised association gets a meeting with the Minister.",
+        obj:["Explain the aims and functions of trade associations","Identify specific trade associations and their roles"],
+        exp:[
+          {t:"General aims and functions", b:"TRADE ASSOCIATIONS bring together businesses in a similar trade or industry to represent shared interests, negotiate collectively with government or suppliers, set standards, and share useful information, giving individually small businesses a much stronger, unified voice than they'd have alone."},
+          {t:"Specific named associations", b:"The CHAMBER OF COMMERCE promotes and protects the general interests of business in a locality or country. EMPLOYERS' ASSOCIATIONS represent employers specifically in matters like wage negotiation with labour unions. CONSUMER ASSOCIATIONS protect and represent buyers' interests (product safety, fair pricing). MANUFACTURERS' ASSOCIATIONS specifically represent the shared interests of companies that manufacture goods."}
+        ],
+        err:["Confusing an Employers' Association (represents businesses/employers) with a Consumer Association (represents buyers)","Treating all trade associations as functionally identical, rather than each serving a specific named constituency"],
+        qs:[
+          Q("An organisation that promotes and protects the general interests of business in a locality is called a",["Chamber of Commerce","Consumer Association","Employers' Association","Manufacturers' Association"],0,"The Chamber of Commerce serves general local/national business interests.","Easy"),
+          Q("An association specifically representing buyers' interests, such as product safety and fair pricing, is a",["Consumer Association","Employers' Association","Chamber of Commerce","Manufacturers' Association"],0,"Consumer Associations specifically protect buyers' interests.","Medium",VP),
+          Q("An association representing employers specifically in wage negotiations with labour unions is a(n)",["Employers' Association","Consumer Association","Trade Union","Manufacturers' Association"],0,"Employers' Associations specifically represent employer interests in labour matters.","Medium")
+        ]
+      },
+      { id:"home_trade", name:"Home Trade",
+        hook:"Between a factory in Kano producing shoes and a customer in Enugu buying a single pair, there's usually a whole invisible relay team, wholesalers, retailers, warehouses, quietly making sure the right quantity reaches the right place at the right time.",
+        obj:["Distinguish retail from wholesale trade","Explain the functions of warehousing and channels of distribution"],
+        exp:[
+          {t:"Retail trade", b:"RETAILING sells goods directly to the final consumer, in small quantities. Retail outlets range from small-scale (a single kiosk) to large-scale (a supermarket chain). Modern retailing trends include branding, self-service, after-sales service, and vending machines, all aimed at making the buying experience easier or more distinctive."},
+          {t:"Wholesale trade and warehousing", b:"WHOLESALING buys goods in bulk from producers and sells in smaller (but still substantial) quantities to retailers, MERCHANT wholesalers buy and resell goods on their own account, while AGENT wholesalers arrange sales on behalf of producers without ever fully owning the goods themselves. WAREHOUSING stores goods until needed, bridging the gap between when goods are produced and when they're actually demanded."},
+          {t:"Channels of distribution", b:"The typical CHANNEL OF DISTRIBUTION runs Producer → Wholesaler → Retailer → Consumer, though the choice of channel depends on factors like the product's nature, cost, and how directly the producer wants to reach customers. Sometimes forces (bulk-buying retailers, direct producer sales) push toward ELIMINATING the middleman (wholesaler) entirely, while other forces (product complexity, geographic spread) help the middleman survive and remain valuable."}
+        ],
+        err:["Confusing retail (small quantities, to final consumers) with wholesale (bulk, to retailers)","Assuming a merchant wholesaler and an agent wholesaler do the same thing, when a merchant wholesaler actually OWNS the goods while an agent does not"],
+        qs:[
+          Q("Selling goods directly to the final consumer, typically in small quantities, is called",["retail trade","wholesale trade","warehousing","entrepot trade"],0,"Retail trade sells directly to final consumers.","Easy"),
+          Q("Buying goods in bulk and reselling in smaller quantities to retailers describes",["wholesale trade","retail trade","warehousing only","entrepot trade"],0,"Wholesale trade bridges producers and retailers with bulk buying/reselling.","Easy"),
+          Q("A wholesaler who arranges sales on behalf of a producer without ever fully owning the goods is a(n)",["agent wholesaler","merchant wholesaler","retailer","warehouse manager"],0,"Agent wholesalers facilitate sales without taking ownership, unlike merchant wholesalers.","Hard",VP),
+          Q("The typical channel of distribution runs from",["Producer to Wholesaler to Retailer to Consumer","Consumer to Retailer to Wholesaler to Producer","Producer directly to Consumer only, always","Retailer to Producer to Consumer"],0,"The standard distribution channel flows Producer → Wholesaler → Retailer → Consumer.","Medium")
+        ]
+      },
+      { id:"foreign_trade", name:"Foreign Trade",
+        hook:"A container of cocoa leaving a Nigerian port and a shipment of machinery arriving from Germany are both part of the exact same global conversation, one country selling what it has plenty of, buying what it needs, and foreign trade is simply the formal name for that entire exchange.",
+        obj:["Explain basic concepts in international trade","Distinguish export, import and entrepot trade","Explain barriers to international trade"],
+        exp:[
+          {t:"Basic concepts", b:"TERMS OF TRADE compares the prices of a country's exports to its imports. BALANCE OF TRADE compares the value of a country's exports and imports of goods specifically. BALANCE OF PAYMENTS is broader, covering ALL financial transactions (trade, investment, loans) between a country and the rest of the world. COUNTER TRADE involves exchanging goods directly for other goods rather than money, similar in principle to barter, between countries."},
+          {t:"Export, import and entrepot trade", b:"EXPORT is selling goods to another country; IMPORT is buying goods from another country. ENTREPOT trade involves importing goods specifically to re-export them (often after minor processing or simply storage), rather than for the importing country's own domestic consumption. Trade is also classified as VISIBLE (physical goods) or INVISIBLE (services like banking, insurance, tourism)."},
+          {t:"Barriers to international trade", b:"Countries sometimes restrict trade using TARIFFS (taxes on imports/exports), QUOTAS (limits on quantity), or outright bans, often to protect local (infant) industries, raise government revenue, or respond to political disputes, though this can also raise prices for domestic consumers and provoke retaliation from trading partners."}
+        ],
+        err:["Confusing balance of trade (goods only) with the broader balance of payments (all financial transactions)","Assuming entrepot trade means goods are kept for the importing country's own use, when it specifically means importing FOR RE-EXPORT"],
+        qs:[
+          Q("The comparison of the value of a country's exports and imports of goods specifically is called its",["balance of trade","balance of payments","terms of trade","counter trade"],0,"Balance of trade specifically compares goods exports and imports.","Medium"),
+          Q("Trade involving importing goods specifically for the purpose of re-exporting them is called",["entrepot trade","export trade","import trade only","visible trade"],0,"Entrepot trade is importing for re-export, not domestic use.","Medium",VP),
+          Q("A tax placed on imported goods to restrict trade is called a",["tariff","quota","subsidy","counter trade"],0,"A tariff is a tax on imports/exports.","Easy"),
+          Q("A quantity limit placed on how much of a good can be imported is called a",["quota","tariff","subsidy","entrepot restriction"],0,"A quota limits the quantity of goods that can be imported.","Easy")
+        ]
+      },
+      { id:"purchase_sale", name:"Purchase and Sale of Goods",
+        hook:"An exporter shipping goods overseas has to decide, in precise, contractual terms, exactly where their responsibility for those goods actually ends, get it wrong, and a damaged shipment could become an expensive argument about who was supposed to have insured what.",
+        obj:["Explain terms of trade: discounts and shipping terms","Distinguish terms and means of payment"],
+        exp:[
+          {t:"Trade discounts and shipping terms", b:"TRADE DISCOUNT is a reduction off the list price, often given to other businesses buying for resale. CASH DISCOUNT rewards prompt payment. FOB (Free on Board) means the seller's responsibility ends once goods are loaded onto the ship, the BUYER then arranges and pays for freight and insurance onward. CIF (Cost, Insurance, Freight) means the SELLER arranges and pays for freight and insurance all the way to the destination port, a genuinely important, commonly confused distinction."},
+          {t:"Terms and means of payment", b:"TERMS of payment describe WHEN payment happens: CASH (immediate), HIRE PURCHASE (paying in instalments while using the goods, ownership transfers only after the final payment), or DEFERRED PAYMENT (paying later, by agreement). MEANS of payment are the actual TOOLS used to pay: legal tender (cash), cheques, bank drafts, money orders, and bills of exchange (a written order to pay a specific sum by a specific date)."}
+        ],
+        err:["Confusing FOB (buyer arranges/pays freight & insurance from port of origin) with CIF (seller arranges/pays freight & insurance all the way to destination)","Confusing 'terms' of payment (when/how it's structured) with 'means' of payment (the actual payment tool used)"],
+        qs:[
+          Q("Under FOB (Free on Board) terms, the seller's responsibility ends when",["the goods are loaded onto the ship at the port of origin","the goods arrive at the destination port","payment is received in full","the goods leave the factory"],0,"FOB means seller responsibility ends at loading; the buyer then handles freight/insurance onward.","Medium",VP),
+          Q("Under CIF (Cost, Insurance, Freight) terms, the SELLER is responsible for arranging and paying for",["freight and insurance to the destination port","only the cost of the goods themselves","only insurance, not freight","nothing beyond the factory gate"],0,"CIF specifically means the seller bears freight and insurance costs to the destination.","Hard",VP),
+          Q("Paying for goods in instalments while using them, with ownership transferring only after the final payment, describes",["hire purchase","cash payment","deferred payment only","a bill of exchange"],0,"Hire purchase involves instalment payment with delayed ownership transfer.","Medium"),
+          Q("A written order instructing payment of a specific sum by a specific date is called a",["bill of exchange","trade discount","cash discount","quota"],0,"A bill of exchange is a formal written payment instruction.","Medium")
+        ]
+      },
+      { id:"money_banks", name:"Money and Banks",
+        hook:"Long before coins or naira notes existed, people traded goats for grain and hoped both sides agreed the swap was fair, money was invented specifically to end that awkward guessing game.",
+        obj:["Explain the meaning, qualities and functions of money","Identify types of banks and bank accounts"],
+        exp:[
+          {t:"Money - qualities and functions", b:"Good money needs specific QUALITIES: general acceptability, durability, portability, divisibility, and scarcity (limited supply, or it loses value). Money serves as a MEDIUM OF EXCHANGE (avoiding the need for direct barter), a MEASURE OF VALUE (pricing things comparably), a STORE OF VALUE (saving for later), and a STANDARD FOR DEFERRED PAYMENT (settling future debts)."},
+          {t:"Types of banks and accounts", b:"The CENTRAL BANK regulates the whole banking system and controls money supply (in Nigeria, the CBN). COMMERCIAL BANKS handle everyday banking for individuals and businesses. Other SPECIALISED banks serve specific sectors (e.g. agricultural or development banks). Common account types include CURRENT accounts (frequent transactions, often no interest), SAVINGS accounts (interest-earning, for accumulating funds), and FIXED DEPOSIT accounts (money locked in for a set period, usually earning higher interest)."}
+        ],
+        err:["Assuming any object can function as money without the specific required qualities (acceptability, durability, divisibility, scarcity)","Confusing the Central Bank's regulatory role with a Commercial Bank's day-to-day customer banking role"],
+        qs:[
+          Q("Money serves as a way to avoid direct barter mainly through its function as a",["medium of exchange","store of value only","measure of value only","standard for deferred payment only"],0,"Medium of exchange is money's core function in replacing barter.","Easy"),
+          Q("Which of the following is a required quality of good money?",["Durability","Perishability","Unlimited supply","Difficulty dividing into smaller units"],0,"Durability is a genuinely required quality of effective money.","Medium",VP),
+          Q("In Nigeria, the bank responsible for regulating the entire banking system and controlling money supply is the",["Central Bank of Nigeria (CBN)","nearest commercial bank branch","a savings and loans association","a microfinance bank"],0,"The CBN is Nigeria's central regulatory bank.","Easy"),
+          Q("A bank account where money is locked in for a set period, usually earning higher interest, is a",["fixed deposit account","current account","savings account only","joint account"],0,"Fixed deposit accounts lock funds for a set term at higher interest.","Medium")
+        ]
+      },
+      { id:"insurance_comm", name:"Insurance",
+        hook:"Nobody who buys insurance actually WANTS to need it, and that's precisely the point, insurance exists to turn an unpredictable, potentially ruinous loss into a small, predictable, manageable cost paid in advance.",
+        obj:["Explain the meaning and basic principles of insurance","Identify types of insurance and insurable risks"],
+        exp:[
+          {t:"Basic principles of insurance", b:"UTMOST GOOD FAITH requires both parties to honestly disclose all relevant facts. INSURABLE INTEREST means the person insuring something must genuinely stand to lose financially if it's damaged or lost, you can't insure a stranger's car. INDEMNITY means insurance restores the insured to their PREVIOUS financial position, not more, insurance isn't meant to produce a profit from a loss. CONTRIBUTION applies when multiple insurers cover the same risk, sharing the payout proportionally. PROXIMATE CAUSE identifies the actual, direct cause of a loss, to determine if it's genuinely covered."},
+          {t:"Types of insurance and risk", b:"Common types include FIRE, PERSONAL ACCIDENT, MARINE, LIFE AND ENDOWMENT, and BURGLARY insurance, each covering a specific category of risk. INSURABLE risks are those that are accidental, measurable, and not certain to happen (e.g. fire damage). UNINSURABLE risks are those too uncertain to price fairly or that are simply gambling-style risks (e.g. losing a bet)."}
+        ],
+        err:["Assuming insurance can produce a profit from a claim, when indemnity specifically limits payout to restoring the PREVIOUS position, not more","Assuming any risk at all can be insured, when insurable risks specifically must be accidental and genuinely measurable"],
+        qs:[
+          Q("The insurance principle requiring both parties to honestly disclose all relevant facts is called",["utmost good faith","indemnity","insurable interest","contribution"],0,"Utmost good faith requires full, honest disclosure by both parties.","Medium"),
+          Q("The insurance principle stating that a payout should restore the insured to their previous financial position, not more, is called",["indemnity","utmost good faith","insurable interest","proximate cause"],0,"Indemnity limits payout to restoring the pre-loss position, not producing profit.","Medium",VP),
+          Q("The requirement that a person insuring something must genuinely stand to lose financially if it's damaged is called",["insurable interest","utmost good faith","contribution","indemnity"],0,"Insurable interest requires a genuine financial stake in the insured item.","Medium"),
+          Q("Which of the following would generally be considered an UNINSURABLE risk?",["Losing money in a casual bet","Fire damage to a warehouse","A ship sinking at sea","A car accident"],0,"Gambling losses are not genuine insurable risks; the others are accidental and measurable.","Hard")
+        ]
+      },
+      { id:"stock_credit", name:"Stock Exchange and Credit",
+        hook:"When a company needs a large amount of money to grow, it doesn't just ask a single bank for a loan, it can sell tiny pieces of itself, called shares, to thousands of strangers at once, through a marketplace built exactly for that purpose.",
+        obj:["Explain the meaning and functions of the Stock Exchange","Explain the meaning, types and functions of credit"],
+        exp:[
+          {t:"The Stock Exchange", b:"The STOCK EXCHANGE is a formal marketplace where existing shares and other securities (like government bonds) are bought and sold between investors. It allows companies to raise capital by issuing shares, and gives investors a way to buy into (or exit from) ownership of companies relatively easily. Types of securities traded include ORDINARY SHARES, PREFERENCE SHARES, and BONDS."},
+          {t:"Credit, credit unions and thrift societies", b:"CREDIT is the ability to obtain goods or money now with an agreement to pay later, functioning to help businesses manage cash flow and consumers make larger purchases over time. CREDIT UNIONS and THRIFT SOCIETIES are member-owned financial groups where members pool savings and can borrow from that shared pool, often at more favourable terms than a commercial bank, since they serve members' mutual benefit rather than external profit."}
+        ],
+        err:["Assuming the Stock Exchange itself directly lends money to companies, when it actually facilitates trading of shares BETWEEN investors","Confusing a credit union (member-owned, mutual benefit) with a standard commercial bank (profit-oriented, external ownership)"],
+        qs:[
+          Q("The Stock Exchange is best described as a marketplace where",["existing shares and securities are bought and sold between investors","only new companies are formed","only government taxes are collected","goods are physically manufactured"],0,"The Stock Exchange facilitates trading of shares/securities among investors.","Medium"),
+          Q("The ability to obtain goods or money now with an agreement to pay later is called",["credit","insurance","turnover","indemnity"],0,"Credit specifically involves deferred payment for goods/money received now.","Easy"),
+          Q("A member-owned financial group where members pool savings and can borrow from that shared pool is a",["credit union / thrift society","commercial bank","stock exchange","insurance company"],0,"Credit unions/thrift societies are member-owned and operate for mutual benefit.","Medium",VP)
+        ]
+      },
+      { id:"transport_comm", name:"Transport and Communications",
+        hook:"A trader with the best prices in the country is worthless to a customer three states away if there's no reliable way to get goods there, or even to simply place the order in the first place, which is exactly why transport and communication earn their own place in Commerce.",
+        obj:["Explain the importance and forms of transport","Explain the importance of communication services"],
+        exp:[
+          {t:"Forms of transport", b:"Goods and people move by LAND (road, rail), WATER (rivers, sea), AIR, or PIPELINE (for liquids/gases like oil). Each form has its own advantages and disadvantages, road transport is flexible and reaches most areas, but has limited capacity; water transport is cost-effective for bulk goods, but slower and limited to navigable routes."},
+          {t:"Seaports, airports and communication", b:"SEAPORTS and AIRPORTS serve as key gateways connecting a country to international trade, handling the loading, unloading, and customs clearance of goods. COMMUNICATION SERVICES (the Post Office, courier agencies) allow traders to exchange information, orders, and documents efficiently, without communication, coordinating any trade over distance becomes far harder."}
+        ],
+        err:["Assuming one form of transport is universally 'best', rather than each suiting different situations (cost, speed, cargo type)","Overlooking communication as a distinct, essential Commerce topic, separate from physical transport"],
+        qs:[
+          Q("Which form of transport is specifically used for moving liquids or gases such as oil?",["Pipeline","Road","Rail","Air"],0,"Pipelines are specifically designed for liquid/gas transport.","Easy"),
+          Q("Seaports and airports mainly serve Commerce by",["connecting a country to international trade and handling goods clearance","only serving passengers, never cargo","replacing the need for banks","eliminating the need for insurance"],0,"Seaports/airports are key gateways for international trade and cargo handling.","Medium",VP),
+          Q("Courier agencies and the Post Office primarily support Commerce through",["communication services enabling exchange of information and documents","direct manufacturing of goods","providing insurance cover","regulating the stock exchange"],0,"These services facilitate communication essential to coordinating trade.","Medium")
+        ]
+      },
+      { id:"marketing_comm", name:"Introduction to Marketing",
+        hook:"A brilliant product that nobody knows exists, wants, or can find is commercially worthless, marketing is the whole discipline of closing that exact gap.",
+        obj:["Explain the meaning and functions of marketing, including the marketing mix","Explain advertising, public relations and sales promotion"],
+        exp:[
+          {t:"Marketing meaning and the marketing mix", b:"MARKETING is identifying, anticipating and satisfying customer needs profitably. The MARKETING MIX (the '4 Ps') covers PRODUCT (what's offered), PRICE (what it costs), PLACE (how/where it's distributed), and PROMOTION (how customers learn about and are persuaded toward it). MARKET SEGMENTATION divides a broad market into groups with similar needs, letting a business target its efforts more precisely."},
+          {t:"Advertising, PR and sales promotion", b:"ADVERTISING is paid, non-personal promotion through media (TV, radio, print, digital), aiming to inform and persuade a broad audience. PUBLIC RELATIONS manages a company's overall public image and reputation, not just individual product promotion. SALES PROMOTION uses short-term incentives (trade fairs, exhibitions, free gifts, demonstrations) to boost sales quickly. PERSONAL SELLING is direct, one-on-one persuasion between a salesperson and a potential customer."}
+        ],
+        err:["Assuming marketing only means advertising, when advertising is just one part of the broader marketing mix","Confusing public relations (overall company image) with sales promotion (short-term sales-boosting incentives)"],
+        qs:[
+          Q("The 'marketing mix' (4 Ps) consists of",["Product, Price, Place and Promotion","Product, Profit, Place and People","Price, Profit, Promotion and Placement","Product, Price, People and Profit"],0,"The classic marketing mix is Product, Price, Place, Promotion.","Easy"),
+          Q("Dividing a broad market into groups with similar needs, to target efforts more precisely, is called",["market segmentation","the marketing mix","personal selling","sales promotion"],0,"Market segmentation groups customers by similar needs/characteristics.","Medium"),
+          Q("Managing a company's overall public image and reputation, distinct from individual product promotion, is the role of",["public relations","personal selling","sales promotion","advertising only"],0,"Public relations focuses on overall reputation, not just product-specific promotion.","Medium",VP),
+          Q("Short-term incentives like trade fairs, free gifts and demonstrations, used to quickly boost sales, describe",["sales promotion","advertising","public relations","personal selling"],0,"Sales promotion uses short-term incentives to drive immediate sales.","Medium")
+        ]
+      },
+      { id:"legal_business", name:"Legal Aspects of Business",
+        hook:"A handshake deal can be just as legally binding as a signed document, but only if it actually meets the basic legal requirements of a genuine contract, which is exactly the kind of practical legal knowledge this topic covers.",
+        obj:["Identify key areas of law relating to business","Explain consumer protection and its methods"],
+        exp:[
+          {t:"Areas of law relating to business", b:"CONTRACT law governs legally binding agreements between parties. AGENCY law governs situations where one party (an agent) acts on behalf of another. The SALE OF GOODS ACT sets rules for fair transactions involving goods. The HIRE PURCHASE ACT regulates instalment-payment agreements. The TRADE DESCRIPTIONS ACT prohibits misleading claims about goods being sold."},
+          {t:"Consumer protection", b:"Consumers need protection against unfair or unsafe business practices, and this is achieved through government LEGISLATION (like Food and Drugs Acts, Standards Organisation Acts), price control measures, product quality regulation, and consumer associations that advocate on buyers' behalf. Without these protections, individual consumers often have far less power than large businesses to demand fair treatment."}
+        ],
+        err:["Assuming only written contracts are legally binding, when verbal agreements meeting the legal requirements can be binding too","Assuming consumer protection is only about price, overlooking product safety and truthful advertising as equally important protections"],
+        qs:[
+          Q("The area of law governing legally binding agreements between two or more parties is",["Contract law","Agency law","the Trade Descriptions Act","the Hire Purchase Act"],0,"Contract law specifically governs binding agreements.","Easy"),
+          Q("The law prohibiting misleading claims about goods being sold is the",["Trade Descriptions Act","Sale of Goods Act","Hire Purchase Act","Agency Law"],0,"The Trade Descriptions Act specifically targets misleading product claims.","Medium",VP),
+          Q("Government legislation, price control, and product quality regulation are all methods of",["consumer protection","business formation","stock exchange regulation","transport regulation"],0,"These are specific mechanisms protecting consumers.","Medium")
+        ]
+      },
+      { id:"nationalisation", name:"Nationalisation and Indigenisation/Divestiture",
+        hook:"A government taking full ownership of a privately-run oil company, and that same government later selling shares of a state-owned company back to private investors, are two opposite moves in the exact same ongoing tug-of-war over who should really control an economy's key businesses.",
+        obj:["Explain the meaning and aims of nationalisation and indigenisation/divestiture","Explain their advantages and disadvantages"],
+        exp:[
+          {t:"Meaning and aims", b:"NATIONALISATION is government taking ownership of previously private businesses, often in strategically important industries, aiming to ensure national control over key resources and services. INDIGENISATION requires foreign-owned businesses to transfer partial or full ownership to citizens of the host country. DIVESTITURE (privatisation) is the reverse process, government selling off state-owned businesses to private owners, often aiming to improve efficiency or raise government revenue."},
+          {t:"Advantages and disadvantages", b:"Nationalisation/indigenisation can increase national control and keep profits within the country, but can also reduce efficiency (state-run businesses sometimes lack competitive pressure) and discourage foreign investment. Divestiture can improve efficiency and raise government funds, but may also mean losing national control over strategically important industries and can lead to job losses during restructuring."}
+        ],
+        err:["Confusing nationalisation (government taking ownership) with divestiture (government selling ownership) - they are opposite processes","Assuming nationalisation or divestiture is always purely positive or purely negative, when both carry genuine trade-offs"],
+        qs:[
+          Q("Government taking ownership of previously privately-owned businesses is called",["nationalisation","divestiture","indigenisation only","privatisation"],0,"Nationalisation is government acquiring ownership of private businesses.","Easy"),
+          Q("Government selling off state-owned businesses to private owners is called",["divestiture (privatisation)","nationalisation","indigenisation","dissolution"],0,"Divestiture/privatisation is the reverse of nationalisation.","Easy"),
+          Q("A potential disadvantage of nationalisation is that it can",["reduce efficiency due to lack of competitive pressure","automatically increase foreign investment","guarantee higher profits","eliminate the need for management"],0,"State-run businesses can face reduced efficiency without competitive pressure.","Medium",VP)
+        ]
+      },
+      { id:"economic_groupings", name:"Economic Groupings",
+        hook:"No single West African country, acting entirely alone, has quite the same bargaining power as the same countries speaking together, which is exactly the logic behind organisations like ECOWAS.",
+        obj:["Identify major regional and international economic groupings","Explain their objectives and obstacles"],
+        exp:[
+          {t:"Regional groupings", b:"ECOWAS (Economic Community of West African States) promotes economic integration and cooperation among West African countries. Other regional bodies include the Niger Basin Commission (NBC) and Lake Chad Basin Commission (LCBC), managing shared water resources across borders, and the Mano River Union, promoting cooperation among specific West African neighbours."},
+          {t:"International groupings", b:"The IMF (International Monetary Fund) and IBRD (World Bank) provide financial assistance and support economic stability internationally. UNCTAD (United Nations Conference on Trade and Development) promotes trade opportunities specifically for developing countries. Common OBSTACLES facing these groupings include differing national interests, unequal levels of development among members, and infrastructural or political barriers to genuine integration."}
+        ],
+        err:["Assuming all economic groupings serve identical purposes, rather than each having a distinct specific focus (trade, water resources, development finance)","Being unable to name a specific grouping and its actual objective, only describing 'international cooperation' vaguely"],
+        qs:[
+          Q("ECOWAS specifically aims to promote",["economic integration and cooperation among West African countries","cooperation only between Nigeria and Ghana","global trade rules for all countries","only military cooperation"],0,"ECOWAS promotes West African economic integration and cooperation.","Easy"),
+          Q("The organisation specifically responsible for managing shared water resources across the Niger Basin countries is the",["Niger Basin Commission (NBC)","IMF","UNCTAD","ECOWAS"],0,"The Niger Basin Commission manages this specific shared resource.","Medium",VP),
+          Q("UNCTAD specifically focuses on promoting",["trade opportunities for developing countries","military security","water resource management","only European trade"],0,"UNCTAD promotes trade and development interests of developing countries.","Medium")
+        ]
+      }
+    ]
+  },
+  {
+    id:"finacc", name:"Financial Accounting",
+    examFormat:"Paper 1 (1 hour, 25% of total marks) - 50 objective questions covering the entire syllabus. Paper 2 (2½ hours, 75% of total marks) - two sections: Section A (Theory) answer 2 of 4 questions for 30% of the paper; Section B (Practice) answer 3 of 5 questions for 45% of the paper.",
+    topics:[
+      { id:"intro_acc", name:"Introduction to Accounting",
+        hook:"A shopkeeper who never writes anything down can still tell you roughly how business is going by the feel of the till, but the moment a bank, an investor, or the tax office asks 'prove it', that feeling is worthless. Accounting exists precisely to turn that vague feeling into evidence.",
+        obj:["Explain the history, nature and functions of accounting","Distinguish book-keeping from accounting","Identify users of accounting information"],
+        exp:[
+          {t:"Nature and functions of accounting", b:"ACCOUNTING is the process of recording, classifying, summarising and interpreting financial transactions to help people make informed decisions. BOOK-KEEPING is narrower, just the actual day-to-day RECORDING of transactions; accounting goes further, using those records to prepare summaries and draw meaningful conclusions. Every accountant does some book-keeping, but book-keeping alone isn't yet accounting."},
+          {t:"Users of accounting information", b:"OWNERS/shareholders use accounts to judge business performance and returns. MANAGEMENT uses them for day-to-day decision-making. LENDERS AND BANKS assess creditworthiness before lending. GOVERNMENT/TAX authorities use them to assess tax owed. EMPLOYEES may reference them regarding job security and pay negotiations. SUPPLIERS use them to judge whether to extend credit. Each user needs the SAME underlying records, but reads them for a genuinely different purpose."}
+        ],
+        err:["Treating book-keeping and accounting as identical, when book-keeping is only the recording step within the broader accounting process","Assuming only business owners have any real use for accounting information, overlooking lenders, tax authorities, employees and suppliers"],
+        qs:[
+          Q("The day-to-day recording of financial transactions, as distinct from the broader process of summarising and interpreting them, is called",["book-keeping","accounting","auditing","budgeting"],0,"Book-keeping is specifically the recording step within accounting.","Easy"),
+          Q("A bank considering whether to lend money to a business would primarily use accounting information to assess",["the business's creditworthiness and ability to repay","only the owner's personal preferences","the colour scheme of the shop","unrelated legal matters"],0,"Lenders assess creditworthiness using financial statements.","Medium",VP),
+          Q("Which of the following is a genuine user of accounting information?",["Government tax authorities","Only the business owner","Only competitors","No one outside the business"],0,"Tax authorities, along with owners, lenders, employees and suppliers, are genuine users of accounting information.","Medium")
+        ]
+      },
+      { id:"double_entry", name:"Principles and Practice of Double Entry",
+        hook:"Every single transaction in accounting has a twin, spend cash to buy stock, and you've simultaneously decreased one asset (cash) while increasing another (stock). Double entry is simply the discipline of always recording both halves of that story.",
+        obj:["Explain the double entry principle and classification of accounts","Explain the cash book, trial balance and bank reconciliation"],
+        exp:[
+          {t:"The double entry principle", b:"Every transaction affects at least TWO accounts, recorded as a DEBIT in one account and a CREDIT in another, always for equal amounts. As a simple rule: debits increase assets and expenses, and decrease liabilities, income and capital; credits do the exact opposite. SOURCE DOCUMENTS (invoices, receipts) provide the evidence for each entry, recorded first in SUBSIDIARY BOOKS (day books) before being posted to the LEDGER, where individual accounts are kept."},
+          {t:"Cash book, trial balance and reconciliation", b:"The CASH BOOK records all cash and bank transactions, an ANALYTICAL cash book adds extra columns to categorise payments/receipts, while a PETTY CASH BOOK (often using the IMPREST system, a fixed float topped up periodically) handles small day-to-day expenses. A TRIAL BALANCE lists all ledger account balances to confirm total debits equal total credits, a useful check, though it won't catch every possible error (like a transaction posted correctly but to the wrong account). A BANK RECONCILIATION STATEMENT explains any difference between the cash book's bank balance and the bank statement's balance, usually due to timing differences like unpresented cheques."}
+        ],
+        err:["Forgetting that EVERY transaction needs both a debit and a credit entry of EQUAL value","Assuming a trial balance that 'balances' proves there are no errors at all, when it only confirms debits equal credits in total, missing errors like postings to the wrong correct-type account"],
+        qs:[
+          Q("Under the double entry principle, every transaction is recorded as",["a debit in one account and a credit in another, of equal value","a debit only","a credit only","neither a debit nor a credit"],0,"Double entry requires matching debit and credit entries of equal value.","Easy"),
+          Q("A debit entry generally increases",["assets and expenses","liabilities and income","capital only","nothing at all"],0,"Debits increase assets and expenses (and decrease liabilities, income, capital).","Medium",VP),
+          Q("A document showing all ledger account balances, used to confirm total debits equal total credits, is called a",["trial balance","bank reconciliation statement","cash book","subsidiary book"],0,"A trial balance checks that total debits equal total credits.","Easy"),
+          Q("A trial balance that balances (debits equal credits) proves that",["total debits equal total credits, but does not guarantee there are no errors at all","there are absolutely no errors anywhere in the accounts","all transactions were recorded in the correct accounts","the business made a profit"],0,"A balancing trial balance can still hide errors like postings to the wrong account of the correct type.","Hard"),
+          Q("A bank reconciliation statement is prepared mainly to",["explain differences between the cash book balance and the bank statement balance","calculate net profit","record petty cash transactions","classify fixed assets"],0,"Bank reconciliation explains discrepancies between cash book and bank statement balances.","Medium")
+        ]
+      },
+      { id:"final_accounts_sole", name:"The Final Accounts of a Sole Trader",
+        hook:"At the end of a trading year, every business owner faces the same two blunt questions: did I actually make money, and what do I actually own? The final accounts exist purely to answer both, in that order.",
+        obj:["Prepare a trading and profit and loss account","Prepare a balance sheet, including simple adjustments"],
+        exp:[
+          {t:"Trading and profit and loss account", b:"The TRADING ACCOUNT calculates GROSS PROFIT: Sales minus Cost of Goods Sold. The PROFIT AND LOSS ACCOUNT then calculates NET PROFIT: Gross Profit minus operating expenses (rent, wages, utilities). For example, Sales of ₦80,000 with Cost of Goods Sold of ₦50,000 gives a Gross Profit of ₦30,000; if expenses are ₦15,000, Net Profit is ₦15,000."},
+          {t:"The balance sheet and adjustments", b:"The BALANCE SHEET is a snapshot (not a period-based account) showing what a business OWNS (assets) and OWES (liabilities), plus the owner's CAPITAL, at one specific date, following the accounting equation: Assets = Capital + Liabilities. ADJUSTMENTS (like accrued expenses not yet paid, or prepaid expenses paid in advance) must be correctly applied before final figures are accurate, an expense incurred but unpaid still belongs in THIS period's profit and loss account, not a later one."}
+        ],
+        err:["Confusing gross profit (sales minus cost of goods sold only) with net profit (gross profit minus ALL operating expenses)","Treating the balance sheet as covering a PERIOD like the trading account, when it's actually a snapshot at one specific date"],
+        qs:[
+          Q("Gross profit is calculated as",["Sales minus Cost of Goods Sold","Sales minus all expenses","Total assets minus total liabilities","Capital minus drawings"],0,"Gross profit is specifically sales minus cost of goods sold.","Easy"),
+          Q("A business has Sales of ₦80,000, Cost of Goods Sold of ₦50,000, and operating expenses of ₦15,000. Its Net Profit is",["₦15,000","₦30,000","₦45,000","₦65,000"],0,"Gross profit = 80,000-50,000=30,000; Net profit = 30,000-15,000=15,000.","Medium",VP),
+          Q("The balance sheet is best described as",["a snapshot of assets, liabilities and capital at one specific date","a record of profit earned over a trading period","a list of all cash transactions only","identical in purpose to the trading account"],0,"The balance sheet is a snapshot at a point in time, unlike period-based accounts.","Medium"),
+          Q("An expense that has been incurred in the current period but not yet paid should be treated as",["an accrued expense, included in this period's accounts","ignored until it is actually paid","a prepaid expense","excluded from the profit and loss account entirely"],0,"Accrued (unpaid but incurred) expenses belong in the period they were incurred, not when paid.","Hard")
+        ]
+      },
+      { id:"reserves_provisions", name:"Reserves and Provisions",
+        hook:"A delivery van bought today will not be worth the same amount in five years, and pretending otherwise in the accounts would quietly overstate exactly how much the business actually owns.",
+        obj:["Explain provisions for doubtful debts and discounts","Explain depreciation, including straight line and reducing balance methods","Distinguish reserves from provisions"],
+        exp:[
+          {t:"Provisions for doubtful debts and discounts", b:"A PROVISION FOR DOUBTFUL DEBTS is an estimated amount set aside because some debtors may never actually pay, calculated as a percentage of outstanding debtors (e.g. 5% of ₦20,000 debtors = ₦1,000 provision). A PROVISION FOR DISCOUNTS anticipates that some debtors will be given a cash discount for prompt payment, reducing the amount actually expected to be received."},
+          {t:"Depreciation methods", b:"DEPRECIATION spreads the cost of a fixed asset over its useful life. The STRAIGHT LINE method charges an EQUAL amount each year: (Cost - Residual Value) ÷ Useful Life. A ₦50,000 asset with ₦5,000 residual value over 5 years depreciates ₦9,000 per year, every year. The REDUCING BALANCE method instead charges a fixed PERCENTAGE of the asset's remaining (net book) value each year, meaning the depreciation amount gets SMALLER every year as the asset's value reduces. At 20% reducing balance on a ₦50,000 asset: Year 1 depreciation is ₦10,000 (leaving ₦40,000), Year 2 is ₦8,000 (leaving ₦32,000), the amount shrinking each year, unlike the straight line method's constant charge."},
+          {t:"Reserves vs provisions", b:"A PROVISION is set aside for a known, reasonably certain future cost or loss (like doubtful debts) and is charged against profit as an expense. A RESERVE is a portion of PROFIT deliberately set aside (retained) for general business strengthening or a specific future purpose, not because a specific loss is expected, a genuinely different concept from a provision despite the terms sometimes being confused."}
+        ],
+        err:["Assuming straight line and reducing balance depreciation give the SAME yearly amount, when reducing balance charges a shrinking amount each year while straight line stays constant","Confusing a provision (set aside for an anticipated specific cost/loss) with a reserve (retained profit for general strengthening)"],
+        qs:[
+          Q("A ₦50,000 asset with a ₦5,000 residual value, depreciated over 5 years using the straight line method, has an annual depreciation charge of",["₦9,000","₦10,000","₦5,000","₦45,000"],0,"(50,000-5,000)÷5 = 9,000 per year.","Medium",VP),
+          Q("Using the reducing balance method at 20% on a ₦50,000 asset, the depreciation charge in Year 1 is",["₦10,000","₦9,000","₦8,000","₦40,000"],0,"20% of 50,000 = 10,000 in Year 1.","Medium",VP),
+          Q("Under the reducing balance method, the depreciation charge from one year to the next",["decreases, since it is a percentage of a shrinking net book value","stays exactly the same each year","increases every year","is charged only in the final year"],0,"Reducing balance depreciation shrinks yearly as it's based on the reducing net book value.","Hard"),
+          Q("A provision for doubtful debts is best described as",["an estimated amount set aside because some debtors may not pay","a portion of profit retained for general business strengthening","a fixed asset's original purchase cost","the total of all cash sales"],0,"Provisions for doubtful debts anticipate specific expected non-payment.","Medium"),
+          Q("A reserve, as distinct from a provision, is best described as",["a portion of profit deliberately retained for general strengthening or a future purpose","money set aside for a specific known expected loss","a type of fixed asset","the same thing as a provision"],0,"Reserves are retained profit for general purposes, distinct from provisions for specific anticipated costs.","Hard")
+        ]
+      },
+      { id:"manufacturing_acc", name:"Manufacturing Accounts",
+        hook:"A furniture maker doesn't just have one cost, wood, glue, the carpenter's wages, factory rent, all blend into the final price of a finished chair, and a manufacturing account exists specifically to track and classify every one of those different cost types.",
+        obj:["Prepare a simple manufacturing account with cost classifications"],
+        exp:[
+          {t:"Cost classifications in manufacturing", b:"A MANUFACTURING ACCOUNT calculates the total cost of producing goods, before they're ever sold. Costs are classified as DIRECT (traceable straight to the product, like raw materials and direct factory labour) and INDIRECT/FACTORY OVERHEADS (factory rent, machinery depreciation, supervisor salaries, costs that support production generally but aren't traceable to one specific unit). PRIME COST is the total of all direct costs; adding factory overheads to prime cost gives the PRODUCTION COST, which then flows into the trading account as the manufactured goods' 'cost of goods sold' equivalent."}
+        ],
+        err:["Confusing direct costs (traceable to a specific unit, like raw materials) with indirect/overhead costs (support production generally, like factory rent)","Forgetting that Prime Cost is direct costs ONLY, before overheads are added to reach total Production Cost"],
+        qs:[
+          Q("Costs that can be traced directly to a specific unit of production, such as raw materials, are called",["direct costs","indirect costs (overheads)","fixed assets","reserves"],0,"Direct costs are specifically traceable to individual production units.","Easy"),
+          Q("Factory rent and machinery depreciation, which support production generally but aren't traceable to one unit, are classified as",["indirect costs (factory overheads)","direct costs","prime costs only","reserves"],0,"These are indirect costs/overheads supporting production broadly.","Medium"),
+          Q("Prime Cost specifically refers to",["the total of all direct costs only","the total of direct costs plus factory overheads","only factory overheads","the final selling price"],0,"Prime cost is direct costs only, before overheads are added.","Medium",VP)
+        ]
+      },
+      { id:"control_accounts", name:"Control Accounts and Self-Balancing Ledgers",
+        hook:"A business with a thousand individual customer accounts doesn't want to check every single one just to spot an error, a control account gives a single, powerful summary check instead, catching problems without the tedious manual search.",
+        obj:["Explain the purpose of control accounts","Prepare Sales Ledger and Purchases Ledger control accounts"],
+        exp:[
+          {t:"Purpose of control accounts", b:"A CONTROL ACCOUNT is a summary account that should match the total of many individual accounts in a ledger, acting as an arithmetic check and helping locate errors without checking every single individual account one by one."},
+          {t:"Sales Ledger and Purchases Ledger control accounts", b:"The SALES LEDGER CONTROL ACCOUNT summarises all transactions with debtors: Opening Debtors + Credit Sales - Receipts from Debtors (- discounts allowed, - returns) = Closing Debtors. For example, Opening Debtors ₦10,000 + Credit Sales ₦45,000 - Receipts ₦40,000 = Closing Debtors ₦15,000. The PURCHASES LEDGER CONTROL ACCOUNT works the same way for creditors, summarising credit purchases and payments made to suppliers."}
+        ],
+        err:["Forgetting to include discounts allowed/received or returns when calculating a control account balance in a full example","Confusing the Sales Ledger Control Account (tracks debtors/customers) with the Purchases Ledger Control Account (tracks creditors/suppliers)"],
+        qs:[
+          Q("A control account mainly serves to",["provide a summary check against the total of many individual ledger accounts","replace the need for individual customer accounts entirely","record only cash transactions","calculate depreciation"],0,"Control accounts provide a summary arithmetic check.","Easy"),
+          Q("The Sales Ledger Control Account specifically summarises transactions with",["debtors (customers who owe the business money)","creditors (suppliers the business owes money to)","fixed assets only","cash transactions only"],0,"The Sales Ledger Control Account tracks debtor (customer) balances.","Easy"),
+          Q("Opening Debtors of ₦10,000, plus Credit Sales of ₦45,000, minus Receipts from Debtors of ₦40,000, gives Closing Debtors of",["₦15,000","₦5,000","₦95,000","₦35,000"],0,"10,000+45,000-40,000 = 15,000.","Medium",VP)
+        ]
+      },
+      { id:"single_entry", name:"Single Entry and Incomplete Records",
+        hook:"Not every small business keeps perfect double-entry books, some just keep a cash box and a rough notebook, yet even from these genuinely incomplete records, a skilled accountant can still work out roughly how much profit was made.",
+        obj:["Explain the nature of single entry and incomplete records","Compute profit from two balance sheets","Prepare final accounts from incomplete records"],
+        exp:[
+          {t:"Nature of incomplete records", b:"SINGLE ENTRY (incomplete records) happens when a business hasn't kept full double-entry books, often just a cash record and rough notes on debtors/creditors. This is common in small, informally-run businesses that never adopted formal book-keeping."},
+          {t:"Computing profit from two balance sheets", b:"When full records don't exist, PROFIT can still be estimated by comparing CAPITAL at the start and end of a period: Closing Capital - Opening Capital + Drawings - Additional Capital Introduced = Profit for the period. This works because capital naturally grows through profit (and shrinks through drawings/losses), even without a full account trail explaining every individual transaction."},
+          {t:"Preparing final accounts from incomplete records", b:"To build proper final accounts from incomplete records, missing figures (like credit sales or purchases) are often reconstructed by working BACKWARD from what IS known (opening/closing debtor balances, cash received), using control-account-style logic to fill the gaps before a normal trading and profit and loss account and balance sheet can be prepared."}
+        ],
+        err:["Assuming profit can only ever be calculated from full double-entry records, overlooking the capital-comparison method for incomplete records","Forgetting to add back drawings (which reduce capital but aren't a business loss) when calculating profit from two balance sheets"],
+        qs:[
+          Q("A business that has not kept full double-entry records, relying instead on a cash record and rough notes, is said to be using",["single entry (incomplete records)","full double entry","control accounts only","manufacturing accounts"],0,"Single entry describes incomplete record-keeping.","Easy"),
+          Q("Profit calculated from two balance sheets is found using the formula",["Closing Capital minus Opening Capital, plus Drawings, minus Additional Capital Introduced","Closing Capital plus Opening Capital","Opening Capital minus Drawings only","Total assets minus total expenses"],0,"This formula reconstructs profit from the change in capital, adjusted for drawings and new capital.","Hard",VP),
+          Q("Why must drawings be ADDED BACK when calculating profit from two balance sheets?",["Because drawings reduce capital but are not a business loss, so they must be added back to avoid understating profit","Because drawings increase capital directly","Because drawings are always equal to profit","Because drawings have no effect on capital"],0,"Drawings reduce capital without being a genuine business loss, so must be added back to isolate real profit.","Hard")
+        ]
+      },
+      { id:"notforprofit_acc", name:"Accounts of Not-For-Profit Organizations",
+        hook:"A social club doesn't sell anything or chase profit, yet it still needs to know exactly where its members' subscription money actually went, which is precisely why a slightly different set of accounts exists just for organisations like this.",
+        obj:["Prepare receipts and payments accounts","Prepare income and expenditure accounts","Explain subscriptions in advance/arrears and accumulated fund"],
+        exp:[
+          {t:"Receipts and payments vs income and expenditure accounts", b:"A RECEIPTS AND PAYMENTS ACCOUNT is simply a summary of all actual cash received and paid during a period, similar to a cash book summary. An INCOME AND EXPENDITURE ACCOUNT is the not-for-profit equivalent of a profit and loss account, showing income earned and expenses incurred for the PERIOD (not just cash movements), then calculating a SURPLUS (instead of 'profit') or DEFICIT (instead of 'loss')."},
+          {t:"Subscriptions and accumulated fund", b:"Members sometimes pay SUBSCRIPTIONS IN ADVANCE (for a future period) or fall INTO ARREARS (haven't yet paid for the current period), both needing adjustment so the income and expenditure account reflects the correct period's actual subscription income, not just cash received. The ACCUMULATED FUND is the not-for-profit equivalent of 'capital', representing the organisation's net worth built up over time from surpluses, since there are no individual owners to hold capital personally."}
+        ],
+        err:["Confusing a receipts and payments account (pure cash summary) with an income and expenditure account (period-based, like profit and loss)","Assuming a not-for-profit organisation's 'capital' equivalent is called the same thing as a sole trader's, rather than the accumulated fund"],
+        qs:[
+          Q("A summary of all actual cash received and paid by a not-for-profit organisation during a period is called a",["receipts and payments account","income and expenditure account","trading account","manufacturing account"],0,"Receipts and payments accounts summarise actual cash movement.","Easy"),
+          Q("The not-for-profit equivalent of a profit and loss account, showing income and expenses for the period rather than just cash movements, is the",["income and expenditure account","receipts and payments account","trial balance","control account"],0,"Income and expenditure accounts mirror profit and loss accounts for not-for-profit bodies.","Medium"),
+          Q("In a not-for-profit organisation, the equivalent of 'capital' is called the",["accumulated fund","share capital","working capital","reserve fund only"],0,"The accumulated fund represents accumulated net worth in a not-for-profit body.","Medium",VP),
+          Q("A not-for-profit organisation's income and expenditure account results in either a surplus or a",["deficit","profit","loss","dividend"],0,"Not-for-profit accounts use 'surplus' and 'deficit' rather than 'profit' and 'loss'.","Easy")
+        ]
+      },
+      { id:"acc_concepts", name:"Accounting Concepts and Conventions",
+        hook:"Two accountants working completely independently, in different countries, should still produce broadly comparable accounts for similar businesses, and that's only possible because everyone quietly agrees to follow the same small set of foundational ground rules.",
+        obj:["Explain key accounting concepts and their significance","Explain the limitations of accounting concepts"],
+        exp:[
+          {t:"Key accounting concepts", b:"The GOING CONCERN concept assumes a business will continue operating for the foreseeable future, unless there's clear evidence otherwise. The ACCRUAL (matching) concept records income and expenses when they're EARNED/INCURRED, not necessarily when cash changes hands. The CONSISTENCY concept requires using the same accounting methods period after period, so figures stay genuinely comparable. The PRUDENCE (conservatism) concept says don't overstate profits or assets, recognise losses as soon as they're anticipated, but only recognise profits once they're actually realised."},
+          {t:"Significance and limitations", b:"These concepts exist to make accounts genuinely RELIABLE and COMPARABLE across time and between businesses. Their key LIMITATION is that accounting concepts sometimes pull in different directions (e.g. prudence can conflict with fully matching all figures), and concepts like historical cost don't account for genuine changes in an asset's real market value over time, meaning accounts still involve real judgement, not purely mechanical rule-following."}
+        ],
+        err:["Assuming accounting concepts guarantee perfectly accurate figures, when they're really about consistency and reliability, not perfect precision","Confusing the accrual concept (record when earned/incurred) with simply recording only when cash is received or paid"],
+        qs:[
+          Q("The accounting concept assuming a business will continue operating for the foreseeable future is the",["going concern concept","accrual concept","consistency concept","prudence concept"],0,"Going concern assumes continued operation.","Easy"),
+          Q("The accounting concept requiring income and expenses to be recorded when earned or incurred, not necessarily when cash changes hands, is the",["accrual (matching) concept","going concern concept","consistency concept","materiality concept"],0,"The accrual concept matches income/expenses to when they're earned/incurred.","Medium",VP),
+          Q("The accounting concept discouraging the overstatement of profits or assets, recognising losses early but profits only once realised, is",["prudence (conservatism)","consistency","going concern","materiality"],0,"Prudence favours caution against overstating financial position.","Medium")
+        ]
+      },
+      { id:"partnership_acc", name:"Partnership Accounts",
+        hook:"Two friends starting a business together sounds simple, until one contributes more capital, another works more hours, and it's time to actually divide the profits fairly, which is exactly the kind of detail a partnership agreement and its accounts exist to settle upfront.",
+        obj:["Explain partnership agreements and capital/current accounts","Prepare profit and loss appropriation accounts","Explain admission of a partner and dissolution"],
+        exp:[
+          {t:"Partnership agreements and accounts", b:"A PARTNERSHIP AGREEMENT sets out how profits/losses are shared, interest on capital, partners' salaries, and other terms agreed between partners. Each partner typically has a fixed CAPITAL ACCOUNT (their original investment, rarely changed) and a fluctuating CURRENT ACCOUNT (tracking their share of profits, drawings, and interest, changing regularly)."},
+          {t:"Profit and loss appropriation account", b:"After calculating overall net profit, the APPROPRIATION ACCOUNT shows how that profit is actually DIVIDED among partners, after first deducting partners' salaries and interest on capital (if agreed), with the remaining balance split according to the agreed PROFIT-SHARING RATIO."},
+          {t:"Admission and dissolution", b:"ADMISSION of a new partner requires adjusting existing partners' capital accounts (often revaluing assets first) to fairly reflect the new partner's entry and any goodwill payment. DISSOLUTION is the formal winding-up of a partnership, realising (selling) assets, paying off liabilities, and distributing any remaining balance among partners according to their final capital account balances."}
+        ],
+        err:["Confusing a partner's capital account (fixed, rarely changes) with their current account (fluctuates with profit share, drawings, interest)","Assuming profit is automatically shared equally among partners, when the actual sharing ratio depends entirely on their specific partnership agreement"],
+        qs:[
+          Q("A partner's CAPITAL account, as distinct from their current account, typically",["remains relatively fixed, representing their original investment","changes constantly with every drawing and profit share","is always identical between partners","doesn't exist in a partnership"],0,"Capital accounts are relatively fixed; current accounts fluctuate.","Medium"),
+          Q("The account showing how net profit is divided among partners, after salaries and interest on capital, is the",["profit and loss appropriation account","trading account","control account","income and expenditure account"],0,"The appropriation account shows profit division among partners.","Medium",VP),
+          Q("The formal winding-up of a partnership, realising assets and settling liabilities, is called",["dissolution","admission","appropriation","incorporation"],0,"Dissolution is the formal closing-down of a partnership.","Easy")
+        ]
+      },
+      { id:"company_acc", name:"Company Accounts",
+        hook:"A sole trader answers to nobody but themselves; a limited company answers to shareholders who've never even visited the office, which is exactly why company accounts follow a noticeably stricter, more formal structure than a sole trader's.",
+        obj:["Explain the formation and share capital of companies","Explain final accounts for internal use and simple ratio interpretation"],
+        exp:[
+          {t:"Formation and share capital", b:"Company formation involves specific STATUTORY (legal) requirements, formally registering the company and its share structure. Companies raise capital by ISSUING SHARES (ORDINARY shares carry voting rights and variable dividends; PREFERENCE shares get a fixed dividend priority but usually no voting rights) and can also raise LOAN CAPITAL (borrowed funds, like debentures, repaid with fixed interest regardless of profit)."},
+          {t:"Final accounts and ratio interpretation", b:"Company final accounts (for internal use) follow broadly the same trading/profit and loss/balance sheet structure as a sole trader, adjusted for company-specific items (dividends, retained earnings). Simple RATIOS help interpret these accounts, for example, comparing profit to sales, or current assets to current liabilities, giving a quick sense of profitability or liquidity beyond just reading the raw figures."}
+        ],
+        err:["Confusing ordinary shares (voting rights, variable dividend) with preference shares (fixed dividend priority, usually no voting rights)","Assuming loan capital (debentures) behaves like share capital, when debenture holders are creditors owed fixed interest, not owners sharing in profit"],
+        qs:[
+          Q("Shares that carry voting rights but receive a variable (not fixed) dividend are called",["ordinary shares","preference shares","debentures","loan capital"],0,"Ordinary shares carry voting rights with variable dividends.","Easy"),
+          Q("Shares that receive a fixed dividend with priority over ordinary shareholders, but usually no voting rights, are called",["preference shares","ordinary shares","debentures","loan stock only"],0,"Preference shares get fixed, priority dividends but typically lack voting rights.","Medium",VP),
+          Q("Loan capital (such as debentures) differs from share capital in that debenture holders are",["creditors owed fixed interest, not owners sharing in profit","owners with voting rights","entitled to a variable share of profit","the same as ordinary shareholders"],0,"Debenture holders are creditors, not owners, and receive fixed interest.","Medium")
+        ]
+      },
+      { id:"dept_branch_acc", name:"Departmental and Branch Accounts",
+        hook:"A supermarket selling both groceries and electronics needs to know which department is actually pulling its weight, lumping all sales together would hide a genuinely struggling section behind a thriving one.",
+        obj:["Explain the purpose of departmental accounts","Explain inter-branch transactions and record-keeping"],
+        exp:[
+          {t:"Departmental accounts", b:"DEPARTMENTAL ACCOUNTS split a single business's trading results by department, allowing management to see each department's individual profit contribution separately, rather than one combined figure that could hide a struggling department behind a thriving one."},
+          {t:"Branch accounts and inter-branch transactions", b:"BRANCH ACCOUNTS track a business's performance at each separate physical branch. INTER-BRANCH TRANSACTIONS (goods or cash transferred between branches, excluding foreign branches on this syllabus) need careful recording so branch accounts remain accurate and don't double-count value. The HEAD OFFICE typically maintains overall consolidated records, while each branch keeps its own local records."}
+        ],
+        err:["Assuming departmental accounts are only useful for very large businesses, when even a modest business with distinct product lines can benefit from separating results","Forgetting that inter-branch transfers need careful recording to avoid double-counting value across branches"],
+        qs:[
+          Q("Splitting a business's trading results by department, to see each department's individual profit contribution, is the purpose of",["departmental accounts","branch accounts only","control accounts","manufacturing accounts"],0,"Departmental accounts separate results by department.","Easy"),
+          Q("Transactions involving goods or cash transferred between a business's own branches are called",["inter-branch transactions","inter-company transactions","foreign trade","control account entries"],0,"Inter-branch transactions occur between branches of the same business.","Medium",VP)
+        ]
+      },
+      { id:"pubsector_acc", name:"Public Sector Accounting",
+        hook:"A government doesn't sell products for profit, yet it still collects, spends, and must account for genuinely enormous sums of public money, which demands its own specific accounting approach, distinct from a private business.",
+        obj:["Identify sources of public revenue","Distinguish capital from recurrent government expenditure"],
+        exp:[
+          {t:"Sources of public revenue", b:"Government revenue comes mainly from TAXATION (income tax, VAT, customs duties), non-tax sources like fees and licences, and revenue from government-owned enterprises or natural resources (e.g. oil revenue in Nigeria)."},
+          {t:"Capital vs recurrent expenditure", b:"RECURRENT EXPENDITURE covers regular, repeating running costs (salaries, routine maintenance), similar in spirit to recurrent business expenses. CAPITAL EXPENDITURE covers long-term investment in infrastructure and assets (roads, hospitals, schools), providing benefit over many years rather than being consumed immediately, government accounting procedures track and report both separately since they serve very different budgeting purposes."}
+        ],
+        err:["Assuming all government spending is the same type, rather than genuinely distinct recurrent (ongoing) and capital (long-term investment) categories","Overlooking non-tax revenue sources (fees, licences, resource revenue), assuming government revenue is only from taxation"],
+        qs:[
+          Q("Regular, repeating government running costs, such as salaries, are classified as",["recurrent expenditure","capital expenditure","public revenue","a reserve"],0,"Recurrent expenditure covers regular, ongoing running costs.","Easy"),
+          Q("Long-term government investment in infrastructure, such as roads and hospitals, is classified as",["capital expenditure","recurrent expenditure","a provision","a control account entry"],0,"Capital expenditure covers long-term infrastructure investment.","Easy"),
+          Q("Which of these is a genuine source of public revenue?",["Taxation","Depreciation","A provision for doubtful debts","A trial balance"],0,"Taxation is a core source of public revenue; the others are accounting concepts, not revenue sources.","Medium",VP)
+        ]
+      },
+      { id:"data_processing", name:"Introduction to Data Processing",
+        hook:"Long before computers, businesses still had to somehow turn raw transaction slips into meaningful summaries, a manual, often exhausting process that modern data processing systems now handle in seconds.",
+        obj:["Explain the steps in data processing","Distinguish manual, mechanical and electronic data processing"],
+        exp:[
+          {t:"Steps in data processing", b:"Data processing follows three basic steps: INPUT (raw data is entered/collected), PROCESSING (the data is calculated, sorted, or summarised), and OUTPUT (the final, useful information is produced, e.g. a report or account)."},
+          {t:"Manual, mechanical and electronic processing", b:"MANUAL data processing is done entirely by hand (pen, paper, mental calculation). MECHANICAL processing uses simple machines (like manual adding machines) to assist calculation. ELECTRONIC data processing uses computers, combining hardware (physical components) and software (programs) to process data far faster and with fewer errors, now the dominant method in accounting environments, though installation requires considering factors like cost, staff training, and reliability of power supply."}
+        ],
+        err:["Confusing the three data processing STEPS (input, processing, output) with the three data processing METHODS (manual, mechanical, electronic)","Assuming electronic data processing eliminates the need to still understand input/processing/output as a data flow"],
+        qs:[
+          Q("The three basic steps of data processing are",["input, processing and output","recording, checking and filing","manual, mechanical and electronic","assets, liabilities and capital"],0,"Input, processing and output are the three fundamental steps.","Easy"),
+          Q("Data processing carried out using computers, combining hardware and software, is called",["electronic data processing","manual data processing","mechanical data processing","control processing"],0,"Electronic data processing uses computer hardware and software.","Easy"),
+          Q("A key factor to consider when installing an electronic data processing system in an accounting environment is",["reliability of power supply and staff training","the colour of the computer casing","eliminating the need for any input data","removing the output stage entirely"],0,"Practical installation factors include power reliability and staff training.","Medium",VP)
+        ]
+      }
+    ]
   }
 ];
 
@@ -4014,7 +4748,10 @@ const UPLOAD_COVERAGE = {
   crs:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
   chemistry:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
   physics:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
-  biology:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"}
+  biology:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  geography:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  commerce:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"},
+  finacc:{syllabus:"built directly from the official WAEC syllabus", pastPapers:"none yet - all practice questions below are AI-generated in a matching WAEC style"}
 };
 
 /* ======================= APP STATE ======================= */
@@ -4022,7 +4759,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], welcomeTeaserPicked:null };
+  studentStreak:0, entitlements:[], welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -4383,8 +5120,18 @@ async function loginSuccess(username){
   await loadAllProgress();
   await loadEntitlements();
   await loadStreak();
+  await loadContactInfo();
   saveLastUsername(username);
   go("home");
+}
+async function loadContactInfo(){
+  try{
+    const result = await supabaseRPC("gce_get_contact_info", { p_username: state.user });
+    state.contactEmail = (result && result.email) || "";
+    state.contactPhone = (result && result.phone) || "";
+  }catch(e){
+    state.contactEmail = ""; state.contactPhone = "";
+  }
 }
 function logout(){
   state.user = null;
@@ -4412,10 +5159,15 @@ async function submitSignup(){
   try{
     const u = document.getElementById("suUsername") ? document.getElementById("suUsername").value : state.usernameField;
     const p = document.getElementById("suPasskey") ? document.getElementById("suPasskey").value : state.passkeyField;
+    const email = document.getElementById("suEmail") ? document.getElementById("suEmail").value.trim() : "";
+    const phone = document.getElementById("suPhone") ? document.getElementById("suPhone").value.trim() : "";
     state.usernameField = u;
     state.authError = null;
     const result = await createProfile(u, p);
     if(result.error){ state.authError = result.error; render(); return; }
+    if(email || phone){
+      try{ await supabaseRPC("gce_update_contact_info", { p_username: result.username, p_email: email, p_phone: phone }); }catch(e){ /* non-fatal - checkout will just ask again if this silently failed */ }
+    }
     await loginSuccess(result.username);
   }catch(e){
     state.authError = "Something unexpected went wrong (" + (e && e.message ? e.message : "unknown error") + "). Please try again.";
@@ -4587,6 +5339,36 @@ function renderRewards(){
   </div>`;
 }
 
+/* An explicit, unmissable stop between "payment done" and "back on your dashboard" -
+   deliberately not an automatic redirect. Flutterwave's own checkout modal shows its
+   own static success screen for a moment first, and a silent navigation underneath
+   it left students staring at a screen that looked finished when it wasn't. This
+   forces one clear decision point instead: here's what just got unlocked, click to
+   continue when you're ready. */
+function renderCheckoutSuccess(){
+  const info = state.checkoutSuccess || { subjectIds: [], amount: 0 };
+  const names = info.subjectIds.map(id=>{ const s = findSubject(id); return s ? s.name : id; });
+  return `
+  <div class="welcome-wrap">
+    <div style="font-size:64px;margin-bottom:8px;">✅</div>
+    <h1 class="welcome-h1">Payment Successful!</h1>
+    <p class="welcome-p">₦${info.amount.toLocaleString()} received. You're now enrolled in:</p>
+    <div class="disclaimer" style="text-align:left;max-width:420px;margin:0 auto 20px;">
+      <ul class="bullets">${names.map(n=>`<li><b>${n}</b></li>`).join("")}</ul>
+    </div>
+    <p class="welcome-p" style="font-size:13px;">A receipt has been sent to your email.</p>
+    <div class="welcome-actions">
+      <button class="stampbtn" onclick="dismissCheckoutSuccess()">OK, take me to my profile →</button>
+    </div>
+  </div>
+  `;
+}
+function dismissCheckoutSuccess(){
+  state.checkoutSuccess = null;
+  go("home");
+}
+window.dismissCheckoutSuccess = dismissCheckoutSuccess;
+
 function renderPricing(){
   const enrolledIds = state.guest ? [] : (state.entitlements||[]);
   const preselect = state.pricingPreselect;
@@ -4636,15 +5418,24 @@ function renderPricing(){
       <div style="font-size:13px;color:var(--ink-soft);">${newlySelected.length} subject${newlySelected.length!==1?'s':''} selected</div>
       <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--ink);">₦${total.toLocaleString()}</div>
     </div>
-    <div style="flex:1;min-width:220px;">
-      <input id="pricingEmail" type="email" placeholder="Your email (for payment receipt)" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
+    <div style="flex:1;min-width:180px;">
+      ${state.contactEmail ? `
+        <div style="font-size:12.5px;color:var(--ink-soft);">Receipt to <b style="color:var(--ink);">${state.contactEmail}</b>${state.contactPhone?' · confirmation to <b style="color:var(--ink);">'+state.contactPhone+'</b>':''} <a onclick="state.editingContact=true;render();" style="color:var(--purple);text-decoration:underline;cursor:pointer;">change</a></div>
+      ` : `
+        <input id="pricingEmail" type="email" placeholder="Your email (for payment receipt)" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;margin-bottom:8px;">
+        <input id="pricingPhone" type="tel" placeholder="Phone number (optional, for payment confirmation)" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
+      `}
+      ${(state.contactEmail && state.editingContact) ? `
+        <input id="pricingEmail" type="email" placeholder="New email" value="${state.contactEmail}" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;margin-bottom:8px;margin-top:8px;">
+        <input id="pricingPhone" type="tel" placeholder="New phone number" value="${state.contactPhone||''}" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
+      ` : ""}
     </div>
     <button class="stampbtn" ${newlySelected.length===0?"disabled":""} onclick="startCheckout()">
       ${newlySelected.length===0 ? "Select a subject to continue" : "Pay ₦"+total.toLocaleString()+" now →"}
     </button>
   </div>
   ${state.pricingError ? `<div class="auth-error" style="margin-top:14px;">${state.pricingError}</div>` : ""}
-  <div class="welcome-note" style="margin-top:16px;">Payments are processed securely by Flutterwave. BuildNET Academy never sees or stores your card details.</div>
+  <div class="welcome-note" style="margin-top:16px;">Payments are processed securely by Flutterwave. BuildNET Academy never sees or stores your card details. A payment receipt is sent automatically to your email.</div>
   `;
 }
 window.renderPricing = renderPricing;
@@ -4664,12 +5455,27 @@ function startCheckout(){
   const enrolledIds = state.entitlements||[];
   const newlySelected = [...pricingSelected].filter(id=>!enrolledIds.includes(id));
   if(!newlySelected.length){ return; }
+
+  // Use what's already on file unless the student is actively editing it or never
+  // provided any in the first place - this is the whole point of asking once at
+  // signup instead of every time: checkout itself should just be pick-and-pay.
+  const usingStoredContact = state.contactEmail && !state.editingContact;
   const emailEl = document.getElementById("pricingEmail");
-  const email = emailEl ? emailEl.value.trim() : "";
+  const phoneEl = document.getElementById("pricingPhone");
+  const email = usingStoredContact ? state.contactEmail : (emailEl ? emailEl.value.trim() : "");
+  const phone = usingStoredContact ? (state.contactPhone||"") : (phoneEl ? phoneEl.value.trim() : "");
+
   if(!email || !email.includes("@")){ state.pricingError = "Please enter a valid email address for your payment receipt."; render(); return; }
 
+  // If this came from the form (new or just-edited), save it for next time so
+  // checkout stays a one-time ask, not a repeated one.
+  if(!usingStoredContact){
+    supabaseRPC("gce_update_contact_info", { p_username: state.user, p_email: email, p_phone: phone }).catch(()=>{});
+    state.contactEmail = email; state.contactPhone = phone; state.editingContact = false;
+  }
+
   const total = newlySelected.length * SUBJECT_PRICE_NGN;
-  const txRef = "buildnet-" + state.user + "-" + Date.now();
+  const txRef = "buildnetacademy-" + state.user + "-" + Date.now();
 
   if(typeof FlutterwaveCheckout !== "function"){
     state.pricingError = "Payment isn't available right now (checkout script failed to load). Please refresh and try again.";
@@ -4689,12 +5495,12 @@ function startCheckout(){
     amount: total,
     currency: "NGN",
     payment_options: "card, banktransfer, ussd, mobilemoney",
-    customer: { email, name: state.user },
+    customer: { email, name: state.user, phonenumber: phone || undefined },
     customizations: {
       title: "BuildNET Academy",
-      description: newlySelected.length+" subject(s): "+newlySelected.map(id=>{const s=findSubject(id);return s?s.name:id;}).join(", ")
+      description: "[BuildNET Academy] "+newlySelected.length+" subject(s): "+newlySelected.map(id=>{const s=findSubject(id);return s?s.name:id;}).join(", ")
     },
-    meta: { username: state.user, subject_ids: newlySelected.join(",") },
+    meta: { product: "buildnet_academy", username: state.user, subject_ids: newlySelected.join(",") },
     callback: function(data){
       handleCheckoutCallback(data, newlySelected, total, txRef);
     },
@@ -4742,7 +5548,12 @@ async function handleCheckoutCallback(data, subjectIds, expectedAmount, txRef){
       pricingSelected.clear();
       await loadEntitlements();
       state.pricingBusy = false;
-      go("home");
+      // Don't silently jump to the dashboard - Flutterwave's own success screen may
+      // still be sitting on top of the page for a moment, so land on an explicit
+      // confirmation the student has to actively continue past, not something that
+      // happens invisibly behind another screen.
+      state.checkoutSuccess = { subjectIds, amount: expectedAmount };
+      go("checkoutSuccess");
     } else {
       state.pricingBusy = false;
       state.pricingError = "We received your payment but couldn't confirm it automatically (" + (result&&result.error?result.error:"unknown issue") + "). Contact support with reference " + txRef + " and we'll sort it out.";
@@ -4778,7 +5589,8 @@ async function checkPendingPayment(){
       clearPendingPayment();
       pricingSelected.clear();
       await loadEntitlements();
-      go("home");
+      state.checkoutSuccess = { subjectIds: pending.subjectIds, amount: pending.amount };
+      go("checkoutSuccess");
     } else if(result && result.pending){
       state.pricingError = "Still pending - your bank transfer hasn't cleared with Flutterwave yet. This can take a few minutes; try checking again shortly.";
       render();
@@ -5037,7 +5849,7 @@ function topicHasVerified(t){ return t.qs.some(q=>q.src); }
 /* ======================= NAVIGATION ======================= */
 function go(view, params, skipHistory){
   params = params || {};
-  if(!state.user && ["home","subject","topic","quiz","results","dashboard","theorylist","theoryattempt","remediate","rewards","pricing"].includes(view)){ view = "welcome"; }
+  if(!state.user && ["home","subject","topic","quiz","results","dashboard","theorylist","theoryattempt","remediate","rewards","pricing","checkoutSuccess"].includes(view)){ view = "welcome"; }
   if(!skipHistory && state.view && state.view !== view && !["welcome","signup","login"].includes(state.view)){
     state.navStack.push({ view: state.view, subjectId: state.subjectId, topicId: state.topicId });
     if(state.navStack.length > 20) state.navStack.shift();
@@ -5434,7 +6246,7 @@ function render(){
   else {
     html = renderHeader();
     const inMockNow = state.view==="quiz" && state.quiz && state.quiz.mode==="mock";
-    if((state.view !== "home" || state.navStack.length) && !inMockNow){
+    if((state.view !== "home" || state.navStack.length) && !inMockNow && state.view!=="checkoutSuccess"){
       html += `<button class="back-btn" onclick="goBack()">← Back</button>`;
     }
     if(state.view==="home") html += renderHome();
@@ -5448,6 +6260,7 @@ function render(){
     else if(state.view==="remediate") html += renderRemediation();
     else if(state.view==="rewards") html += renderRewards();
     else if(state.view==="pricing") html += renderPricing();
+    else if(state.view==="checkoutSuccess") html += renderCheckoutSuccess();
   }
   html += renderFooter();
   app.innerHTML = '<div class="view-anim">' + html + '</div>';
@@ -5707,7 +6520,8 @@ function renderGuardian(){
     // preview. Payment status is shown separately, as context, never as a filter here.
     const touched = allSubjectStats.filter(s=>s.hasActivity);
     const untouched = allSubjectStats.filter(s=>!s.hasActivity && s.enrolled);
-    const notEnrolled = allSubjectStats.filter(s=>!s.enrolled && !s.hasActivity);
+    // (Subjects with neither activity nor enrollment are simply omitted below -
+    // not the guardian dashboard's business to surface as a gap.)
     const ranked = [...touched].sort((a,b)=>a.readiness.score-b.readiness.score);
     const weakest = ranked.filter(s=>!s.readiness.meetsTarget).slice(0,3);
     const strongest = ranked.filter(s=>s.readiness.meetsTarget).slice(-2).reverse();
@@ -5758,12 +6572,9 @@ function renderGuardian(){
         <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label}</div>
       </div>`;
     }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No activity or enrollment recorded yet.</span></div>`;
-
-    const notEnrolledHtml = notEnrolled.length ? `
-      <div style="margin-top:14px;padding:12px 14px;background:#F9FAFB;border-radius:12px;border:1px dashed var(--line);">
-        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">NOT YET ENROLLED (${notEnrolled.length})</div>
-        <div style="font-size:13px;color:var(--ink);">${notEnrolled.map(s=>s.name).join(", ")}</div>
-      </div>` : "";
+    // Deliberately not showing which subjects the student hasn't enrolled in - that's
+    // between the student/guardian and their own choices, not the guardian dashboard's
+    // business to surface as a gap for every other subject they didn't pay for.
 
     return `
     <div class="guardian-child-card">
@@ -5783,7 +6594,6 @@ function renderGuardian(){
         </div>
       </div>
       <div style="margin-top:14px;">${subjRows}</div>
-      ${notEnrolledHtml}
     </div>`;
   }).join("");
 
@@ -5877,7 +6687,12 @@ function renderSignup(){
     <label class="auth-label">USERNAME</label>
     <input id="suUsername" class="auth-input" type="text" placeholder="e.g. tolu_reads" maxlength="20" autocomplete="off" value="${state.usernameField||""}" onkeydown="if(event.key==='Enter'){document.getElementById('suPasskey').focus();}">
     <label class="auth-label">CHOOSE A 4-DIGIT PASSKEY</label>
-    <input id="suPasskey" class="auth-input auth-pin" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="••••" maxlength="4" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSignup();}">
+    <input id="suPasskey" class="auth-input auth-pin" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="••••" maxlength="4" autocomplete="off" onkeydown="if(event.key==='Enter'){document.getElementById('suEmail').focus();}">
+    <label class="auth-label">EMAIL (recommended)</label>
+    <input id="suEmail" class="auth-input" type="email" placeholder="for payment receipts and confirmations" autocomplete="off" onkeydown="if(event.key==='Enter'){document.getElementById('suPhone').focus();}">
+    <label class="auth-label">PHONE NUMBER (recommended)</label>
+    <input id="suPhone" class="auth-input" type="tel" placeholder="for WhatsApp/SMS confirmations" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSignup();}">
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:-10px 0 14px;">Adding these now means checkout later is just picking subjects and paying - no extra questions at the moment you're trying to pay.</p>
     <button class="stampbtn auth-submit" onclick="submitSignup()">CREATE MY PROFILE</button>
     <div class="auth-switch">Already have a profile? <a onclick="go('login')">Log in instead</a></div>
     <div class="auth-switch"><a onclick="go('welcome')">← Back</a></div>
