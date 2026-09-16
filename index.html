@@ -4612,12 +4612,22 @@ function renderPricing(){
 
   const newlySelected = [...pricingSelected].filter(id=>!enrolledIds.includes(id));
   const total = newlySelected.length * SUBJECT_PRICE_NGN;
+  const pending = getPendingPayment();
+  const pendingBanner = (pending && !state.pricingBusy) ? `
+    <div class="disclaimer" style="background:#FFF3D6;border-color:#F59E0B;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <span>💳 You have a payment in progress (ref: ${pending.txRef}) for ${pending.subjectIds.length} subject${pending.subjectIds.length!==1?'s':''} - started ${Math.round((Date.now()-pending.startedAt)/60000)} min ago. If you paid by bank transfer and it hasn't unlocked yet, check its status below.</span>
+      <span style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="ghost-btn" onclick="checkPendingPayment()">Check my payment</button>
+        <button class="ghost-btn" onclick="dismissPendingPayment()">Dismiss</button>
+      </span>
+    </div>` : "";
 
   return `
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / Choose your subjects</div>
   <h2>Enroll in the subjects you're sitting for</h2>
   <p style="color:var(--ink-soft);max-width:62ch;margin-top:6px;">Every subject shows you a free taste before you pay - the first key idea in every topic, and a small slice of every practice set and readiness check. Tick what you need below; your dashboard only ever shows what you've actually enrolled in.</p>
   <div class="disclaimer" style="margin-top:10px;">General Mathematics and English Language are required for every enrollment (WAEC's own compulsory pair), so they're automatically included below and can't be unchecked. Everything else is entirely your choice.</div>
+  ${pendingBanner}
 
   <div class="pricing-grid">${cards}</div>
 
@@ -4667,6 +4677,12 @@ function startCheckout(){
     return;
   }
 
+  // Saved BEFORE opening the payment modal, specifically so a student who picks
+  // bank transfer and then closes the tab before it clears can come back later
+  // and recover this payment with "Check my payment" - without this, closing
+  // early would mean losing all record of what was being paid for.
+  savePendingPayment({ txRef, subjectIds: newlySelected, amount: total, startedAt: Date.now() });
+
   FlutterwaveCheckout({
     public_key: FLUTTERWAVE_PUBLIC_KEY,
     tx_ref: txRef,
@@ -4682,10 +4698,26 @@ function startCheckout(){
     callback: function(data){
       handleCheckoutCallback(data, newlySelected, total, txRef);
     },
-    onclose: function(){ /* user closed the payment modal without completing - nothing to do */ }
+    onclose: function(){ /* user closed the payment modal without completing - the pending
+                             record stays saved so "Check my payment" can still recover it
+                             later if the payment actually went through anyway. */ }
   });
 }
 window.startCheckout = startCheckout;
+
+/* Pending payments are tracked per-browser in localStorage (not the database - there's
+   nothing to store server-side until a payment is actually confirmed). Kept deliberately
+   simple: one pending record at a time is enough for this flow, cleared the moment a
+   payment resolves (success) or is explicitly dismissed. */
+function savePendingPayment(p){
+  try{ localStorage.setItem("gce_pending_payment", JSON.stringify(p)); }catch(e){}
+}
+function getPendingPayment(){
+  try{ const raw = localStorage.getItem("gce_pending_payment"); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function clearPendingPayment(){
+  try{ localStorage.removeItem("gce_pending_payment"); }catch(e){}
+}
 
 /* Client-side callback fires the instant Flutterwave reports success, but that
    report alone is never trusted to unlock content - it's trivial to fake from the
@@ -4706,6 +4738,7 @@ async function handleCheckoutCallback(data, subjectIds, expectedAmount, txRef){
     });
     const result = await res.json();
     if(result && result.success){
+      clearPendingPayment();
       pricingSelected.clear();
       await loadEntitlements();
       state.pricingBusy = false;
@@ -4721,6 +4754,50 @@ async function handleCheckoutCallback(data, subjectIds, expectedAmount, txRef){
     render();
   }
 }
+
+/* Recovery path for a payment (almost always a bank transfer) that never fired its
+   own callback - the student closed the tab, switched apps, or their phone locked
+   before Flutterwave confirmed the transfer had landed. Uses only the reference we
+   saved locally, since there's no Flutterwave-assigned transaction_id to work with. */
+async function checkPendingPayment(){
+  const pending = getPendingPayment();
+  if(!pending) return;
+  state.pricingBusy = true; render();
+  try{
+    const res = await fetch("/api/verify-payment", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        tx_ref: pending.txRef, expected_amount: pending.amount,
+        username: state.user, subject_ids: pending.subjectIds
+      })
+    });
+    const result = await res.json();
+    state.pricingBusy = false;
+    if(result && result.success){
+      clearPendingPayment();
+      pricingSelected.clear();
+      await loadEntitlements();
+      go("home");
+    } else if(result && result.pending){
+      state.pricingError = "Still pending - your bank transfer hasn't cleared with Flutterwave yet. This can take a few minutes; try checking again shortly.";
+      render();
+    } else {
+      state.pricingError = "Couldn't confirm this payment (" + (result&&result.error?result.error:"unknown issue") + "). If you're sure you paid, contact support with reference " + pending.txRef + ".";
+      render();
+    }
+  }catch(e){
+    state.pricingBusy = false;
+    state.pricingError = "Couldn't reach our server to check. Try again in a moment.";
+    render();
+  }
+}
+window.checkPendingPayment = checkPendingPayment;
+function dismissPendingPayment(){
+  clearPendingPayment();
+  render();
+}
+window.dismissPendingPayment = dismissPendingPayment;
 
 function recordAnswer(subjectId, topicId, correct){
   const p = state.progress[subjectId];
