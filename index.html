@@ -14,6 +14,21 @@
     --font-display:'Trebuchet MS','Comic Sans MS','Segoe UI Rounded','Segoe UI',Verdana,sans-serif;
     --font-body:'Segoe UI','Helvetica Neue',Verdana,Arial,sans-serif;
   }
+  html[data-theme="dark"]{
+    --card:#241D3D; --line:#3D3363; --bg:#161029; --ink:#F2EFFB; --ink-soft:#B7ADD6;
+  }
+  html[data-theme="dark"] body{
+    background:
+      radial-gradient(circle at 6% 10%, rgba(255,79,163,0.10), transparent 42%),
+      radial-gradient(circle at 94% 14%, rgba(77,150,255,0.10), transparent 42%),
+      radial-gradient(circle at 12% 92%, rgba(255,203,61,0.08), transparent 40%),
+      radial-gradient(circle at 90% 88%, rgba(23,195,178,0.10), transparent 42%),
+      var(--bg);
+  }
+  html[data-theme="dark"] input, html[data-theme="dark"] textarea{
+    background:#2E2650; color:var(--ink); border-color:var(--line);
+  }
+  html[data-theme="dark"] img.welcome-logo, html[data-theme="dark"] img.brand-logo{ filter:brightness(0.95); }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -41,7 +56,7 @@
   .readiness-party-overlay{position:fixed;inset:0;background:rgba(43,35,80,0.72);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;animation:viewIn .3s ease both;overflow:hidden;}
   .readiness-party-confetti{position:absolute;inset:0;pointer-events:none;}
   .readiness-party-confetti span{position:absolute;top:-20px;border-radius:3px;animation:partyConfettiFall linear forwards;}
-  .readiness-party-card{background:#fff;border-radius:28px;padding:40px 32px;max-width:480px;max-height:88vh;overflow-y:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;z-index:1;}
+  .readiness-party-card{background:var(--card);border-radius:28px;padding:40px 32px;max-width:480px;max-height:88vh;overflow-y:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;z-index:1;}
 
   .masthead{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
   .brand{display:flex;flex-direction:row;align-items:center;gap:10px;cursor:pointer;}
@@ -62,7 +77,7 @@
   .disclaimer{font-size:12px;color:var(--ink-soft);border:2px dashed var(--yellow);border-radius:16px;padding:12px 16px;margin:16px 0 22px;background:#FFF9E5;}
   .disclaimer b{color:var(--ink);}
   .crumbs{font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;font-weight:600;}
-  .back-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--purple);border:2px solid var(--pink-soft);border-radius:999px;padding:9px 18px;font-family:var(--font-display);font-size:14px;font-weight:700;margin:14px 0 6px;box-shadow:0 3px 10px rgba(124,58,237,0.12);transition:transform .15s ease, background .15s ease, color .15s ease;cursor:pointer;}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;background:var(--card);color:var(--purple);border:2px solid var(--pink-soft);border-radius:999px;padding:9px 18px;font-family:var(--font-display);font-size:14px;font-weight:700;margin:14px 0 6px;box-shadow:0 3px 10px rgba(124,58,237,0.12);transition:transform .15s ease, background .15s ease, color .15s ease;cursor:pointer;}
   .back-btn:hover{background:linear-gradient(90deg,var(--purple),var(--pink));color:#fff;border-color:transparent;transform:translateX(-3px);}
   .back-btn:active{transform:scale(0.96);}
   .crumbs button{background:none;border:none;color:var(--ink-soft);text-decoration:none;padding:0;font-family:inherit;font-size:inherit;font-weight:600;cursor:pointer;}
@@ -106,7 +121,7 @@
   .subject-overview-text{flex:1;min-width:0;}
   .ov-greeting{font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.35;}
   .subject-overview-text p{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 12px;}
-  .ov-tip{font-size:13px;color:var(--purple-dark);background:#fff;border-radius:14px;padding:10px 14px;display:inline-block;box-shadow:0 2px 8px rgba(43,35,80,0.08);}
+  .ov-tip{font-size:13px;color:var(--purple-dark);background:var(--card);border-radius:14px;padding:10px 14px;display:inline-block;box-shadow:0 2px 8px rgba(43,35,80,0.08);}
   @media (max-width:640px){.subject-overview{flex-direction:column;text-align:center;} .subject-overview-art{width:140px;}}
   .toc{border-top:none;}
   .toc-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;margin-bottom:8px;border-radius:16px;cursor:pointer;background:var(--card);box-shadow:0 2px 8px rgba(43,35,80,0.06);transition:transform .15s ease, box-shadow .15s ease;}
@@ -138,7 +153,7 @@
     box-shadow:0 5px 14px rgba(124,58,237,0.3); transition:transform .18s cubic-bezier(.34,1.56,.64,1);}
   .primary-btn:hover{transform:scale(1.05);}
   .primary-btn:active{transform:scale(0.95);}
-  .ghost-btn{background:#fff;color:var(--purple);border:2px solid var(--purple);border-radius:999px;padding:11px 20px;font-size:13.5px;font-weight:600;font-family:var(--font-display);transition:all .18s ease;}
+  .ghost-btn{background:var(--card);color:var(--purple);border:2px solid var(--purple);border-radius:999px;padding:11px 20px;font-size:13.5px;font-weight:600;font-family:var(--font-display);transition:all .18s ease;}
   .ghost-btn:hover{background:var(--purple);color:#fff;transform:scale(1.04);}
   .ghost-btn:active{transform:scale(0.95);}
   .topic-stats{font-size:12px;color:var(--ink-soft);margin-top:16px;font-weight:600;}
@@ -173,7 +188,7 @@
   .dot.locked{border-color:#D1D5DB;background:repeating-linear-gradient(45deg,#D1D5DB,#D1D5DB 2px,#F3F4F6 2px,#F3F4F6 4px);}
   .paywall-card{background:linear-gradient(135deg,#FFF3D6,#F3E8FF);border:2px dashed var(--purple);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
   .pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:22px 0;}
-  .pricing-card{position:relative;display:block;border:2.5px solid var(--line);border-radius:18px;padding:18px 16px 16px;cursor:pointer;background:#fff;transition:transform .12s ease;}
+  .pricing-card{position:relative;display:block;border:2.5px solid var(--line);border-radius:18px;padding:18px 16px 16px;cursor:pointer;background:var(--card);transition:transform .12s ease;}
   .pricing-card:has(input:checked){transform:translateY(-2px);box-shadow:0 6px 18px rgba(43,35,80,0.10);}
   .pricing-card.already-owned{background:#F0FDF4;cursor:default;}
   .pricing-card input{position:absolute;top:14px;right:14px;width:20px;height:20px;}
@@ -182,7 +197,7 @@
   .pricing-card-meta{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;}
   .pricing-card-price{font-weight:800;font-size:16px;color:var(--purple);}
   .pricing-card.already-owned .pricing-card-price{color:#16A34A;}
-  .pricing-checkout-bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#fff;border-radius:20px;padding:18px 22px;box-shadow:0 8px 28px rgba(43,35,80,0.16);border:2px solid var(--line);margin-top:24px;}
+  .pricing-checkout-bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--card);border-radius:20px;padding:18px 22px;box-shadow:0 8px 28px rgba(43,35,80,0.16);border:2px solid var(--line);margin-top:24px;}
   .paywall-lock{font-size:34px;margin-bottom:8px;}
   .paywall-title{font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--ink);margin-bottom:8px;}
   .paywall-body{font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;}
@@ -330,7 +345,7 @@
   .admin-bar-wrap{flex:1;min-width:6px;display:flex;align-items:flex-end;height:100%;cursor:default;}
   .admin-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:opacity .15s;}
   .admin-bar-wrap:hover .admin-bar{opacity:0.7;}
-  .guardian-child-card{background:#fff;border:2px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(43,35,80,0.06);}
+  .guardian-child-card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 4px 14px rgba(43,35,80,0.06);}
   .live-activity-badge{display:inline-block;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:8px;}
   .live-activity-on{background:#DCFCE7;color:#166534;animation:pulseGlow 2s ease-in-out infinite;}
   .live-activity-off{background:#F1F0F7;color:var(--ink-soft);}
@@ -368,7 +383,7 @@
   .worked-verified{display:inline-block;font-size:10px;font-weight:800;color:var(--green);background:#DAF8EB;border-radius:999px;padding:3px 9px;margin-left:4px;}
   .worked-ai{display:inline-block;font-size:10px;font-weight:800;color:var(--ink-soft);background:#EDEAF7;border-radius:999px;padding:3px 9px;margin-left:4px;}
   .worked-steps{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
-  .worked-step{display:flex;align-items:flex-start;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 2px 8px rgba(43,35,80,0.07);}
+  .worked-step{display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:0 2px 8px rgba(43,35,80,0.07);}
   .worked-step-num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-family:var(--font-display);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;}
   .worked-step-body{flex:1;}
   .worked-step-body p{margin:0;font-size:14px;line-height:1.55;color:var(--ink);}
@@ -3564,14 +3579,16 @@ const SUBJECTS = [
         obj:["Distinguish living from non-living things using characteristics of life","Explain the hierarchy of classification (kingdom to species)"],
         exp:[
           {t:"Characteristics of living things", b:"Living things share several defining characteristics: NUTRITION (obtaining and using food), RESPIRATION (releasing energy from food), EXCRETION (removing waste), GROWTH, MOVEMENT, REPRODUCTION, SENSITIVITY (responding to stimuli), and life eventually ending in DEATH. A virus is a genuinely tricky borderline case, often mentioned as a link between living and non-living, since it shows some but not all of these characteristics outside a host cell."},
-          {t:"The classification hierarchy", b:"Organisms are grouped into a nested hierarchy, from broadest to most specific: KINGDOM, PHYLUM, CLASS, ORDER, FAMILY, GENUS, SPECIES. Each level groups organisms sharing progressively more specific characteristics, members of the same SPECIES can interbreed to produce fertile offspring, the most specific and biologically meaningful grouping."}
+          {t:"The classification hierarchy", b:"Organisms are grouped into a nested hierarchy, from broadest to most specific: KINGDOM, PHYLUM, CLASS, ORDER, FAMILY, GENUS, SPECIES. Each level groups organisms sharing progressively more specific characteristics, members of the same SPECIES can interbreed to produce fertile offspring, the most specific and biologically meaningful grouping."},
+          {t:"Binomial nomenclature - the specific naming system", b:"Every species has a unique two-part scientific name, its GENUS (capitalised) followed by its SPECIES (lowercase), both conventionally italicised, called BINOMIAL NOMENCLATURE. Humans are Homo sapiens, for instance, Homo being the genus, sapiens the specific species. This system, used worldwide regardless of local language, exists precisely to avoid the confusion of different regions using different common names for the exact same organism."}
         ],
-        err:["Assuming movement alone is enough to prove something is alive (plants grow and respond without moving from place to place)","Mixing up the order of the classification hierarchy"],
+        err:["Assuming movement alone is enough to prove something is alive (plants grow and respond without moving from place to place)","Mixing up the order of the classification hierarchy","Getting binomial nomenclature's order backwards (genus first, capitalised; species second, lowercase)"],
         qs:[
           Q("Which of these is NOT one of the characteristics of living things?",["Crystallization","Nutrition","Respiration","Excretion"],0,"Crystallization is a physical/chemical process, not a characteristic of life.","Easy"),
           Q("The process by which living things release energy from food is called",["respiration","excretion","nutrition","growth"],0,"Respiration specifically releases energy from food.","Easy"),
           Q("The most specific level of biological classification, where members can interbreed to produce fertile offspring, is the",["species","genus","family","kingdom"],0,"Species is the most specific classification level.","Medium"),
-          Q("Arrange the following in the correct order from broadest to most specific: Class, Kingdom, Species, Phylum, Genus",["Kingdom, Phylum, Class, Genus, Species","Species, Genus, Class, Phylum, Kingdom","Kingdom, Class, Phylum, Species, Genus","Phylum, Kingdom, Class, Species, Genus"],0,"The correct hierarchy from broadest to narrowest is Kingdom, Phylum, Class, Order, Family, Genus, Species.","Medium",VP)
+          Q("Arrange the following in the correct order from broadest to most specific: Class, Kingdom, Species, Phylum, Genus",["Kingdom, Phylum, Class, Genus, Species","Species, Genus, Class, Phylum, Kingdom","Kingdom, Class, Phylum, Species, Genus","Phylum, Kingdom, Class, Species, Genus"],0,"The correct hierarchy from broadest to narrowest is Kingdom, Phylum, Class, Order, Family, Genus, Species.","Medium",VP),
+          Q("In the scientific name Homo sapiens, 'Homo' represents the organism's",["genus","species","kingdom","phylum"],0,"In binomial nomenclature, the first (capitalised) word is the genus.","Medium",VP)
         ]
       },
       { id:"cellbio", name:"Cell Structure and Organization",
@@ -3579,14 +3596,16 @@ const SUBJECTS = [
         obj:["Identify the structure and functions of major cell organelles","Distinguish plant cells from animal cells","Explain the levels of biological organisation"],
         exp:[
           {t:"Key cell organelles", b:"The CELL MEMBRANE controls what enters and leaves the cell. The NUCLEUS contains genetic material and controls cell activities. MITOCHONDRIA release energy through respiration, the cell's 'power plant'. In plant cells specifically, the CELL WALL provides rigid structural support, CHLOROPLASTS carry out photosynthesis, and a large central VACUOLE stores water and maintains turgor pressure, none of which animal cells typically have."},
+          {t:"Ribosomes - the protein-making organelle, present in every cell", b:"RIBOSOMES are the site of PROTEIN SYNTHESIS, building proteins according to genetic instructions from the nucleus. Unlike the cell wall, chloroplasts and large vacuole, ribosomes are found in BOTH plant AND animal cells, since every cell, regardless of type, needs to make proteins to survive and function."},
           {t:"Levels of organisation", b:"Life is organised in increasing complexity: CELLS group into TISSUES (cells of similar structure and function), tissues group into ORGANS (like the heart or a leaf), organs group into ORGAN SYSTEMS (like the digestive system), and organ systems work together in a complete ORGANISM."}
         ],
-        err:["Assuming animal cells have a cell wall and chloroplasts, like plant cells do","Confusing 'tissue' with 'organ' in the organisation hierarchy"],
+        err:["Assuming animal cells have a cell wall and chloroplasts, like plant cells do","Confusing 'tissue' with 'organ' in the organisation hierarchy","Forgetting ribosomes exist in both plant and animal cells, unlike the distinctly plant-only organelles"],
         qs:[
           Q("The organelle responsible for releasing energy through respiration is the",["mitochondrion","nucleus","cell wall","vacuole"],0,"Mitochondria are the site of aerobic respiration and energy release.","Easy"),
           Q("Which structure is found in plant cells but NOT in animal cells?",["Cell wall","Cell membrane","Nucleus","Mitochondrion"],0,"The cell wall is a distinctly plant-cell structure.","Easy"),
           Q("The correct order of increasing biological organisation is",["cell, tissue, organ, organ system, organism","tissue, cell, organ system, organ, organism","organ, tissue, cell, organism, organ system","organism, organ system, organ, tissue, cell"],0,"Cells group into tissues, tissues into organs, organs into organ systems, forming an organism.","Medium",VP),
-          Q("The organelle that controls the cell's activities and contains genetic material is the",["nucleus","mitochondrion","ribosome","cell membrane"],0,"The nucleus houses genetic material and directs cell activity.","Easy")
+          Q("The organelle that controls the cell's activities and contains genetic material is the",["nucleus","mitochondrion","ribosome","cell membrane"],0,"The nucleus houses genetic material and directs cell activity.","Easy"),
+          Q("The organelle responsible for protein synthesis, found in both plant and animal cells, is the",["ribosome","chloroplast","cell wall","vacuole"],0,"Ribosomes synthesise proteins and are present in all cells.","Medium",VP)
         ]
       },
       { id:"cellenvironment", name:"The Cell and its Environment",
@@ -3594,14 +3613,17 @@ const SUBJECTS = [
         obj:["Distinguish diffusion from osmosis","Explain the effect of osmosis on plant and animal cells in different solutions"],
         exp:[
           {t:"Diffusion vs osmosis", b:"DIFFUSION is the movement of particles from a region of higher concentration to lower concentration, requiring no energy, like a drop of ink spreading through water. OSMOSIS is a specific type of diffusion, the movement of WATER MOLECULES specifically, across a selectively permeable membrane, from a region of higher water concentration (dilute solution) to lower water concentration (concentrated solution)."},
-          {t:"Osmosis and cells - the practical effects", b:"A plant cell placed in a dilute (hypotonic) solution absorbs water and becomes firm (turgid), the cell wall prevents it from bursting. An animal cell in the same situation would actually burst, since it has no protective wall. In a concentrated (hypertonic) solution, both plant and animal cells lose water and shrink, a plant cell becomes flaccid or plasmolysed, its membrane pulling away from the cell wall."}
+          {t:"Osmosis and cells - the practical effects", b:"A plant cell placed in a dilute (hypotonic) solution absorbs water and becomes firm (turgid), the cell wall prevents it from bursting. An animal cell in the same situation would actually burst, since it has no protective wall. In a concentrated (hypertonic) solution, both plant and animal cells lose water and shrink, a plant cell becomes flaccid or plasmolysed, its membrane pulling away from the cell wall."},
+          {t:"Active transport - moving substances the 'wrong' way, at a cost", b:"Unlike diffusion and osmosis, which both move substances DOWN a concentration gradient (high to low) for free, ACTIVE TRANSPORT moves substances AGAINST their concentration gradient (low to high), and this genuinely requires ENERGY (from respiration) to achieve, since it works against the natural direction particles would otherwise move. Root hair cells absorbing mineral ions from soil, even when the soil's ion concentration is lower than inside the root cell, is a classic real example of active transport in action."}
         ],
-        err:["Assuming osmosis and diffusion are entirely unrelated, when osmosis is really a specific case of diffusion involving water","Forgetting that only plant cells, with a protective cell wall, can become turgid without bursting"],
+        err:["Assuming osmosis and diffusion are entirely unrelated, when osmosis is really a specific case of diffusion involving water","Forgetting that only plant cells, with a protective cell wall, can become turgid without bursting","Assuming active transport, like diffusion, happens for free, when it specifically requires energy since it moves substances against their concentration gradient"],
         qs:[
           Q("The movement of particles from a region of high concentration to low concentration is called",["diffusion","osmosis","active transport","transpiration"],0,"Diffusion describes general particle movement down a concentration gradient.","Easy"),
           Q("Osmosis specifically refers to the movement of",["water molecules across a selectively permeable membrane","any dissolved particle across any membrane","only sugar molecules","gases only"],0,"Osmosis is specifically about water movement across a selectively permeable membrane.","Medium"),
           Q("A plant cell placed in a concentrated salt solution will most likely",["lose water and become flaccid or plasmolysed","absorb water and become turgid","remain completely unchanged","immediately burst"],0,"A hypertonic (concentrated) external solution draws water out of the cell.","Medium",VP),
-          Q("An animal cell (e.g. a red blood cell) placed in pure water will most likely",["absorb water and burst, since it has no protective cell wall","become turgid but stay intact","shrink and become crenated","remain completely unaffected"],0,"Without a cell wall, excess water uptake can cause an animal cell to burst (lyse).","Hard",VP)
+          Q("An animal cell (e.g. a red blood cell) placed in pure water will most likely",["absorb water and burst, since it has no protective cell wall","become turgid but stay intact","shrink and become crenated","remain completely unaffected"],0,"Without a cell wall, excess water uptake can cause an animal cell to burst (lyse).","Hard",VP),
+          Q("The movement of substances against their concentration gradient, requiring energy from respiration, is called",["active transport","diffusion","osmosis","transpiration"],0,"Active transport specifically requires energy to move substances against the concentration gradient.","Medium",VP),
+          Q("Root hair cells absorbing mineral ions from soil, even when soil ion concentration is lower than inside the cell, demonstrates",["active transport","diffusion only","osmosis only","evaporation"],0,"This movement against the gradient requires active transport.","Hard")
         ]
       },
       { id:"nutrition_plant", name:"Nutrition in Plants",
@@ -3609,14 +3631,16 @@ const SUBJECTS = [
         obj:["Explain the process of photosynthesis, including the word and balanced equation","Identify factors affecting the rate of photosynthesis"],
         exp:[
           {t:"Photosynthesis", b:"Green plants manufacture their own food through photosynthesis: carbon dioxide and water combine, using light energy captured by chlorophyll, to produce glucose and oxygen. Word equation: carbon dioxide + water --(light energy, chlorophyll)--> glucose + oxygen. Balanced equation: 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂."},
-          {t:"Factors affecting the rate", b:"Photosynthesis rate is limited by whichever factor is currently in shortest supply (the 'limiting factor'): LIGHT INTENSITY (more light generally means a faster rate, up to a point), CARBON DIOXIDE CONCENTRATION, and TEMPERATURE (enzymes controlling the reaction work best within an optimal range, too hot and they're damaged, too cold and they work slowly)."}
+          {t:"Factors affecting the rate", b:"Photosynthesis rate is limited by whichever factor is currently in shortest supply (the 'limiting factor'): LIGHT INTENSITY (more light generally means a faster rate, up to a point), CARBON DIOXIDE CONCENTRATION, and TEMPERATURE (enzymes controlling the reaction work best within an optimal range, too hot and they're damaged, too cold and they work slowly)."},
+          {t:"Testing a leaf for starch - proof that photosynthesis happened", b:"The IODINE TEST is the standard way to confirm a leaf has actually been photosynthesising: iodine solution turns from its normal orange-brown colour to BLUE-BLACK in the presence of starch, since glucose made by photosynthesis is often converted to starch for storage. A leaf kept in darkness beforehand (destarched) that's then exposed to light and tested will turn blue-black specifically where light reached it, a genuinely visual, testable way to prove photosynthesis requires light, not just an assumption stated in words."}
         ],
-        err:["Forgetting chlorophyll and light are both required, not just carbon dioxide and water alone","Assuming increasing one factor (like light) always increases the rate, even when a different factor is actually limiting it"],
+        err:["Forgetting chlorophyll and light are both required, not just carbon dioxide and water alone","Assuming increasing one factor (like light) always increases the rate, even when a different factor is actually limiting it","Forgetting the iodine test's specific colour change (blue-black for starch present), assuming any colour change proves photosynthesis"],
         qs:[
           Q("The word equation for photosynthesis produces glucose and",["oxygen","carbon dioxide","nitrogen","water only"],0,"Photosynthesis produces glucose and oxygen as products.","Easy"),
           Q("The green pigment that captures light energy for photosynthesis is",["chlorophyll","haemoglobin","cellulose","starch"],0,"Chlorophyll captures light energy in photosynthesis.","Easy"),
           Q("Which of these is NOT a factor affecting the rate of photosynthesis?",["Soil pH directly","Light intensity","Carbon dioxide concentration","Temperature"],0,"Light intensity, CO2 concentration and temperature are the classic limiting factors; soil pH is not directly one of them.","Medium"),
-          Q("The balanced chemical equation for photosynthesis is",["6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂","C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O","6CO₂ + 6O₂ → C₆H₁₂O₆","C₆H₁₂O₆ → 6CO₂ + 6H₂O"],0,"This is the correctly balanced photosynthesis equation.","Medium",VP)
+          Q("The balanced chemical equation for photosynthesis is",["6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂","C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O","6CO₂ + 6O₂ → C₆H₁₂O₆","C₆H₁₂O₆ → 6CO₂ + 6H₂O"],0,"This is the correctly balanced photosynthesis equation.","Medium",VP),
+          Q("The iodine test is used to confirm the presence of starch in a leaf, and produces which colour change if starch is present?",["Orange-brown to blue-black","Blue to red","Colourless to green","No colour change occurs"],0,"Iodine solution turns blue-black in the presence of starch.","Medium",VP)
         ]
       },
       { id:"nutrition_animal", name:"Nutrition in Animals",
@@ -5044,7 +5068,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null };
+  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light" };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -6642,12 +6666,15 @@ function render(){
 function renderHeader(){
   const userLabel = state.guest ? "👀 Guest preview" : state.user;
   const inMock = state.view==="quiz" && state.quiz && state.quiz.mode==="mock";
+  const themeIcon = state.theme==="dark" ? "☀️" : "🌙";
   const navRight = state.user
     ? `<span class="navlink ${state.view==='home'?'active':''} ${inMock?'navlink-disabled':''}" ${inMock?'title="Unavailable during your readiness check - submit it first"':`onclick="go('home')"`}>Subjects</span>
        <span class="navlink ${state.view==='dashboard'?'active':''} ${inMock?'navlink-disabled':''}" ${inMock?'title="Unavailable during your readiness check - submit it first"':`onclick="go('dashboard')"`}>Readiness Dashboard</span>
        <span class="navlink mono" title="${state.guest?'Guest preview - nothing is saved':'Logged in as '+state.user}">${userLabel}</span>
+       <span class="navlink" title="Switch to ${state.theme==='dark'?'light':'dark'} mode" onclick="toggleTheme()">${themeIcon}</span>
        <span class="navlink" onclick="logout()">${state.guest?"Exit preview":"Log out"}</span>`
-    : `<span class="navlink" onclick="go('welcome')">Home</span>`;
+    : `<span class="navlink" title="Switch to ${state.theme==='dark'?'light':'dark'} mode" onclick="toggleTheme()">${themeIcon}</span>
+       <span class="navlink" onclick="go('welcome')">Home</span>`;
   return `
   <div class="masthead">
     <div class="brand" onclick="go(${state.user?"'home'":"'welcome'"})">
@@ -6663,6 +6690,25 @@ function renderHeader(){
   ${state.guest ? `<div class="ai-grading-disclaimer" style="margin-top:14px;">👀 <b>Guest preview mode:</b> you're browsing without an account, so nothing you do here will be saved, and AI features (study buddy chat, theory grading) need a real connection to Claude to work. Great for looking around - create a real profile to actually track progress.</div>` : ""}
   ${inMock ? `<div class="ai-grading-disclaimer" style="margin-top:14px;background:#FEF2F2;border-color:#EF4444;">🔒 <b>Readiness check in progress:</b> navigation and the Study Buddy are locked until you submit, so this feels like the real thing. Focus up!</div>` : ""}
   `;
+}
+/* Theme choice is purely a client-side display preference - saved to localStorage
+   only, never sent to the server, and applied by toggling one attribute on the
+   root element, which the CSS below reads to swap the base colour variables. */
+function toggleTheme(){
+  state.theme = state.theme==="dark" ? "light" : "dark";
+  try{ localStorage.setItem("gce_theme", state.theme); }catch(e){}
+  applyTheme();
+  render();
+}
+window.toggleTheme = toggleTheme;
+function applyTheme(){
+  if(typeof document!=="undefined" && document.documentElement){
+    document.documentElement.setAttribute("data-theme", state.theme);
+  }
+}
+function loadTheme(){
+  try{ state.theme = localStorage.getItem("gce_theme") || "light"; }catch(e){ state.theme = "light"; }
+  applyTheme();
 }
 function adminToggleUserDetail(username){
   state.adminExpandedUser = state.adminExpandedUser === username ? null : username;
@@ -7769,6 +7815,7 @@ function renderDashboard(){
 
 /* ======================= INIT ======================= */
 (async function init(){
+  loadTheme();
   if(typeof window !== "undefined" && window.location && window.location.hash === "#admin"){
     state.view = "admin";
     render();
