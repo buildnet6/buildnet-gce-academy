@@ -37,6 +37,11 @@
   @keyframes floaty{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
   @keyframes pulseDot{ 0%,100%{opacity:0.35;} 50%{opacity:1;} }
   @keyframes confettiFall{ to{ transform:translateY(160px) rotate(360deg); opacity:0; } }
+  @keyframes partyConfettiFall{ to{ transform:translateY(110vh) rotate(720deg); opacity:0.2; } }
+  .readiness-party-overlay{position:fixed;inset:0;background:rgba(43,35,80,0.72);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;animation:viewIn .3s ease both;overflow:hidden;}
+  .readiness-party-confetti{position:absolute;inset:0;pointer-events:none;}
+  .readiness-party-confetti span{position:absolute;top:-20px;border-radius:3px;animation:partyConfettiFall linear forwards;}
+  .readiness-party-card{background:#fff;border-radius:28px;padding:40px 32px;max-width:480px;max-height:88vh;overflow-y:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;z-index:1;}
 
   .masthead{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
   .brand{display:flex;flex-direction:row;align-items:center;gap:10px;cursor:pointer;}
@@ -3043,14 +3048,16 @@ const SUBJECTS = [
         obj:["Balance simple chemical equations","Explain the mole concept and Avogadro's number","Perform simple stoichiometric calculations"],
         exp:[
           {t:"Balancing equations", b:"The Law of Conservation of Mass means atoms can't simply appear or disappear in a reaction, so a correctly balanced equation must have the exact same number of each type of atom on both sides. This is done by adjusting the numbers placed IN FRONT of each formula (coefficients), never by changing the formulas themselves."},
-          {t:"The mole and Avogadro's number", b:"A MOLE is simply a specific, very large counting number, 6.02×10²³ particles, called Avogadro's number, the chemist's version of a 'dozen', just scaled up enormously to be useful for atoms and molecules. Once you know how many moles of a substance you have, you can calculate its mass (using molar mass) or, for a gas, its volume, letting stoichiometry connect the balanced equation's ratios to real, measurable quantities in the lab."}
+          {t:"The mole and Avogadro's number", b:"A MOLE is simply a specific, very large counting number, 6.02×10²³ particles, called Avogadro's number, the chemist's version of a 'dozen', just scaled up enormously to be useful for atoms and molecules. Once you know how many moles of a substance you have, you can calculate its mass (using molar mass) or, for a gas, its volume, letting stoichiometry connect the balanced equation's ratios to real, measurable quantities in the lab."},
+          {t:"The limiting reagent - the one that actually decides how much product forms", b:"In a real reaction, you rarely have the EXACT ratio of reactants a balanced equation calls for, one runs out before the other. The reactant that runs out first is the LIMITING REAGENT, and it alone determines the MAXIMUM amount of product that can form, no matter how much of the other reactant (the 'excess reagent') is left over unreacted. Identifying the limiting reagent correctly, by comparing the actual mole ratio available to the ratio the equation requires, is exactly the step students most often skip, leading to an answer based on the wrong reactant entirely."}
         ],
-        err:["Changing a chemical formula's subscripts to balance an equation, instead of adjusting coefficients","Confusing 'moles' with 'mass' or 'number of particles' directly, without applying the correct conversion"],
+        err:["Changing a chemical formula's subscripts to balance an equation, instead of adjusting coefficients","Confusing 'moles' with 'mass' or 'number of particles' directly, without applying the correct conversion","Calculating product yield from whichever reactant's quantity is given first, without checking which one is actually limiting"],
         qs:[
           Q("Balancing a chemical equation means ensuring",["the same number of each type of atom appears on both sides","the same number of molecules appears on both sides","the same mass of gas is produced","the reaction happens faster"],0,"Balancing enforces conservation of atoms, not necessarily molecule count.","Easy"),
           Q("Avogadro's number, approximately 6.02×10²³, represents the number of particles in",["one mole of a substance","one gram of any substance","one litre of any gas","one atom"],0,"Avogadro's number defines the mole as a counting unit.","Medium"),
           Q("In the balanced equation 2H₂ + O₂ → 2H₂O, how many moles of oxygen are needed to react completely with 4 moles of hydrogen?",["2 moles","1 mole","4 moles","8 moles"],0,"The 2:1 ratio of H₂:O₂ means 4 moles of H₂ requires 2 moles of O₂.","Hard",VP),
-          Q("The mass of one mole of a substance, in grams, is numerically equal to its",["relative molecular (or atomic) mass","atomic number","number of protons","boiling point"],0,"Molar mass in grams equals the relative molecular/atomic mass.","Medium")
+          Q("The mass of one mole of a substance, in grams, is numerically equal to its",["relative molecular (or atomic) mass","atomic number","number of protons","boiling point"],0,"Molar mass in grams equals the relative molecular/atomic mass.","Medium"),
+          Q("In the reaction 2H₂ + O₂ → 2H₂O, 4g of H₂ (2 moles) is mixed with 16g of O₂ (0.5 moles). The limiting reagent is",["O₂, since only 0.5 mol is available but 1 mol is needed to react with all the H₂","H₂, since it has the larger mass","O₂, since it has the larger mass","neither - both react completely with none left over"],0,"The 2:1 ratio needs 1 mol O2 for 2 mol H2, but only 0.5 mol O2 is available, making it the limiting reagent.","Hard",VP)
         ]
       },
       { id:"states", name:"States of Matter",
@@ -3058,14 +3065,16 @@ const SUBJECTS = [
         obj:["Explain the kinetic theory of matter","Distinguish solids, liquids and gases by particle arrangement and energy","Explain changes of state"],
         exp:[
           {t:"Kinetic theory", b:"All matter is made of tiny particles in constant motion, and how much energy those particles have determines the state of matter. In a SOLID, particles vibrate in fixed positions, tightly packed. In a LIQUID, particles have enough energy to slide past each other while staying close together. In a GAS, particles have enough energy to move independently and spread far apart, filling whatever space is available."},
-          {t:"Changes of state", b:"Adding heat energy increases particle movement, driving a substance from solid to liquid (melting) to gas (boiling/evaporation); removing heat energy does the reverse (condensing, freezing). Crucially, during an actual change of state, the temperature stays constant even while heat is still being added or removed, since that energy is being used to break or form the bonds between particles, not to raise the temperature further."}
+          {t:"Changes of state", b:"Adding heat energy increases particle movement, driving a substance from solid to liquid (melting) to gas (boiling/evaporation); removing heat energy does the reverse (condensing, freezing). Crucially, during an actual change of state, the temperature stays constant even while heat is still being added or removed, since that energy is being used to break or form the bonds between particles, not to raise the temperature further."},
+          {t:"All six transitions, named precisely", b:"Beyond the four everyday ones, chemistry names EVERY transition between states precisely: solid→liquid is MELTING, liquid→solid is FREEZING, liquid→gas is BOILING/EVAPORATION, gas→liquid is CONDENSATION, solid→gas directly is SUBLIMATION, and gas→solid directly is DEPOSITION (frost forming directly from water vapour is a real example). Being able to name the SPECIFIC direction, not just 'it changed state', is exactly what a precise answer requires."}
         ],
-        err:["Assuming heating always immediately raises temperature, even during a phase change","Confusing evaporation (occurs at any temperature, from the surface only) with boiling (occurs throughout the liquid, at a fixed temperature)"],
+        err:["Assuming heating always immediately raises temperature, even during a phase change","Confusing evaporation (occurs at any temperature, from the surface only) with boiling (occurs throughout the liquid, at a fixed temperature)","Being unable to name deposition (gas directly to solid) as the reverse of sublimation"],
         qs:[
           Q("According to kinetic theory, particles in a gas, compared to a solid, have",["much greater energy and move independently, far apart","less energy and are more tightly packed","identical energy and arrangement","no motion at all"],0,"Gas particles have high energy and move freely, unlike the fixed vibration of solid particles.","Easy"),
           Q("The process of a liquid changing directly to a gas at any temperature, from its surface only, is called",["evaporation","boiling","condensation","sublimation"],0,"Evaporation occurs at the surface at any temperature, unlike boiling.","Medium"),
           Q("During melting, while heat is continuously supplied, the temperature of the substance",["remains constant until melting is complete","rises steadily","falls","becomes negative"],0,"Temperature plateaus during a phase change as energy breaks particle bonds instead of raising temperature.","Medium",VP),
-          Q("A substance changing directly from a solid to a gas, without passing through the liquid state, undergoes",["sublimation","evaporation","condensation","deposition"],0,"Sublimation is the direct solid-to-gas transition.","Medium")
+          Q("A substance changing directly from a solid to a gas, without passing through the liquid state, undergoes",["sublimation","evaporation","condensation","deposition"],0,"Sublimation is the direct solid-to-gas transition.","Medium"),
+          Q("Frost forming directly from water vapour in the air, without passing through liquid water, is an example of",["deposition","sublimation","evaporation","melting"],0,"Deposition is the direct gas-to-solid transition, the reverse of sublimation.","Hard",VP)
         ]
       },
       { id:"energy_chem", name:"Energy and Energy Changes",
@@ -3073,14 +3082,17 @@ const SUBJECTS = [
         obj:["Distinguish exothermic from endothermic reactions","Explain enthalpy change and simple energy diagrams"],
         exp:[
           {t:"Exothermic vs endothermic", b:"An EXOTHERMIC reaction releases energy to the surroundings, usually felt as heat, like the lit match. An ENDOTHERMIC reaction instead absorbs energy from the surroundings, making the immediate area feel colder, like certain salts dissolving. Combustion reactions are reliably exothermic; many dissolving and decomposition reactions are endothermic."},
-          {t:"Enthalpy change", b:"Enthalpy change (ΔH) measures the heat energy difference between products and reactants. By convention, ΔH is NEGATIVE for an exothermic reaction (energy leaves the system) and POSITIVE for an endothermic reaction (energy enters the system), a sign convention that trips students up if they assume 'negative' always means 'less energy released' rather than 'energy released outward'."}
+          {t:"Enthalpy change", b:"Enthalpy change (ΔH) measures the heat energy difference between products and reactants. By convention, ΔH is NEGATIVE for an exothermic reaction (energy leaves the system) and POSITIVE for an endothermic reaction (energy enters the system), a sign convention that trips students up if they assume 'negative' always means 'less energy released' rather than 'energy released outward'."},
+          {t:"Activation energy - why reactions need a 'push' to start", b:"ACTIVATION ENERGY is the minimum energy needed before a reaction can begin at all, even a genuinely exothermic reaction (like burning wood) needs an initial spark or heat source to get going, since existing bonds must first be broken before new ones can form and release energy. A CATALYST works specifically by lowering this activation energy barrier, providing an easier pathway, without being consumed itself or changing whether the reaction is exothermic or endothermic overall."}
         ],
-        err:["Assuming all reactions release heat, when many genuinely absorb it instead","Getting the sign convention backwards: exothermic is NEGATIVE ΔH, not positive"],
+        err:["Assuming all reactions release heat, when many genuinely absorb it instead","Getting the sign convention backwards: exothermic is NEGATIVE ΔH, not positive","Assuming an exothermic reaction needs no energy at all to start, forgetting activation energy is still required to begin it"],
         qs:[
           Q("A reaction that releases heat energy to its surroundings is called",["exothermic","endothermic","isothermic","adiabatic"],0,"Exothermic reactions release energy outward.","Easy"),
           Q("A reaction that absorbs heat energy from its surroundings, making the surroundings feel colder, is called",["endothermic","exothermic","catalytic","neutral"],0,"Endothermic reactions absorb energy from surroundings.","Easy"),
           Q("By convention, the enthalpy change (ΔH) for an exothermic reaction is",["negative","positive","always zero","undefined"],0,"Exothermic reactions have negative ΔH since energy leaves the system.","Medium",VP),
-          Q("Combustion of fuels, such as burning wood or petrol, is best classified as",["an exothermic reaction","an endothermic reaction","a non-chemical physical change","a purely nuclear reaction"],0,"Combustion reliably releases heat energy, making it exothermic.","Easy")
+          Q("Combustion of fuels, such as burning wood or petrol, is best classified as",["an exothermic reaction","an endothermic reaction","a non-chemical physical change","a purely nuclear reaction"],0,"Combustion reliably releases heat energy, making it exothermic.","Easy"),
+          Q("The minimum energy needed before a reaction can begin at all, even one that will end up exothermic, is called the",["activation energy","enthalpy change","bond energy","lattice energy"],0,"Activation energy is the initial energy barrier a reaction must overcome to start.","Medium",VP),
+          Q("A catalyst speeds up a reaction specifically by",["lowering the activation energy needed for the reaction to proceed","increasing the enthalpy change of the reaction","being consumed as an extra reactant","making an endothermic reaction exothermic"],0,"Catalysts provide an alternative pathway with lower activation energy.","Medium")
         ]
       },
       { id:"acidsbase", name:"Acids, Bases and Salts",
@@ -3088,14 +3100,17 @@ const SUBJECTS = [
         obj:["Define acids and bases using the Arrhenius concept","Explain the pH scale","Explain neutralization and salt formation"],
         exp:[
           {t:"Acids and bases", b:"By the Arrhenius definition, an ACID is a substance that produces H⁺ (or H₃O⁺) ions in water, while a BASE produces OH⁻ ions in water. The pH SCALE (0-14) measures how acidic or basic a solution is: below 7 is acidic, exactly 7 is neutral (pure water), above 7 is basic (alkaline)."},
-          {t:"Neutralization and salts", b:"When an acid reacts with a base, they NEUTRALISE each other, producing a SALT and water, acid + base → salt + water. This is exactly why milk of magnesia (a base) relieves the discomfort of excess stomach acid, and why farmers add lime (a base) to acidic soil to bring its pH closer to neutral for better crop growth."}
+          {t:"Neutralization and salts", b:"When an acid reacts with a base, they NEUTRALISE each other, producing a SALT and water, acid + base → salt + water. This is exactly why milk of magnesia (a base) relieves the discomfort of excess stomach acid, and why farmers add lime (a base) to acidic soil to bring its pH closer to neutral for better crop growth."},
+          {t:"Strong vs weak - not the same thing as concentrated vs dilute", b:"STRONG acids/bases ionise (split into ions) almost COMPLETELY in water (e.g. hydrochloric acid); WEAK acids/bases only ionise PARTIALLY, existing mostly as un-ionised molecules with only a small fraction as ions (e.g. ethanoic/acetic acid). This is a genuinely different property from CONCENTRATION, which just measures how much acid is dissolved in a given volume, regardless of how completely it ionises. A dilute solution of a strong acid can still be more acidic (lower pH) than a concentrated solution of a weak acid, since strength (ionisation degree), not just concentration, determines the actual H+ ion output."}
         ],
-        err:["Assuming a strong acid and a concentrated acid mean the same thing (strength refers to ionisation, concentration to amount dissolved)","Forgetting that pH 7 specifically means neutral, not 'a little acidic'"],
+        err:["Assuming a strong acid and a concentrated acid mean the same thing (strength refers to ionisation, concentration to amount dissolved)","Forgetting that pH 7 specifically means neutral, not 'a little acidic'","Assuming a dilute strong acid must be less acidic than a concentrated weak acid, when ionisation degree can outweigh concentration"],
         qs:[
           Q("According to the Arrhenius concept, an acid is a substance that produces",["H+ ions in water","OH- ions in water","only salt","only water"],0,"Arrhenius acids specifically produce H+ ions in aqueous solution.","Easy"),
           Q("A solution with a pH of 7 is described as",["neutral","strongly acidic","strongly basic","unmeasurable"],0,"pH 7 is exactly neutral.","Easy"),
           Q("The reaction between an acid and a base to form a salt and water is called",["neutralization","oxidation","sublimation","electrolysis"],0,"Acid + base reactions producing salt and water are neutralization reactions.","Easy"),
-          Q("A solution with a pH of 3 is best described as",["acidic","neutral","basic (alkaline)","impossible to determine"],0,"Any pH below 7 is acidic.","Medium",VP)
+          Q("A solution with a pH of 3 is best described as",["acidic","neutral","basic (alkaline)","impossible to determine"],0,"Any pH below 7 is acidic.","Medium",VP),
+          Q("A strong acid, compared to a weak acid, is one that",["ionises almost completely in water","is always more concentrated","always has a lower volume","always reacts more slowly"],0,"Strength refers to degree of ionisation, not concentration.","Medium",VP),
+          Q("Hydrochloric acid (a strong acid) and ethanoic acid (a weak acid) differ mainly in that",["HCl ionises almost completely in water while ethanoic acid only partially ionises","HCl is always more concentrated than ethanoic acid","ethanoic acid always has a higher pH regardless of concentration","there is no genuine difference between them"],0,"The key distinction is degree of ionisation (strength), not concentration.","Hard")
         ]
       },
       { id:"solubility", name:"Solubility of Substances",
@@ -3103,14 +3118,16 @@ const SUBJECTS = [
         obj:["Explain solubility and distinguish saturated from unsaturated solutions","Explain factors affecting solubility"],
         exp:[
           {t:"Saturated vs unsaturated", b:"A SATURATED solution has dissolved the maximum amount of solute possible at that temperature, adding more just leaves undissolved solid sitting at the bottom. An UNSATURATED solution can still dissolve more solute before reaching that limit."},
-          {t:"Factors affecting solubility", b:"For most solids dissolving in water, solubility INCREASES as temperature rises, exactly why hot tea dissolves more sugar than cold tea. Gases behave oppositely, their solubility in water DECREASES as temperature rises, which is why a warm fizzy drink loses its carbonation faster than a cold one."}
+          {t:"Factors affecting solubility", b:"For most solids dissolving in water, solubility INCREASES as temperature rises, exactly why hot tea dissolves more sugar than cold tea. Gases behave oppositely, their solubility in water DECREASES as temperature rises, which is why a warm fizzy drink loses its carbonation faster than a cold one."},
+          {t:"Solubility curves - reading the graph WAEC actually asks about", b:"A SOLUBILITY CURVE plots how much solute (usually in grams per 100g of water) dissolves at different temperatures, letting you read off the maximum solubility at any given temperature directly from the graph. WAEC commonly asks students to read a specific value off such a curve, or to calculate how much solid crystallises out when a saturated solution is cooled from one temperature to another, the difference between the two curve readings at those temperatures is exactly the mass that comes out of solution as crystals."}
         ],
-        err:["Assuming solubility always increases with temperature, forgetting gases behave the opposite way","Confusing a saturated solution with a concentrated one (a dilute solution can still be saturated if the solute simply doesn't dissolve well)"],
+        err:["Assuming solubility always increases with temperature, forgetting gases behave the opposite way","Confusing a saturated solution with a concentrated one (a dilute solution can still be saturated if the solute simply doesn't dissolve well)","Forgetting that the mass of solid crystallising on cooling is the DIFFERENCE between two solubility readings, not either reading alone"],
         qs:[
           Q("A solution that has dissolved the maximum solute possible at a given temperature is called",["saturated","unsaturated","dilute","pure"],0,"A saturated solution holds the maximum dissolvable solute at that temperature.","Easy"),
           Q("For most solid solutes dissolving in water, solubility generally",["increases as temperature rises","decreases as temperature rises","stays exactly constant with temperature","becomes zero at high temperature"],0,"Most solids become more soluble in water as temperature increases.","Medium"),
           Q("For gases dissolving in water, solubility generally",["decreases as temperature rises","increases as temperature rises","is unaffected by temperature","only depends on pressure, never temperature"],0,"Gas solubility in water decreases as temperature rises, unlike most solids.","Medium",VP),
-          Q("A warm carbonated drink loses its fizz faster than a cold one mainly because",["the gas's solubility decreases as temperature rises, releasing it from solution","the liquid evaporates completely","the sugar content increases with heat","carbon dioxide becomes heavier when warm"],0,"Reduced gas solubility at higher temperature causes CO2 to escape more readily.","Medium")
+          Q("A warm carbonated drink loses its fizz faster than a cold one mainly because",["the gas's solubility decreases as temperature rises, releasing it from solution","the liquid evaporates completely","the sugar content increases with heat","carbon dioxide becomes heavier when warm"],0,"Reduced gas solubility at higher temperature causes CO2 to escape more readily.","Medium"),
+          Q("A solubility curve shows that a salt's solubility is 50g per 100g of water at 60°C, and 30g per 100g of water at 20°C. If a saturated solution made with 100g of water at 60°C is cooled to 20°C, the mass of salt that crystallises out is",["20g","30g","50g","80g"],0,"The crystallised mass is the difference between the two solubility readings: 50-30=20g.","Hard",VP)
         ]
       },
       { id:"kinetics", name:"Chemical Kinetics and Equilibrium",
@@ -3118,14 +3135,16 @@ const SUBJECTS = [
         obj:["Explain factors affecting the rate of a chemical reaction","Explain the concept of chemical equilibrium"],
         exp:[
           {t:"Factors affecting reaction rate", b:"Reaction rate increases with: higher TEMPERATURE (particles move faster, colliding more often and more energetically), higher CONCENTRATION (more particles available to collide), a CATALYST (speeds up a reaction without being used up itself, by providing an easier reaction pathway), and greater SURFACE AREA (more particle contact area, which is why powdered substances react faster than solid lumps)."},
-          {t:"Chemical equilibrium", b:"Some reactions don't go to completion, instead reaching a point where the forward and reverse reactions occur at exactly the same rate, called EQUILIBRIUM. At equilibrium, the amounts of reactants and products stay constant, not because the reaction has stopped, but because it's happening in both directions at matched speed, a dynamic balance rather than a frozen one."}
+          {t:"Chemical equilibrium", b:"Some reactions don't go to completion, instead reaching a point where the forward and reverse reactions occur at exactly the same rate, called EQUILIBRIUM. At equilibrium, the amounts of reactants and products stay constant, not because the reaction has stopped, but because it's happening in both directions at matched speed, a dynamic balance rather than a frozen one."},
+          {t:"Le Chatelier's Principle - predicting how equilibrium shifts", b:"LE CHATELIER'S PRINCIPLE states that if a system at equilibrium is disturbed (by changing concentration, pressure, or temperature), the equilibrium shifts in whichever direction PARTIALLY COUNTERACTS that change. Increasing a reactant's concentration shifts equilibrium toward the PRODUCTS (using up the extra reactant); increasing pressure shifts equilibrium toward the side with FEWER gas molecules; increasing temperature shifts equilibrium toward whichever direction ABSORBS the extra heat (the endothermic direction). This lets you predict the direction of a shift without needing to know the exact numbers involved."}
         ],
-        err:["Assuming a catalyst gets consumed in the reaction it speeds up","Assuming equilibrium means the reaction has completely stopped, rather than balanced in both directions"],
+        err:["Assuming a catalyst gets consumed in the reaction it speeds up","Assuming equilibrium means the reaction has completely stopped, rather than balanced in both directions","Assuming increasing temperature always shifts equilibrium the same direction, when it actually depends on which direction is endothermic for that specific reaction"],
         qs:[
           Q("Which of these would generally INCREASE the rate of a chemical reaction?",["Increasing the temperature","Decreasing the concentration of reactants","Using larger solid lumps instead of powder","Removing the catalyst"],0,"Higher temperature increases particle energy and collision frequency, speeding up reactions.","Easy"),
           Q("A catalyst speeds up a reaction by",["providing an alternative pathway with lower activation energy, without being consumed","being permanently used up in the reaction","cooling the reaction mixture","removing reactants from the mixture"],0,"Catalysts lower activation energy and are not consumed.","Medium"),
           Q("At chemical equilibrium, the forward and reverse reaction rates are",["equal, with a dynamic balance maintained","completely stopped","always exactly zero for the reverse reaction","impossible to compare"],0,"Equilibrium is a dynamic state where forward and reverse rates match.","Medium",VP),
-          Q("Powdered zinc reacts with dilute acid faster than a solid zinc lump mainly because powder has",["greater surface area for particle collisions","lower temperature","less mass overall","weaker chemical bonds"],0,"Greater surface area increases the frequency of effective collisions.","Medium")
+          Q("Powdered zinc reacts with dilute acid faster than a solid zinc lump mainly because powder has",["greater surface area for particle collisions","lower temperature","less mass overall","weaker chemical bonds"],0,"Greater surface area increases the frequency of effective collisions.","Medium"),
+          Q("According to Le Chatelier's Principle, increasing the concentration of a reactant in a system at equilibrium will shift the equilibrium",["toward the products, using up the extra reactant","toward the reactants","in no particular direction","only if a catalyst is also added"],0,"The system shifts to partially counteract the added reactant by forming more product.","Hard",VP)
         ]
       },
       { id:"redox", name:"Redox Reactions",
@@ -3133,14 +3152,16 @@ const SUBJECTS = [
         obj:["Define oxidation and reduction in terms of electron transfer","Identify oxidising and reducing agents in a reaction"],
         exp:[
           {t:"OIL RIG - the memory device", b:"OXIDATION Is Loss (of electrons); REDuction Is Gain (of electrons), remembered as 'OIL RIG'. Since electrons lost by one substance must be gained by another, oxidation and reduction always happen together in the same reaction, which is exactly why it's called a REDOX (reduction-oxidation) reaction, never one without the other."},
-          {t:"Oxidising and reducing agents", b:"The OXIDISING AGENT is the substance that causes oxidation in another substance by accepting its electrons, meaning the oxidising agent itself gets reduced in the process. The REDUCING AGENT causes reduction in another substance by donating electrons, meaning it itself gets oxidised. This 'agent gets the opposite treatment' logic is exactly where students most often trip up."}
+          {t:"Oxidising and reducing agents", b:"The OXIDISING AGENT is the substance that causes oxidation in another substance by accepting its electrons, meaning the oxidising agent itself gets reduced in the process. The REDUCING AGENT causes reduction in another substance by donating electrons, meaning it itself gets oxidised. This 'agent gets the opposite treatment' logic is exactly where students most often trip up."},
+          {t:"Oxidation numbers - spotting redox even without obvious electron transfer", b:"An OXIDATION NUMBER (or state) is a value assigned to an atom reflecting its degree of oxidation, useful because not every redox reaction has an obviously 'ionic' electron transfer to point at. As a rule, an increase in oxidation number means OXIDATION has occurred; a decrease means REDUCTION has occurred. For example, in the reaction where iron(II) becomes iron(III) (Fe²⁺ → Fe³⁺), the oxidation number rises from +2 to +3, confirming oxidation occurred, exactly matching OIL RIG's 'loss of electrons' even though no obvious ion was 'given away' to a visible partner in the equation as written."}
         ],
-        err:["Confusing which substance is 'oxidised' versus which one is the 'oxidising agent' (they refer to opposite roles)","Forgetting that oxidation and reduction always occur together, never in isolation"],
+        err:["Confusing which substance is 'oxidised' versus which one is the 'oxidising agent' (they refer to opposite roles)","Forgetting that oxidation and reduction always occur together, never in isolation","Assuming oxidation numbers only apply to obviously ionic compounds, when they're a general tool for spotting oxidation/reduction in any reaction"],
         qs:[
           Q("Using the 'OIL RIG' memory device, oxidation involves the",["loss of electrons","gain of electrons","gain of protons","loss of neutrons"],0,"OIL = Oxidation Is Loss (of electrons).","Easy"),
           Q("Using the 'OIL RIG' memory device, reduction involves the",["gain of electrons","loss of electrons","loss of protons","gain of neutrons"],0,"RIG = Reduction Is Gain (of electrons).","Easy"),
           Q("A substance that causes oxidation in another substance, by accepting electrons from it, is called a(n)",["oxidising agent","reducing agent","catalyst","indicator"],0,"An oxidising agent accepts electrons, causing oxidation elsewhere, while itself being reduced.","Medium"),
-          Q("In a redox reaction, if Substance A loses electrons to Substance B, then Substance A has been",["oxidised, and acted as the reducing agent","reduced, and acted as the oxidising agent","neither oxidised nor reduced","both oxidised and reduced simultaneously"],0,"Losing electrons means Substance A is oxidised, making it the reducing agent (it caused B's reduction).","Hard",VP)
+          Q("In a redox reaction, if Substance A loses electrons to Substance B, then Substance A has been",["oxidised, and acted as the reducing agent","reduced, and acted as the oxidising agent","neither oxidised nor reduced","both oxidised and reduced simultaneously"],0,"Losing electrons means Substance A is oxidised, making it the reducing agent (it caused B's reduction).","Hard",VP),
+          Q("When Fe²⁺ is converted to Fe³⁺, the oxidation number increases from +2 to +3. This change indicates that",["oxidation has occurred","reduction has occurred","no redox change has occurred","the iron has gained electrons"],0,"An increase in oxidation number indicates oxidation (loss of electrons).","Hard")
         ]
       },
       { id:"carbon_chem", name:"Chemistry of Carbon Compounds",
@@ -3148,14 +3169,18 @@ const SUBJECTS = [
         obj:["Distinguish alkanes, alkenes and alkynes","Explain the general properties of hydrocarbons"],
         exp:[
           {t:"Alkanes, alkenes and alkynes", b:"ALKANES contain only single bonds between carbon atoms (saturated), like methane (CH₄). ALKENES contain at least one carbon-carbon double bond (unsaturated), like ethene (C₂H₄). ALKYNES contain at least one carbon-carbon triple bond, like ethyne (C₂H₂). The degree of 'saturation' (single vs double/triple bonds) directly affects reactivity, unsaturated compounds react more readily since that extra bond can be 'opened up' in addition reactions."},
-          {t:"Testing for unsaturation", b:"A classic, testable lab technique: adding bromine water to an unsaturated hydrocarbon (an alkene or alkyne) causes the orange bromine water to decolourise, as it reacts across the double or triple bond. A saturated alkane shows NO such colour change, since it has no extra bond available to react with the bromine. This simple test is a genuinely reliable way to distinguish the two categories experimentally."}
+          {t:"Testing for unsaturation", b:"A classic, testable lab technique: adding bromine water to an unsaturated hydrocarbon (an alkene or alkyne) causes the orange bromine water to decolourise, as it reacts across the double or triple bond. A saturated alkane shows NO such colour change, since it has no extra bond available to react with the bromine. This simple test is a genuinely reliable way to distinguish the two categories experimentally."},
+          {t:"Beyond hydrocarbons - alcohols and carboxylic acids", b:"Not every carbon compound is a pure hydrocarbon, some carry a specific FUNCTIONAL GROUP that defines a whole family of related compounds. ALCOHOLS carry an -OH group (e.g. ethanol, C₂H₅OH, the alcohol in fermented drinks), formed industrially from ethene plus steam, or biologically through fermentation of sugars by yeast. CARBOXYLIC ACIDS carry a -COOH group (e.g. ethanoic/acetic acid, CH₃COOH, the acid in vinegar), and, being genuine acids, they react with bases to form salts and turn blue litmus red, unlike alcohols, which are neutral."},
         ],
-        err:["Assuming all hydrocarbons behave identically regardless of single/double/triple bonds","Forgetting the specific bromine water test result: decolourises for unsaturated compounds, no change for saturated ones"],
+        err:["Assuming all hydrocarbons behave identically regardless of single/double/triple bonds","Forgetting the specific bromine water test result: decolourises for unsaturated compounds, no change for saturated ones","Assuming alcohols are acidic like carboxylic acids, when alcohols are actually neutral compounds"],
         qs:[
           Q("A hydrocarbon containing only single bonds between carbon atoms is called an",["alkane","alkene","alkyne","aromatic compound"],0,"Alkanes are saturated hydrocarbons with only single bonds.","Easy"),
           Q("A hydrocarbon containing at least one carbon-carbon double bond is called an",["alkene","alkane","alkyne","alcohol"],0,"Alkenes contain at least one C=C double bond.","Easy"),
           Q("Adding bromine water to an unsaturated hydrocarbon typically results in",["decolourisation of the bromine water","no visible change at all","an explosive reaction","formation of a solid precipitate only"],0,"Unsaturated compounds decolourise bromine water by reacting across their double/triple bond.","Medium",VP),
-          Q("Ethyne (C₂H₂), containing a carbon-carbon triple bond, is classified as an",["alkyne","alkane","alkene","aromatic hydrocarbon"],0,"Alkynes contain at least one C≡C triple bond.","Medium")
+          Q("Ethyne (C₂H₂), containing a carbon-carbon triple bond, is classified as an",["alkyne","alkane","alkene","aromatic hydrocarbon"],0,"Alkynes contain at least one C≡C triple bond.","Medium"),
+          Q("The functional group that defines an alcohol, such as ethanol, is",["-OH","-COOH","a double bond","a triple bond"],0,"The -OH (hydroxyl) group defines the alcohol family.","Medium",VP),
+          Q("Ethanoic (acetic) acid, the acid found in vinegar, carries which functional group?",["-COOH (carboxylic acid group)","-OH (alcohol group)","a double bond only","a triple bond only"],0,"Ethanoic acid is a carboxylic acid, carrying the -COOH group.","Medium"),
+          Q("Unlike carboxylic acids, alcohols such as ethanol are",["neutral, not acidic","strongly acidic","strongly basic","unreactive with everything"],0,"Alcohols are neutral compounds, unlike the genuinely acidic carboxylic acids.","Medium")
         ]
       },
       { id:"chem_industry", name:"Chemistry, Industry and the Environment",
@@ -3163,14 +3188,17 @@ const SUBJECTS = [
         obj:["Explain the industrial importance of key chemical processes","Discuss chemistry's role in environmental pollution and its control"],
         exp:[
           {t:"Key industrial processes", b:"The HABER PROCESS combines nitrogen and hydrogen gas under high pressure and temperature, with an iron catalyst, to manufacture AMMONIA, the essential starting material for nitrogen-based fertilisers that support much of the world's food production. Industrial chemistry like this is exactly why chemistry and economic development are so closely linked."},
+          {t:"The Contact Process - manufacturing the world's most-produced industrial chemical", b:"The CONTACT PROCESS manufactures SULFURIC ACID, arguably the single most widely used industrial chemical worldwide, essential in fertiliser production, petroleum refining, and countless other processes. It works by first burning sulfur to form sulfur dioxide, then converting this to sulfur trioxide using a VANADIUM(V) OXIDE catalyst, before finally dissolving the product to form sulfuric acid. Like the Haber process, it depends on a specific named catalyst, but a different one, vanadium(V) oxide, not iron, a detail WAEC sometimes tests directly."},
           {t:"Chemistry and environmental pollution", b:"Industrial chemical processes can also cause real environmental harm: burning fossil fuels releases carbon dioxide (linked to global warming) and sulfur dioxide (a cause of acid rain), while improperly disposed industrial waste can contaminate water and soil. Understanding the SAME chemistry that enables useful production is exactly what's needed to design cleaner alternatives and pollution controls."}
         ],
-        err:["Assuming industrial chemistry is only relevant to factories, with no connection to environmental issues","Being unable to name a specific industrial process (like the Haber process) when asked for a concrete example"],
+        err:["Assuming industrial chemistry is only relevant to factories, with no connection to environmental issues","Being unable to name a specific industrial process (like the Haber process) when asked for a concrete example","Confusing the Haber process's catalyst (iron) with the Contact process's catalyst (vanadium(V) oxide)"],
         qs:[
           Q("The Haber process is industrially important because it manufactures",["ammonia, used mainly for nitrogen-based fertilisers","table salt","plastic","glass"],0,"The Haber process combines nitrogen and hydrogen to produce ammonia.","Medium"),
           Q("The burning of fossil fuels is a major source of the gas most associated with",["global warming (carbon dioxide)","completely harmless byproducts only","increased oxygen levels","reduced atmospheric pollution"],0,"Fossil fuel combustion releases significant carbon dioxide, linked to global warming.","Easy"),
           Q("Sulfur dioxide released from industrial processes is a major contributor to",["acid rain","ozone layer thickening","increased soil fertility","reduced global temperatures"],0,"Sulfur dioxide dissolving in atmospheric moisture is a key cause of acid rain.","Medium",VP),
-          Q("The Haber process typically uses which catalyst to speed up ammonia production?",["Iron","Copper","Platinum only","No catalyst is used"],0,"Iron is the classic catalyst used in the Haber process.","Hard")
+          Q("The Haber process typically uses which catalyst to speed up ammonia production?",["Iron","Copper","Platinum only","No catalyst is used"],0,"Iron is the classic catalyst used in the Haber process.","Hard"),
+          Q("The Contact Process is industrially important because it manufactures",["sulfuric acid","ammonia","table salt","glass"],0,"The Contact Process produces sulfuric acid via sulfur dioxide and trioxide.","Medium",VP),
+          Q("The catalyst used in the Contact Process is",["vanadium(V) oxide","iron","platinum","no catalyst is used"],0,"Vanadium(V) oxide is the specific catalyst in the Contact Process, distinct from the Haber process's iron.","Hard")
         ]
       },
       { id:"biochem", name:"Basic Biochemistry and Synthetic Polymers",
@@ -3178,14 +3206,17 @@ const SUBJECTS = [
         obj:["Identify the major classes of biomolecules","Distinguish natural from synthetic polymers"],
         exp:[
           {t:"Major biomolecules", b:"CARBOHYDRATES (like starch and sugar) are the body's primary energy source. PROTEINS, built from amino acids, form structural tissue and enzymes. LIPIDS (fats and oils) store energy and form cell membranes. These three, alongside nucleic acids like DNA, are the core biomolecules basic biochemistry studies."},
-          {t:"Natural vs synthetic polymers", b:"A POLYMER is a large molecule made of many repeating smaller units (monomers) linked together. NATURAL polymers, like starch (made of repeating glucose units) or proteins (made of repeating amino acids), are produced by living organisms. SYNTHETIC polymers, like polythene or PVC, are man-made in factories from simpler starting monomers, the same basic 'long chain of repeating units' concept, just engineered rather than grown."}
+          {t:"Natural vs synthetic polymers", b:"A POLYMER is a large molecule made of many repeating smaller units (monomers) linked together. NATURAL polymers, like starch (made of repeating glucose units) or proteins (made of repeating amino acids), are produced by living organisms. SYNTHETIC polymers, like polythene or PVC, are man-made in factories from simpler starting monomers, the same basic 'long chain of repeating units' concept, just engineered rather than grown."},
+          {t:"Enzymes - proteins acting as biological catalysts", b:"ENZYMES are specialised proteins that act as biological CATALYSTS, speeding up the countless chemical reactions happening inside living things without being used up themselves, exactly the same core catalyst behaviour discussed elsewhere in chemistry, just built from a biomolecule. Enzymes are highly SPECIFIC, each generally only speeds up one particular reaction, and are sensitive to temperature and pH, working best within a narrow optimal range, becoming less effective (or permanently 'denatured') if conditions stray too far outside it."}
         ],
-        err:["Assuming 'polymer' only refers to man-made plastic, forgetting starch and proteins are natural polymers too","Confusing carbohydrates, proteins and lipids' distinct biological roles"],
+        err:["Assuming 'polymer' only refers to man-made plastic, forgetting starch and proteins are natural polymers too","Confusing carbohydrates, proteins and lipids' distinct biological roles","Assuming enzymes work equally well at any temperature or pH, when they're actually highly sensitive to both"],
         qs:[
           Q("The body's primary source of quick energy among the major biomolecules is",["carbohydrates","proteins","lipids","nucleic acids"],0,"Carbohydrates are the body's main quick-energy source.","Easy"),
           Q("A large molecule made of many repeating smaller units linked together is called a",["polymer","monomer","isotope","catalyst"],0,"A polymer consists of repeating monomer units.","Easy"),
           Q("Starch is an example of a",["natural polymer, made of repeating glucose units","synthetic polymer","simple monomer only","non-carbon compound"],0,"Starch is a natural polymer built from repeating glucose (monomer) units.","Medium"),
-          Q("Proteins are built from repeating units called",["amino acids","glucose units","fatty acids","nucleotides only"],0,"Proteins are polymers of amino acids.","Medium",VP)
+          Q("Proteins are built from repeating units called",["amino acids","glucose units","fatty acids","nucleotides only"],0,"Proteins are polymers of amino acids.","Medium",VP),
+          Q("Enzymes act in living organisms as",["biological catalysts, speeding up reactions without being consumed","a source of quick energy only","structural components only","a type of synthetic polymer"],0,"Enzymes are specialised protein catalysts.","Medium"),
+          Q("Enzymes are generally very sensitive to changes in",["temperature and pH","colour and texture only","atomic number only","electrical charge only"],0,"Enzyme activity is highly dependent on temperature and pH conditions.","Medium",VP)
         ]
       },
       { id:"nonmetals", name:"Non-Metals and Their Compounds",
@@ -3193,14 +3224,16 @@ const SUBJECTS = [
         obj:["Identify the allotropes of carbon and their properties","Explain key properties and uses of major non-metals"],
         exp:[
           {t:"Allotropes of carbon", b:"ALLOTROPES are different structural forms of the same element. Carbon has several: GRAPHITE (layers of atoms that slide easily past each other, making it soft and a good conductor, used in pencils), DIAMOND (a rigid 3D network making it extremely hard, used in cutting tools), and AMORPHOUS carbon (like charcoal, with no ordered structure)."},
-          {t:"Other key non-metals", b:"Non-metals such as nitrogen, oxygen, sulfur and chlorine each have distinct, industrially important properties: oxygen supports combustion and respiration, nitrogen is largely unreactive and used to create inert atmospheres, sulfur is used in making sulfuric acid, and chlorine is widely used for water purification and disinfection."}
+          {t:"Other key non-metals", b:"Non-metals such as nitrogen, oxygen, sulfur and chlorine each have distinct, industrially important properties: oxygen supports combustion and respiration, nitrogen is largely unreactive and used to create inert atmospheres, sulfur is used in making sulfuric acid, and chlorine is widely used for water purification and disinfection."},
+          {t:"Oxygen has an allotrope too - ozone", b:"Oxygen itself exists in more than one form: ordinary OXYGEN GAS (O₂), the form we breathe, and OZONE (O₃), a less stable, more reactive molecule made of three oxygen atoms instead of two. Ozone occurs naturally high in the atmosphere, where it forms a protective layer absorbing much of the sun's harmful ultraviolet radiation, genuinely important context for understanding why ozone layer depletion is treated as a serious environmental concern."}
         ],
-        err:["Assuming graphite and diamond, being the same element, must share identical physical properties","Confusing an element's chemical identity with its allotropic (structural) form"],
+        err:["Assuming graphite and diamond, being the same element, must share identical physical properties","Confusing an element's chemical identity with its allotropic (structural) form","Assuming oxygen only exists as O₂, overlooking ozone (O₃) as a genuine allotrope of the same element"],
         qs:[
           Q("Graphite and diamond are both allotropes of",["carbon","silicon","sulfur","nitrogen"],0,"Both are structural forms of pure carbon.","Easy"),
           Q("Diamond is extremely hard mainly because of its",["rigid three-dimensional bonded structure","soft layered structure","lack of any bonding","high electrical conductivity"],0,"Diamond's rigid 3D covalent network gives it exceptional hardness.","Medium"),
           Q("Graphite conducts electricity, unlike diamond, mainly because graphite has",["delocalised electrons able to move within its layered structure","no carbon atoms at all","a completely different chemical formula","a lower melting point"],0,"Graphite's layered structure allows delocalised electrons to move and conduct charge.","Hard",VP),
-          Q("Chlorine is widely used industrially for",["water purification and disinfection","only as a fuel","only as a fertiliser","only as a lubricant"],0,"Chlorine's disinfecting properties make it useful for water treatment.","Medium")
+          Q("Chlorine is widely used industrially for",["water purification and disinfection","only as a fuel","only as a fertiliser","only as a lubricant"],0,"Chlorine's disinfecting properties make it useful for water treatment.","Medium"),
+          Q("Ozone (O₃) and ordinary oxygen gas (O₂) are best described as",["allotropes of the same element, oxygen","completely different elements","identical in every property","never naturally occurring together"],0,"Ozone and O2 are both structural forms (allotropes) of oxygen.","Hard",VP)
         ]
       },
       { id:"metals", name:"Metals and Their Compounds",
@@ -3208,14 +3241,16 @@ const SUBJECTS = [
         obj:["Explain the general physical and chemical properties of metals","Explain corrosion and methods of preventing it"],
         exp:[
           {t:"General properties of metals", b:"Metals are typically good conductors of heat and electricity, malleable (can be hammered into shape without breaking) and ductile (can be drawn into wires), properties that trace back to their metallic bonding and the 'sea' of delocalised electrons discussed earlier in Chemical Bonds."},
-          {t:"Corrosion and its prevention", b:"CORROSION is the gradual destruction of a metal through chemical reaction with its environment, iron RUSTING (reacting with oxygen and water to form hydrated iron oxide) is the most familiar example. Prevention methods include PAINTING or GALVANISING (coating with a protective layer, often zinc, that reacts preferentially so the underlying metal doesn't), and ALLOYING (mixing with other metals to produce a more corrosion-resistant material, like stainless steel)."}
+          {t:"Corrosion and its prevention", b:"CORROSION is the gradual destruction of a metal through chemical reaction with its environment, iron RUSTING (reacting with oxygen and water to form hydrated iron oxide) is the most familiar example. Prevention methods include PAINTING or GALVANISING (coating with a protective layer, often zinc, that reacts preferentially so the underlying metal doesn't), and ALLOYING (mixing with other metals to produce a more corrosion-resistant material, like stainless steel)."},
+          {t:"The reactivity series - ranking metals by how readily they react", b:"The REACTIVITY SERIES lists metals in order of how readily they react (roughly: potassium, sodium, calcium, magnesium, aluminium, zinc, iron, lead, copper, silver, gold, from most to least reactive). This ranking predicts real outcomes: a MORE reactive metal will DISPLACE a less reactive one from its compound in solution (e.g. zinc displaces copper from copper sulfate solution, since zinc is higher in the series), and generally, metals higher in the series corrode/tarnish faster and are extracted from their ores with more difficulty than metals lower down."}
         ],
-        err:["Assuming all metals corrode at the same rate or in the same way","Confusing galvanising (a protective coating) with simple painting, when galvanising specifically uses a sacrificial metal layer"],
+        err:["Assuming all metals corrode at the same rate or in the same way","Confusing galvanising (a protective coating) with simple painting, when galvanising specifically uses a sacrificial metal layer","Assuming any metal can displace any other from solution, rather than only a MORE reactive metal displacing a LESS reactive one"],
         qs:[
           Q("A general physical property shared by most metals is that they are",["good conductors of heat and electricity","poor conductors of electricity","always brittle","never malleable"],0,"Metals are typically good thermal and electrical conductors.","Easy"),
           Q("The rusting of iron is a chemical reaction between iron and",["oxygen and water","only nitrogen","only carbon dioxide","only sunlight"],0,"Rust (hydrated iron oxide) forms from iron reacting with oxygen and water.","Easy"),
           Q("Galvanising protects iron from rusting mainly by",["coating it with a layer of zinc that corrodes preferentially instead of the iron","removing all oxygen from the atmosphere permanently","painting it a bright colour only","heating it to extremely high temperatures"],0,"Galvanising uses a sacrificial zinc coating that corrodes in place of the iron.","Medium",VP),
-          Q("A metal's ability to be hammered into thin sheets without breaking is called",["malleability","ductility","conductivity","reactivity"],0,"Malleability specifically describes resistance to breaking under hammering/shaping.","Medium")
+          Q("A metal's ability to be hammered into thin sheets without breaking is called",["malleability","ductility","conductivity","reactivity"],0,"Malleability specifically describes resistance to breaking under hammering/shaping.","Medium"),
+          Q("In the reactivity series, zinc is more reactive than copper. If zinc metal is added to copper sulfate solution, the expected result is",["zinc displaces copper, forming zinc sulfate solution and copper metal","no reaction occurs at all","copper displaces zinc","both metals dissolve completely with no product"],0,"A more reactive metal (zinc) displaces a less reactive one (copper) from its compound in solution.","Hard",VP)
         ]
       }
     ]
@@ -3229,14 +3264,16 @@ const SUBJECTS = [
         obj:["Distinguish fundamental from derived quantities","Identify correct SI units for common physical quantities"],
         exp:[
           {t:"Fundamental vs derived quantities", b:"FUNDAMENTAL (base) quantities can't be broken down into simpler quantities, length, mass, time, electric current, temperature and luminous intensity are the core fundamental quantities in physics. DERIVED quantities are built by combining fundamental ones, speed (length ÷ time), area (length × length), and density (mass ÷ volume) are all derived from fundamentals combined mathematically."},
-          {t:"SI units", b:"Physics relies on a standardised system (SI units) so measurements mean the same thing globally: metre (m) for length, kilogram (kg) for mass, second (s) for time, ampere (A) for current, kelvin (K) for temperature. Every derived unit, like the newton (force) or the joule (energy), can be traced back to combinations of these base units."}
+          {t:"SI units", b:"Physics relies on a standardised system (SI units) so measurements mean the same thing globally: metre (m) for length, kilogram (kg) for mass, second (s) for time, ampere (A) for current, kelvin (K) for temperature. Every derived unit, like the newton (force) or the joule (energy), can be traced back to combinations of these base units."},
+          {t:"Dimensional analysis - checking an equation makes physical sense", b:"DIMENSIONAL ANALYSIS checks whether an equation is physically sensible by comparing the fundamental quantities (dimensions) on each side, if they don't match, the equation is definitely wrong, even before checking any numbers. For example, speed has dimensions of length/time; an equation claiming to calculate speed must reduce to exactly length divided by time once all units are tracked through, providing a genuinely useful way to sanity-check a formula or spot an error in working, without needing to know the 'correct' answer in advance."}
         ],
-        err:["Assuming any measured quantity is automatically 'fundamental'","Mixing up base units (like the kilogram) with derived units (like the newton)"],
+        err:["Assuming any measured quantity is automatically 'fundamental'","Mixing up base units (like the kilogram) with derived units (like the newton)","Skipping dimensional checks entirely, missing an easy way to catch a wrongly-remembered formula"],
         qs:[
           Q("Which of these is a fundamental (base) physical quantity?",["Mass","Speed","Density","Force"],0,"Mass is a fundamental quantity; speed, density and force are all derived.","Easy"),
           Q("The SI unit of length is the",["metre","centimetre","kilometre","foot"],0,"The metre is the SI base unit of length.","Easy"),
           Q("Speed is classified as a derived quantity because it is calculated from",["length divided by time, both fundamental quantities","mass multiplied by acceleration","a single fundamental quantity alone","temperature and pressure combined"],0,"Speed = distance/time, combining two fundamental quantities.","Medium"),
-          Q("The SI unit of electric current is the",["ampere","volt","ohm","watt"],0,"The ampere is the SI base unit for electric current.","Medium",VP)
+          Q("The SI unit of electric current is the",["ampere","volt","ohm","watt"],0,"The ampere is the SI base unit for electric current.","Medium",VP),
+          Q("Dimensional analysis is a useful technique mainly because it",["can check whether an equation is physically sensible before verifying its numbers","always gives the exact final numerical answer","only applies to electrical quantities","replaces the need for units altogether"],0,"Dimensional analysis checks structural validity of an equation, not the specific numeric answer.","Hard")
         ]
       },
       { id:"motion", name:"Position, Distance, Displacement and Motion",
@@ -3244,13 +3281,15 @@ const SUBJECTS = [
         obj:["Distinguish distance from displacement","Explain position as a description of location relative to a reference point"],
         exp:[
           {t:"Distance vs displacement", b:"DISTANCE is the total path length actually travelled, a scalar quantity with no direction attached. DISPLACEMENT is the straight-line distance from the starting point to the final point, in a specific direction, a vector quantity. Someone walking 5m east then 5m west has travelled a distance of 10m, but their displacement is 0m, since they ended up exactly back where they started."},
-          {t:"Position and reference points", b:"POSITION describes where an object is relative to a chosen reference point (an origin). Motion itself is simply a change in position over time, and describing it accurately always requires agreeing on that reference point first, 'the ball is 3m ahead' only makes sense once everyone agrees what 'ahead' is measured from."}
+          {t:"Position and reference points", b:"POSITION describes where an object is relative to a chosen reference point (an origin). Motion itself is simply a change in position over time, and describing it accurately always requires agreeing on that reference point first, 'the ball is 3m ahead' only makes sense once everyone agrees what 'ahead' is measured from."},
+          {t:"Reading a distance-time graph", b:"A DISTANCE-TIME GRAPH plots distance travelled against time, and its SHAPE tells a specific story: a straight, sloped line means constant speed (the steeper the slope, the faster the motion), a horizontal (flat) line means the object is stationary (not moving at all, even though time is passing), and a curved line means the speed itself is changing (accelerating or decelerating). The GRADIENT of a distance-time graph, at any point, gives the speed at that instant, a genuinely useful visual shortcut once you know what each shape means."}
         ],
-        err:["Treating distance and displacement as always equal, when they only match for straight-line, one-direction motion","Forgetting displacement requires both magnitude AND direction"],
+        err:["Treating distance and displacement as always equal, when they only match for straight-line, one-direction motion","Forgetting displacement requires both magnitude AND direction","Assuming a flat (horizontal) section of a distance-time graph means the object is moving at high speed, when it actually means the object is stationary"],
         qs:[
           Q("Distance differs from displacement mainly because distance",["has no direction, while displacement does","is always smaller than displacement","can never be measured accurately","only applies to circular motion"],0,"Distance is a scalar (no direction); displacement is a vector (has direction).","Easy"),
           Q("A person walks 8m north then 8m south. Their total displacement is",["0m","16m","8m","4m"],0,"Ending at the starting point means displacement is zero, despite covering 16m of distance.","Medium",VP),
-          Q("Displacement is best classified as a",["vector quantity","scalar quantity","fundamental quantity only","dimensionless quantity"],0,"Displacement has both magnitude and direction, making it a vector.","Easy")
+          Q("Displacement is best classified as a",["vector quantity","scalar quantity","fundamental quantity only","dimensionless quantity"],0,"Displacement has both magnitude and direction, making it a vector.","Easy"),
+          Q("A horizontal (flat) section on a distance-time graph indicates that the object is",["stationary, not moving at all during that time","moving at its fastest speed","accelerating rapidly","moving backwards"],0,"A flat section means distance isn't changing - the object is at rest.","Medium",VP)
         ]
       },
       { id:"speedvel", name:"Speed, Velocity and Acceleration",
@@ -3258,14 +3297,17 @@ const SUBJECTS = [
         obj:["Distinguish speed from velocity","Explain acceleration and apply the equations of motion"],
         exp:[
           {t:"Speed vs velocity", b:"SPEED is distance covered per unit time (a scalar, no direction). VELOCITY is displacement per unit time (a vector, direction included). A car maintaining constant speed while going around a bend still has changing VELOCITY, since its direction keeps changing even if its speed doesn't."},
-          {t:"Acceleration and equations of motion", b:"ACCELERATION is the rate of change of velocity with time (Δv/Δt), measured in ms⁻². For motion with constant acceleration, key equations connect initial velocity (u), final velocity (v), acceleration (a), time (t), and displacement (s): v = u + at, and s = ut + ½at². These let you solve for any unknown once enough of the others are given."}
+          {t:"Acceleration and equations of motion", b:"ACCELERATION is the rate of change of velocity with time (Δv/Δt), measured in ms⁻². For motion with constant acceleration, key equations connect initial velocity (u), final velocity (v), acceleration (a), time (t), and displacement (s): v = u + at, and s = ut + ½at². These let you solve for any unknown once enough of the others are given."},
+          {t:"Reading a velocity-time graph", b:"A VELOCITY-TIME GRAPH reveals two things at once: its GRADIENT (slope) gives ACCELERATION at that point (a steeper slope means faster acceleration, a flat/horizontal section means constant velocity, zero acceleration), and the AREA under the graph (between the line and the time-axis) gives the total DISTANCE travelled over that period. This second fact, area equals distance, is exactly how you'd calculate distance from a graph without ever needing s = ut + ½at² directly."}
         ],
-        err:["Assuming constant speed always means zero acceleration, forgetting direction changes count too","Mixing up which equation of motion to use for a given set of known values"],
+        err:["Assuming constant speed always means zero acceleration, forgetting direction changes count too","Mixing up which equation of motion to use for a given set of known values","Confusing what a velocity-time graph's gradient represents (acceleration) with what its area represents (distance)"],
         qs:[
           Q("Velocity differs from speed because velocity specifically includes",["direction","a larger numerical value","time only","no numerical value at all"],0,"Velocity is speed with direction specified, making it a vector.","Easy"),
           Q("Acceleration is defined as the rate of change of",["velocity with time","distance with time","mass with time","force with time"],0,"Acceleration specifically measures how velocity changes over time.","Easy"),
           Q("An object starts from rest and accelerates uniformly at 9.8 ms⁻² for 3 seconds. Its final velocity is",["29.4 m/s","9.8 m/s","3 m/s","19.6 m/s"],0,"v = u + at = 0 + (9.8×3) = 29.4 m/s.","Medium",VP),
-          Q("Using the same object (starting from rest, accelerating at 9.8 ms⁻² for 3 seconds), the distance it covers is",["44.1 m","29.4 m","9.8 m","88.2 m"],0,"s = ut + ½at² = 0 + 0.5×9.8×9 = 44.1 m.","Hard",VP)
+          Q("Using the same object (starting from rest, accelerating at 9.8 ms⁻² for 3 seconds), the distance it covers is",["44.1 m","29.4 m","9.8 m","88.2 m"],0,"s = ut + ½at² = 0 + 0.5×9.8×9 = 44.1 m.","Hard",VP),
+          Q("On a velocity-time graph, the AREA between the line and the time-axis represents",["the distance travelled","the acceleration","the initial velocity only","nothing physically meaningful"],0,"Area under a velocity-time graph gives total distance travelled.","Medium",VP),
+          Q("A velocity-time graph shows velocity increasing steadily from 0 to 20 m/s over 4 seconds. The distance travelled in this time is",["40 m","80 m","20 m","4 m"],0,"Area of the triangle = ½×base×height = ½×4×20 = 40m.","Hard",VP)
         ]
       },
       { id:"vectors", name:"Scalars and Vectors",
@@ -3273,14 +3315,16 @@ const SUBJECTS = [
         obj:["Distinguish scalar from vector quantities, with examples of each","Explain vector addition and resolution"],
         exp:[
           {t:"Scalars vs vectors", b:"SCALAR quantities have magnitude only, no direction: mass, distance, speed and time are all scalars. VECTOR quantities have both magnitude AND direction: weight, displacement, velocity and acceleration are all vectors. Confusing the two matters in practice, adding two forces acting in DIFFERENT directions is not as simple as adding two masses."},
-          {t:"Vector addition and resolution", b:"Vectors acting in the same direction simply add together; vectors acting at an angle to each other combine using methods like the PARALLELOGRAM or TRIANGLE of vectors to find a single RESULTANT vector representing their combined effect. RESOLUTION does the reverse, breaking one vector down into two perpendicular components (often horizontal and vertical), useful for analysing motion on an incline or a projectile's path."}
+          {t:"Vector addition and resolution", b:"Vectors acting in the same direction simply add together; vectors acting at an angle to each other combine using methods like the PARALLELOGRAM or TRIANGLE of vectors to find a single RESULTANT vector representing their combined effect. RESOLUTION does the reverse, breaking one vector down into two perpendicular components (often horizontal and vertical), useful for analysing motion on an incline or a projectile's path."},
+          {t:"Adding perpendicular vectors - a concrete worked example", b:"When two vectors act at exactly 90° to each other, their resultant can be found directly using PYTHAGORAS' THEOREM: resultant² = (first vector)² + (second vector)². For example, a force of 3N acting east combined with a force of 4N acting north gives a resultant of √(3²+4²) = √25 = 5N, acting at an angle found using trigonometry (tan⁻¹(4/3) from the east direction). This specific 3-4-5 combination is a classic, exam-friendly example precisely because the numbers work out to a whole number."}
         ],
-        err:["Adding vector magnitudes directly without accounting for their different directions","Forgetting that resolving a vector into components requires basic trigonometry (sine and cosine)"],
+        err:["Adding vector magnitudes directly without accounting for their different directions","Forgetting that resolving a vector into components requires basic trigonometry (sine and cosine)","Trying to add non-perpendicular vectors using Pythagoras directly, when that method only works for exactly perpendicular vectors"],
         qs:[
           Q("Which of the following is a scalar quantity?",["Mass","Weight","Velocity","Acceleration"],0,"Mass has magnitude only, with no direction, making it a scalar.","Easy"),
           Q("Which of the following is a vector quantity?",["Displacement","Distance","Speed","Time"],0,"Displacement has both magnitude and direction, making it a vector.","Easy"),
           Q("The single vector representing the combined effect of two or more vectors is called the",["resultant","component","scalar sum","magnitude"],0,"The resultant is the combined single vector from adding multiple vectors.","Medium"),
-          Q("Breaking a single vector into two perpendicular parts is called",["resolution of the vector","addition of the vector","cancellation of the vector","scalar conversion"],0,"Resolution splits a vector into perpendicular components.","Medium",VP)
+          Q("Breaking a single vector into two perpendicular parts is called",["resolution of the vector","addition of the vector","cancellation of the vector","scalar conversion"],0,"Resolution splits a vector into perpendicular components.","Medium",VP),
+          Q("A force of 3N acting east and a force of 4N acting north act on the same object. The magnitude of the resultant force is",["5N","7N","1N","12N"],0,"Using Pythagoras: √(3²+4²) = √25 = 5N.","Hard",VP)
         ]
       },
       { id:"forces", name:"Equilibrium of Forces",
@@ -3288,14 +3332,17 @@ const SUBJECTS = [
         obj:["Explain the conditions for equilibrium of forces","Explain the principle of moments and centre of gravity"],
         exp:[
           {t:"Conditions for equilibrium", b:"A body is in EQUILIBRIUM when the net force acting on it is zero (it isn't accelerating) and the net turning effect (moment/torque) about any point is also zero (it isn't rotating). This is why the picture frame stays perfectly still, every force is exactly cancelled out by another."},
-          {t:"Principle of moments and centre of gravity", b:"The PRINCIPLE OF MOMENTS states that for a body in rotational equilibrium, the sum of clockwise moments about a point equals the sum of anticlockwise moments about that same point (this is exactly how a see-saw balances). CENTRE OF GRAVITY is the single point where an object's entire weight can be considered to act; a low, wide centre of gravity makes an object more stable, harder to tip over, which is why race cars are built low and wide."}
+          {t:"Principle of moments and centre of gravity", b:"The PRINCIPLE OF MOMENTS states that for a body in rotational equilibrium, the sum of clockwise moments about a point equals the sum of anticlockwise moments about that same point (this is exactly how a see-saw balances). CENTRE OF GRAVITY is the single point where an object's entire weight can be considered to act; a low, wide centre of gravity makes an object more stable, harder to tip over, which is why race cars are built low and wide."},
+          {t:"Three types of equilibrium - a genuinely useful distinction", b:"STABLE equilibrium describes an object that RETURNS to its original position after a small disturbance (a ball at the bottom of a bowl, nudged slightly, rolls back down). UNSTABLE equilibrium describes an object that moves FURTHER away after even a tiny disturbance (a pencil balanced perfectly on its tip, given the smallest nudge, falls over completely). NEUTRAL equilibrium describes an object that simply settles into a NEW position after being disturbed, neither returning nor moving further away (a ball resting on a flat table, pushed slightly, just rolls to a new spot and stays there)."}
         ],
-        err:["Assuming equilibrium means 'no forces are acting', rather than 'forces are perfectly balanced'","Confusing clockwise and anticlockwise moments when applying the principle of moments"],
+        err:["Assuming equilibrium means 'no forces are acting', rather than 'forces are perfectly balanced'","Confusing clockwise and anticlockwise moments when applying the principle of moments","Confusing unstable equilibrium (moves further away when disturbed) with neutral equilibrium (settles into a new position without returning or diverging)"],
         qs:[
           Q("A body is in equilibrium when",["the net force and net turning moment acting on it are both zero","no forces at all are acting on it","it is moving at high constant speed only","its mass is exactly zero"],0,"Equilibrium requires zero net force AND zero net moment, not the absence of forces.","Medium"),
           Q("The principle of moments states that, for a body in equilibrium, the sum of clockwise moments about a point equals the",["sum of anticlockwise moments about that same point","total weight of the body","total distance travelled","object's acceleration"],0,"Clockwise and anticlockwise moments must balance for rotational equilibrium.","Medium"),
           Q("The single point where an object's entire weight can be considered to act is called its",["centre of gravity","moment of inertia","point of impact","resultant force"],0,"Centre of gravity is the effective point of action of an object's weight.","Easy"),
-          Q("An object with a low, wide centre of gravity is generally",["more stable and harder to tip over","less stable and easier to tip over","completely unaffected by stability concerns","only stable while moving"],0,"A low, wide centre of gravity improves stability against tipping.","Medium",VP)
+          Q("An object with a low, wide centre of gravity is generally",["more stable and harder to tip over","less stable and easier to tip over","completely unaffected by stability concerns","only stable while moving"],0,"A low, wide centre of gravity improves stability against tipping.","Medium",VP),
+          Q("A pencil balanced perfectly on its tip, which falls over completely with the smallest nudge, is in a state of",["unstable equilibrium","stable equilibrium","neutral equilibrium","no equilibrium at all"],0,"Unstable equilibrium describes a system that moves further away from its original position when disturbed.","Medium"),
+          Q("A ball resting on a flat table, which simply rolls to a new spot and stays there when nudged, demonstrates",["neutral equilibrium","stable equilibrium","unstable equilibrium","dynamic equilibrium only"],0,"Neutral equilibrium describes settling into a new position without returning or diverging further.","Hard",VP)
         ]
       },
       { id:"shm", name:"Simple Harmonic Motion",
@@ -4732,6 +4779,216 @@ const THEORY_QUESTIONS = {
       ["Paul instructs believers to submit to governing authorities","He gives a specific theological reason: authorities are described as instituted by God, existing to punish wrongdoing and reward good conduct","This makes orderly government part of God's design for society, not merely a practical convenience","Relevance today: encourages Christians to be law-abiding, responsible citizens as part of their faith, not separate from it","Each point clearly explained with reference to the passage"], 20, null, null, "epistles3"),
     TQ("Explain Paul's teaching on the resurrection in 1 Corinthians 15, including his 'firstfruits' argument.",
       ["Paul argues that if Christ has not been raised, preaching is useless and faith is futile","He presents this as a conditional (if/then) argument, not just a general assertion","Christ is described as the 'firstfruits' of those who have died, the first installment of a larger harvest still to come","This means Christ's resurrection guarantees, rather than merely illustrates, believers' own future resurrection","Each point clearly explained with reference to the passage"], 20, null, null, "epistles5")
+  ],
+  chemistry: [
+    TQ("(a) State the SI unit of temperature and (b) explain the difference between accuracy and precision in scientific measurement, using an example.",
+      ["States the Kelvin as the SI unit of temperature","Correctly defines accuracy as closeness to the true value","Correctly defines precision as consistency between repeated measurements","Gives a valid example (e.g. a faulty balance that is precise but not accurate)","Explains why both qualities matter for reliable measurement"], 10, null, null, "intro_chem"),
+    TQ("An atom of an element X has 17 protons and 18 neutrons. (a) State its atomic number and mass number. (b) Write its electron arrangement across shells. (c) Explain what an isotope of X would be.",
+      ["States atomic number = 17 (proton count)","States mass number = 35 (17+18)","Correctly gives electron arrangement 2,8,7","Explains an isotope as an atom of the same element with a different number of neutrons (and thus different mass number)","Clear, logical presentation throughout"], 10, "VP", null, "atom"),
+    TQ("Describe, with a labelled diagram or clear steps, how you would separate a mixture of sand and common salt, obtaining both components separately.",
+      ["Identifies that salt dissolves in water while sand does not","Describes filtering the mixture (with water added) to separate sand from the salt solution","Describes evaporating the filtrate to recover the salt","Names the two techniques used (filtration, then evaporation/crystallization) correctly","Clear, logical, step-by-step description"], 10, null, null, "separation"),
+    TQ("(a) State the difference between a group and a period in the periodic table. (b) Explain why elements in the same group have similar chemical properties. (c) Explain why noble gases are generally unreactive.",
+      ["Correctly distinguishes a group (column, same valence electrons) from a period (row, same number of shells)","Explains similar chemical properties arise from the same number of valence electrons","Explains noble gas unreactivity as due to a full outer electron shell","Clear, accurate chemical reasoning throughout"], 10, null, null, "periodic"),
+    TQ("(a) Distinguish between ionic and covalent bonding, giving one example of each. (b) Explain why ionic compounds generally conduct electricity when molten but not when solid.",
+      ["Correctly defines ionic bonding (electron transfer) with a valid example (e.g. NaCl)","Correctly defines covalent bonding (electron sharing) with a valid example (e.g. H2O)","Explains that solid ionic compounds have fixed ions unable to move and carry charge","Explains that molten ionic compounds have free-moving ions able to conduct electricity","Clear, accurate reasoning throughout"], 10, "VP", null, "bonding"),
+    TQ("120cm³ of a gas at 27°C and 1 atmosphere pressure is heated to 127°C at constant pressure. (a) State the gas law that applies. (b) Calculate the new volume of the gas.",
+      ["Identifies Charles' Law as the relevant law (constant pressure)","Correctly converts temperatures to Kelvin (300K and 400K)","Sets up V1/T1 = V2/T2 correctly","Solves accurately to find V2 = 160cm³","Shows clear, logical working with correct units throughout"], 10, "VP", null, "stoich"),
+    TQ("Using the kinetic theory of matter, explain what happens to the particles of a substance as it changes from solid to liquid to gas, and why temperature remains constant during a change of state despite continuous heating.",
+      ["Describes solid particles as vibrating in fixed positions","Describes liquid particles as having enough energy to slide past each other","Describes gas particles as moving freely and independently, far apart","Explains that during a phase change, added heat energy breaks/forms bonds between particles rather than raising temperature further","Clear, logical explanation throughout"], 10, null, null, "states"),
+    TQ("(a) Distinguish between an exothermic and an endothermic reaction, giving one everyday example of each. (b) State the sign convention for enthalpy change (ΔH) in each case.",
+      ["Correctly defines exothermic reaction (releases heat) with a valid example (e.g. combustion)","Correctly defines endothermic reaction (absorbs heat) with a valid example (e.g. certain salts dissolving)","States ΔH is negative for exothermic reactions","States ΔH is positive for endothermic reactions"], 8, null, null, "energy_chem"),
+    TQ("(a) State the Arrhenius definitions of an acid and a base. (b) Explain what the pH scale measures, and state the pH of a neutral solution. (c) Write a word equation for a neutralization reaction.",
+      ["States an acid produces H+ ions in water","States a base produces OH- ions in water","Explains the pH scale measures acidity/alkalinity from 0-14","States pH 7 is neutral","Gives a correct word equation: acid + base → salt + water"], 10, null, null, "acidsbase"),
+    TQ("(a) Distinguish between a saturated and an unsaturated solution. (b) Explain, using kinetic theory, why the solubility of most solids in water increases with temperature, while the solubility of gases in water decreases with temperature.",
+      ["Correctly defines a saturated solution as holding the maximum dissolvable solute at that temperature","Correctly defines an unsaturated solution as able to dissolve more solute","Explains increased solid solubility with temperature (increased particle energy aids dissolving)","Explains decreased gas solubility with temperature (gas particles escape more easily as energy increases)","Clear, logical reasoning throughout"], 10, null, null, "solubility"),
+    TQ("(a) State four factors that affect the rate of a chemical reaction, explaining how each affects rate. (b) Explain what is meant by chemical equilibrium.",
+      ["States and explains temperature (higher temperature increases rate)","States and explains concentration (higher concentration increases rate)","States and explains catalyst (speeds reaction without being consumed)","States and explains surface area (greater surface area increases rate)","Correctly explains equilibrium as a state where forward and reverse reaction rates are equal"], 10, null, null, "kinetics"),
+    TQ("Using the 'OIL RIG' principle, explain oxidation and reduction in terms of electron transfer, and identify the oxidising agent and reducing agent in a reaction where substance A loses electrons to substance B.",
+      ["Correctly states oxidation as loss of electrons (OIL)","Correctly states reduction as gain of electrons (RIG)","Correctly identifies substance A (loses electrons) as the reducing agent, itself oxidised","Correctly identifies substance B (gains electrons) as the oxidising agent, itself reduced","Clear, logical reasoning throughout"], 10, "VP", null, "redox"),
+    TQ("(a) Distinguish between a saturated hydrocarbon (alkane) and an unsaturated hydrocarbon (alkene), giving the general test used to distinguish them. (b) State what is observed in this test for each type.",
+      ["Correctly defines an alkane as containing only single carbon-carbon bonds","Correctly defines an alkene as containing at least one carbon-carbon double bond","States bromine water as the distinguishing test","States that an alkene decolourises bromine water","States that an alkane shows no colour change with bromine water"], 10, null, null, "carbon_chem"),
+    TQ("(a) Name the industrial process used to manufacture ammonia and state the raw materials used. (b) State one major environmental problem caused by burning fossil fuels, explaining its cause.",
+      ["Names the Haber process","States nitrogen and hydrogen as the raw materials","Names a valid environmental problem (e.g. global warming or acid rain)","Correctly explains the cause (e.g. carbon dioxide from combustion trapping heat, or sulfur dioxide forming acid rain)"], 8, null, null, "chem_industry"),
+    TQ("(a) Name the three major classes of biomolecules discussed in basic biochemistry, stating one function of each. (b) Explain what is meant by a polymer, giving one natural and one synthetic example.",
+      ["Names carbohydrates and states their energy-supply function","Names proteins and states their structural/enzyme function","Names lipids and states their energy-storage function","Correctly defines a polymer as a large molecule of repeating monomer units","Gives a valid natural example (e.g. starch) and synthetic example (e.g. polythene)"], 10, null, null, "biochem"),
+    TQ("(a) Name the three main allotropes of carbon. (b) Explain, in terms of structure, why diamond is extremely hard while graphite is soft and able to conduct electricity.",
+      ["Names diamond, graphite and amorphous carbon (e.g. charcoal) as the three allotropes","Explains diamond's hardness through its rigid 3D covalent network","Explains graphite's softness through its layered structure that can slide","Explains graphite's electrical conductivity through delocalised electrons within its layers"], 10, "VP", null, "nonmetals"),
+    TQ("(a) Write a word equation for the rusting of iron. (b) Describe, with reasons, one method used to prevent iron from rusting.",
+      ["Correctly states iron + oxygen + water → hydrated iron oxide (rust)","Describes a valid prevention method (e.g. galvanising, painting, alloying)","Explains why the method works (e.g. galvanising uses a sacrificial zinc coating that corrodes preferentially instead of the iron)"], 8, null, null, "metals")
+  ],
+  physics: [
+    TQ("(a) Distinguish between a fundamental (base) quantity and a derived quantity, giving two examples of each. (b) State the SI units of the four fundamental quantities you named.",
+      ["Correctly defines a fundamental quantity as one that cannot be broken into simpler quantities","Correctly defines a derived quantity as one formed by combining fundamental quantities","Gives two valid fundamental examples (e.g. mass, length) with correct SI units","Gives two valid derived examples (e.g. speed, density)"], 8, null, null, "quantities"),
+    TQ("(a) Distinguish between distance and displacement, giving an example to illustrate the difference. (b) A student walks 6m east then 8m north. Calculate the magnitude of the student's total displacement.",
+      ["Correctly defines distance as total path length (scalar, no direction)","Correctly defines displacement as straight-line distance from start to end (vector, with direction)","Gives a valid illustrative example where the two differ","Correctly applies Pythagoras: displacement = √(6²+8²) = 10m","Shows clear working"], 10, "VP", null, "motion"),
+    TQ("A car accelerates uniformly from rest to a velocity of 25 m/s in 5 seconds. (a) Calculate its acceleration. (b) Calculate the distance it travels during this time.",
+      ["Correctly applies a = (v-u)/t to find a = 5 m/s²","Correctly applies s = ut + ½at² (or equivalent) to find s = 62.5m","Shows clear, logical working with correct units throughout"], 10, "VP", null, "speedvel"),
+    TQ("(a) Distinguish between a scalar and a vector quantity, giving two examples of each. (b) Explain what is meant by the resultant of two vectors.",
+      ["Correctly defines a scalar quantity as having magnitude only","Correctly defines a vector quantity as having both magnitude and direction","Gives two valid examples of each","Correctly explains the resultant as the single combined vector representing the effect of two or more vectors"], 8, null, null, "vectors"),
+    TQ("(a) State the two conditions necessary for a body to be in equilibrium. (b) State the principle of moments. (c) Explain why a car with a low, wide centre of gravity is more stable than one with a high centre of gravity.",
+      ["States that the net force on the body must be zero","States that the net turning moment (torque) about any point must be zero","Correctly states the principle of moments (sum of clockwise moments = sum of anticlockwise moments about a point)","Explains that a lower, wider centre of gravity requires a greater tilt before it passes beyond the base, making the object harder to topple"], 10, null, null, "forces"),
+    TQ("(a) Define simple harmonic motion. (b) Distinguish between the period and frequency of an oscillation, stating the relationship between them.",
+      ["Correctly defines SHM as motion where the restoring force is proportional to displacement from equilibrium, directed toward it","Correctly defines period as time for one complete oscillation","Correctly defines frequency as number of oscillations per second","States the relationship f = 1/T"], 8, null, null, "shm"),
+    TQ("State Newton's three laws of motion, and for each law, give one everyday example illustrating it.",
+      ["Correctly states Newton's First Law (inertia) with a valid example","Correctly states Newton's Second Law (F=ma) with a valid example","Correctly states Newton's Third Law (action-reaction) with a valid example","Clear, accurate explanation of each law's meaning, not just the statement"], 12, "VP", null, "newtonlaws"),
+    TQ("A machine lifts a load of mass 50kg through a vertical height of 4m in 10 seconds. (Take g=10 m/s²) (a) Calculate the work done. (b) Calculate the power developed.",
+      ["Correctly calculates the force needed (weight = mg = 500N)","Correctly calculates work done = Force × distance = 2000J","Correctly calculates power = Work/time = 200W","Shows clear, logical working with correct units throughout"], 10, "VP", null, "workenergy"),
+    TQ("(a) Distinguish between heat and temperature. (b) Describe the three methods of heat transfer, stating which one does not require a medium.",
+      ["Correctly defines temperature as a measure of hotness/coldness","Correctly defines heat as energy transferred due to a temperature difference","Correctly describes conduction, convection and radiation","Correctly states radiation as the method not requiring a medium"], 10, null, null, "heat"),
+    TQ("(a) Distinguish between a transverse and a longitudinal wave, giving one example of each. (b) A wave has a frequency of 20Hz and a wavelength of 3m. Calculate its speed.",
+      ["Correctly defines a transverse wave (perpendicular particle vibration) with an example (e.g. light)","Correctly defines a longitudinal wave (parallel particle vibration) with an example (e.g. sound)","Correctly applies v = fλ to find speed = 60 m/s","Shows clear working"], 10, "VP", null, "waves"),
+    TQ("(a) State the law of reflection of light. (b) Distinguish between a convex and a concave lens, stating one use of each.",
+      ["Correctly states the law of reflection (angle of incidence = angle of reflection)","Correctly describes a convex lens as converging, used in magnifying glasses or correcting long-sightedness","Correctly describes a concave lens as diverging, used in correcting short-sightedness"], 8, null, null, "light"),
+      TQ("(a) Explain why sound cannot travel through a vacuum. (b) Distinguish between the pitch and the loudness of a sound, stating what physical property each depends on.",
+      ["Explains sound as a mechanical wave requiring particles of a medium to travel","States pitch depends on frequency (higher frequency = higher pitch)","States loudness depends on amplitude (greater amplitude = louder sound)"], 8, null, null, "sound"),
+    TQ("(a) Explain what is meant by a field, in the physics sense. (b) State one key difference between a gravitational field and an electric field.",
+      ["Correctly defines a field as a region where a force can be experienced without direct contact","States gravitational fields are always attractive","States electric fields can be either attractive or repulsive, depending on the charges involved"], 8, null, null, "fields"),
+    TQ("(a) Explain what is meant by electromagnetic induction. (b) State one everyday application of electromagnetic induction.",
+      ["Correctly explains electromagnetic induction as the production of an electric current by a changing magnetic field (e.g. moving a magnet near a coil)","States a valid application (e.g. electricity generators, transformers)"], 6, null, null, "electromagnetism"),
+    TQ("Describe the historical development of atomic models from Thomson to Rutherford to Bohr, stating the key contribution of each scientist.",
+      ["Describes Thomson's 'plum pudding' model (electrons within a positive sphere)","Describes Rutherford's nuclear model (mostly empty space, small dense positive nucleus), based on alpha-particle scattering","Describes Bohr's model (electrons in fixed, quantised energy levels)","Clear, logical, chronological explanation"], 10, "VP", null, "atom_phys"),
+    TQ("(a) State the three types of radiation emitted by unstable nuclei. (b) State the material needed to stop each type, in order from least to most penetrating.",
+      ["Names alpha, beta and gamma radiation","Correctly states alpha is stopped by paper","Correctly states beta is stopped by a few millimetres of aluminium","Correctly states gamma requires thick lead or concrete, being the most penetrating"], 8, "VP", null, "nucleus"),
+    TQ("A force of 300N acts on an area of 0.5m². (a) Calculate the pressure exerted. (b) Explain why fluid pressure increases with depth.",
+      ["Correctly applies Pressure = Force/Area to find 600 Pa","Explains that deeper points in a fluid have more fluid weight pressing down from above, increasing pressure","Shows clear working with correct units"], 8, "VP", null, "pressure")
+  ],
+  biology: [
+    TQ("(a) List five characteristics of living things. (b) Explain why a virus is considered a borderline case between living and non-living.",
+      ["Correctly lists five valid characteristics (from nutrition, respiration, excretion, growth, movement, reproduction, sensitivity, death)","Explains that a virus shows some but not all characteristics of life outside a host cell (e.g. cannot reproduce independently)"], 8, null, null, "classification"),
+    TQ("(a) Name three organelles found in a plant cell but not typically emphasised in an animal cell, stating one function of each. (b) State the correct order of biological organisation from cell to organism.",
+      ["Names cell wall (structural support), chloroplast (photosynthesis) and vacuole (storage/turgor) with correct functions","Correctly states the order: cell, tissue, organ, organ system, organism"], 8, null, null, "cellbio"),
+    TQ("(a) Distinguish between diffusion and osmosis. (b) Explain what would happen to a plant cell and an animal cell if each were placed in a concentrated salt solution.",
+      ["Correctly defines diffusion as movement of particles from high to low concentration","Correctly defines osmosis as movement of water specifically, across a selectively permeable membrane","Explains the plant cell would lose water and become flaccid/plasmolysed","Explains the animal cell would lose water and shrink (crenate)"], 10, "VP", null, "cellenvironment"),
+    TQ("(a) Write the balanced chemical equation for photosynthesis. (b) State three factors that affect the rate of photosynthesis, explaining how each does so.",
+      ["Correctly writes 6CO2 + 6H2O → C6H12O6 + 6O2","States and explains light intensity's effect on rate","States and explains carbon dioxide concentration's effect on rate","States and explains temperature's effect on rate"], 10, "VP", null, "nutrition_plant"),
+    TQ("(a) Name the three main classes of food and state one function of each. (b) Name the enzyme that digests starch, and state what it is broken down into.",
+      ["Names carbohydrates (energy), proteins (growth/repair) and fats (energy storage/insulation)","Names amylase as the enzyme digesting starch","States starch is broken down into simpler sugars (e.g. maltose/glucose)"], 8, null, null, "nutrition_animal"),
+    TQ("(a) Distinguish between an artery and a vein, in terms of direction of blood flow and structure. (b) Distinguish between xylem and phloem in plants.",
+      ["Correctly states arteries carry blood away from the heart, with thick muscular walls","Correctly states veins carry blood toward the heart, with valves to prevent backflow","Correctly states xylem transports water/minerals upward only","Correctly states phloem transports food substances in both directions"], 10, "VP", null, "transport_bio"),
+    TQ("(a) Write the word equation for aerobic respiration. (b) Explain what happens during anaerobic respiration in human muscles, including the substance produced and its effect.",
+      ["Correctly states glucose + oxygen → carbon dioxide + water + energy","Explains that without enough oxygen, muscles respire anaerobically","States lactic acid is produced, causing the burning/fatigue sensation"], 8, null, null, "respiration_bio"),
+    TQ("(a) Distinguish between excretion and egestion, giving an example of each. (b) State the main nitrogenous waste product removed by the kidney, and name the process by which the kidney maintains water/salt balance.",
+      ["Correctly distinguishes excretion (metabolic waste, e.g. urea) from egestion (undigested food, e.g. faeces)","States urea as the main nitrogenous waste product","Correctly names osmoregulation as the water/salt balancing process"], 8, "VP", null, "excretion"),
+    TQ("(a) Distinguish between positive phototropism and positive geotropism, giving an example of each. (b) State two functions of the skeleton.",
+      ["Correctly defines positive phototropism as growth toward light (e.g. shoots)","Correctly defines positive geotropism as growth toward gravity (e.g. roots growing downward)","States two valid skeleton functions (support, protection, movement)"], 8, null, null, "support_movement"),
+    TQ("Describe the pathway of a reflex arc, from stimulus to response, and explain why a reflex action is faster than a voluntary action.",
+      ["Correctly states the pathway: stimulus, receptor, sensory neurone, relay neurone, motor neurone, effector","Explains reflexes bypass the brain's conscious decision-making, being processed at the spinal cord, making them faster"], 8, "VP", null, "nervous"),
+    TQ("(a) Distinguish between sexual and asexual reproduction. (b) Distinguish between pollination and fertilisation in a flowering plant, explaining why they are not the same event.",
+      ["Correctly defines sexual reproduction (gamete fusion, genetic variation) versus asexual (one parent, genetic clones)","Correctly defines pollination as transfer of pollen from anther to stigma","Correctly defines fertilisation as the actual fusion of male and female gametes","Explains fertilisation happens AFTER pollination, as a separate, later event"], 10, "VP", null, "reproduction_bio"),
+    TQ("In pea plants, tall (T) is dominant over short (t). Two heterozygous tall plants (Tt) are crossed. (a) Draw a Punnett square to show the possible offspring genotypes. (b) State the resulting genotype ratio and phenotype ratio.",
+      ["Correctly draws/describes the Punnett square for Tt × Tt","Correctly states the genotype ratio 1 TT : 2 Tt : 1 tt","Correctly states the phenotype ratio 3 tall : 1 short","Clear, logical presentation"], 10, "VP", null, "genetics"),
+    TQ("(a) Using a named example, distinguish between a food chain and a food web. (b) Explain why food chains rarely extend beyond 4-5 trophic levels.",
+      ["Gives a valid food chain example (producer to consumer sequence)","Correctly explains a food web as an interconnected network of multiple food chains","Explains that roughly 90% of energy is lost as heat at each trophic transfer, limiting how many levels can be supported"], 8, "VP", null, "ecology"),
+    TQ("(a) Explain what is meant by adaptation, using one named example. (b) Explain the process of natural selection.",
+      ["Correctly defines adaptation as a feature improving survival chances in a specific environment, with a valid example","Correctly explains natural selection as better-adapted organisms surviving and reproducing more successfully, increasing helpful traits in a population over generations"], 8, null, null, "adaptation"),
+    TQ("(a) Name one useful and one harmful microorganism, stating what each is used for or the disease it causes. (b) Explain how vaccination protects against disease.",
+      ["Names a valid useful microorganism (e.g. yeast, for fermentation) and its use","Names a valid harmful microorganism/pathogen and the disease it causes (e.g. Plasmodium, malaria)","Correctly explains vaccination as introducing a weakened/inactive pathogen to trigger immune protection before real exposure"], 8, "VP", null, "microorganisms"),
+    TQ("(a) Distinguish between afforestation and reforestation. (b) State two methods of conserving soil from erosion.",
+      ["Correctly defines afforestation as planting trees where no forest previously existed","Correctly defines reforestation as replanting a previously cleared forest area","States two valid soil conservation methods (e.g. maintaining plant cover, controlled grazing, crop rotation, terracing)"], 8, null, null, "conservation")
+  ],
+  geography: [
+    TQ("(a) A map has a scale of 1:50,000. Calculate the actual ground distance represented by 6cm on the map, giving your answer in kilometres. (b) Explain the difference between a gradient calculation and a cross-section.",
+      ["Correctly calculates 6cm × 50,000 = 300,000cm = 3km","Correctly explains gradient as vertical height difference divided by horizontal distance","Correctly explains a cross-section as a side-on profile showing the land's actual rise and fall along a line","Shows clear working"], 10, "VP", null, "mapwork_geo"),
+    TQ("(a) Distinguish between an open traverse and a closed traverse in surveying. (b) State one advantage of prismatic compass surveying over simple chain surveying.",
+      ["Correctly defines a closed traverse as returning to its starting point, forming a loop","Correctly defines an open traverse as not returning to its start","States that prismatic compass surveying additionally measures bearing/direction, not just distance"], 8, null, null, "surveying"),
+    TQ("(a) State the type of statistical diagram best suited to showing (i) a continuous trend over time and (ii) proportional division of a whole. (b) Distinguish between a density (choropleth) map and an isopleth map.",
+      ["Correctly identifies a line graph for continuous trends","Correctly identifies a pie chart for proportional division","Correctly distinguishes a density map (shaded areas by quantity) from an isopleth map (lines connecting equal values)"], 8, null, null, "stats_maps"),
+    TQ("(a) Distinguish between latitude and longitude. (b) If it is 12 noon in London (0° longitude), calculate the time at a location 60°E, stating whether it is ahead or behind London time.",
+      ["Correctly defines latitude as north-south position from the Equator","Correctly defines longitude as east-west position from the Prime Meridian","Correctly calculates 60÷15=4 hours ahead (east is later)","Correctly states the time as 4:00pm","Shows clear working"], 10, "VP", null, "earth_latlong"),
+    TQ("(a) Distinguish between igneous, sedimentary and metamorphic rocks, giving one example of each. (b) Explain how marble is formed from limestone.",
+      ["Correctly defines igneous rocks (from cooled magma/lava) with an example (e.g. granite)","Correctly defines sedimentary rocks (compressed sediment layers) with an example (e.g. sandstone)","Correctly defines metamorphic rocks (transformed by heat/pressure) with an example (e.g. marble)","Explains marble forms when limestone undergoes metamorphism (heat and pressure) without fully melting"], 10, "VP", null, "rocks_geo"),
+    TQ("(a) Distinguish between weathering and erosion. (b) Describe how running water and wind each shape landforms differently.",
+      ["Correctly distinguishes weathering (breaks rock down in place) from erosion (also transports the material away)","Describes running water eroding valleys and depositing sediment to form plains/deltas","Describes wind eroding and depositing material especially in dry regions (e.g. forming sand dunes)"], 8, null, null, "landforms"),
+    TQ("Explain how a warm ocean current can affect the climate of a nearby coastline, using a named example.",
+      ["Explains that a warm current raises nearby air temperature and increases rainfall","Gives a valid named example (e.g. the Gulf Stream/North Atlantic Drift warming Western Europe)","Clear, logical explanation of the mechanism"], 8, "VP", null, "oceans"),
+    TQ("(a) Distinguish between weather and climate. (b) Name and describe two factors that affect a region's climate.",
+      ["Correctly distinguishes weather (short-term, day-to-day) from climate (long-term average pattern)","Describes altitude's effect on climate (higher = cooler)","Describes a second valid factor (latitude, ocean currents, or continentality)"], 8, null, null, "weather_climate"),
+    TQ("(a) Describe the structure of a soil profile, naming its main layers. (b) Explain how poor farming practices can accelerate soil erosion.",
+      ["Correctly names topsoil, subsoil and parent rock/bedrock as the main layers","Explains that practices like overgrazing or continuous cropping remove protective vegetation, exposing soil to erosion"], 8, null, null, "soils_geo"),
+    TQ("Explain why vegetation changes from tropical rainforest to savanna grassland to desert as one moves away from the equator toward the Sahara.",
+      ["Identifies decreasing and increasingly seasonal rainfall as the primary driver of this change","Describes tropical rainforest as occurring in consistently wet conditions","Describes savanna as occurring where rainfall is more seasonal","Describes desert vegetation as minimal due to very low rainfall","Clear, logical explanation throughout"], 10, "VP", null, "vegetation_geo"),
+    TQ("(a) Explain what is meant by desert encroachment (desertification). (b) State three human activities that can contribute to it.",
+      ["Correctly explains desertification as the gradual expansion of desert-like conditions into previously productive land","States three valid contributing activities (e.g. overgrazing, deforestation, poor land management, excessive irrigation)"], 8, null, null, "env_hazards"),
+    TQ("Explain three factors that influence the distribution and density of human population in a region.",
+      ["Explains climate as a factor (favourable climates attract settlement)","Explains relief as a factor (flat, fertile land supports more people)","Explains resources/economic opportunity as a factor","Clear, logical explanation of each"], 8, null, null, "population_geo"),
+    TQ("(a) Distinguish between a nucleated and a dispersed settlement pattern. (b) State three factors that influence where a settlement is located.",
+      ["Correctly defines a nucleated pattern (tightly clustered) versus dispersed (spread out)","States three valid location factors (e.g. water availability, fertile/resource-rich land, defense, transport routes)"], 8, null, null, "settlement"),
+    TQ("Compare road, rail, water and air transport, stating one advantage and one disadvantage of each for moving goods.",
+      ["States a valid advantage and disadvantage of road transport","States a valid advantage and disadvantage of rail transport","States a valid advantage and disadvantage of water transport","States a valid advantage and disadvantage of air transport"], 10, null, null, "transport_geo"),
+    TQ("(a) Distinguish between heavy and light industry, giving one example of each. (b) Explain why a steel plant would typically locate near sources of iron ore and coal.",
+      ["Correctly distinguishes heavy industry (bulky materials, large-scale) from light industry (smaller-scale, consumer-focused)","Gives valid examples of each","Explains that locating near raw materials minimises the cost of transporting bulky, heavy materials"], 8, "VP", null, "manufacturing_geo"),
+    TQ("Explain how a country's resource base and historical/political relationships shape its patterns of world trade, using specific examples.",
+      ["Explains that a country's exports typically reflect what it can produce/extract efficiently","Explains how historical/colonial ties or regional trade blocs (e.g. ECOWAS) shape trade relationships","Gives at least one specific, valid example"], 8, null, null, "trade_geo"),
+    TQ("Choosing one Nigerian geographical region, describe its physical setting, population, resources/economic activities, and one problem of development it faces.",
+      ["Names a valid Nigerian geographical region","Describes its physical setting (relief/drainage)","Describes its population and economic activities","States a genuine development problem the region faces","Clear, structured answer following the expected framework"], 12, null, null, "nigeria_regional"),
+    TQ("Name and describe one specifically named economic activity in Africa (e.g. gold mining in South Africa, oil production in Nigeria/Algeria/Libya, or irrigation agriculture in the Nile/Niger basins), stating its importance to the country/region involved.",
+      ["Names a specific, valid economic activity tied to a specific named place","Describes the activity accurately","Explains its economic importance to the named country/region"], 8, "VP", null, "africa_geo")
+  ],
+  commerce: [
+    TQ("(a) Explain the meaning and scope of Commerce. (b) Name and explain three specific problems (place, time, risk) that Commerce solves between production and consumption.",
+      ["Correctly explains Commerce as the buying, selling and exchange of goods/services plus supporting activities","Explains the problem of place, solved by trade and transport","Explains the problem of time, solved by warehousing","Explains the problem of risk, solved by insurance"], 10, "VP", null, "intro_comm"),
+    TQ("Distinguish between industry, commerce, and direct/indirect services as categories of occupation, giving one example of each.",
+      ["Correctly defines industry (extraction/manufacturing) with an example","Correctly defines commerce (trade/distribution) with an example","Correctly defines direct services (serving an individual directly) with an example","Correctly defines indirect services (supporting trade/industry) with an example"], 10, null, null, "occupations"),
+    TQ("(a) State the four factors of production. (b) Distinguish between primary, secondary and tertiary production, giving one example of each.",
+      ["States land, labour, capital and entrepreneurship as the four factors","Correctly defines primary production (extraction) with an example","Correctly defines secondary production (manufacturing/processing) with an example","Correctly defines tertiary production (services) with an example"], 10, "VP", null, "production_comm"),
+    TQ("(a) Distinguish between a sole proprietorship and a private limited liability company, in terms of ownership and liability. (b) Explain what is meant by dissolution/liquidation of a business.",
+      ["Correctly explains sole proprietorship (single owner, unlimited liability)","Correctly explains a private limited company (shareholders, limited liability)","Correctly explains dissolution as the formal winding-up of a business, settling debts and distributing remaining assets"], 8, "VP", null, "business_units"),
+    TQ("(a) Distinguish between turnover and profit. (b) A trader has current assets of ₦120,000 and current liabilities of ₦45,000. Calculate the working capital.",
+      ["Correctly distinguishes turnover (total sales value) from profit (revenue minus costs)","Correctly applies Working Capital = Current Assets - Current Liabilities","Correctly calculates ₦75,000","Shows clear working"], 8, "VP", null, "capital_profit"),
+    TQ("Explain the specific role of the Chamber of Commerce and distinguish it from an Employers' Association.",
+      ["Correctly explains the Chamber of Commerce as promoting general local/national business interests","Correctly explains an Employers' Association as specifically representing employers in matters like wage negotiation","Clear distinction drawn between the two"], 6, null, null, "trade_assoc"),
+    TQ("(a) Distinguish between a retailer and a wholesaler. (b) Describe the typical channel of distribution from producer to consumer, and explain one force that can lead to the elimination of the middleman.",
+      ["Correctly defines retailing (small quantities, to final consumers)","Correctly defines wholesaling (bulk buying, reselling to retailers)","States the typical channel: Producer → Wholesaler → Retailer → Consumer","Explains a valid force for middleman elimination (e.g. large retailers buying directly in bulk from producers)"], 10, "VP", null, "home_trade"),
+    TQ("(a) Distinguish between the balance of trade and the balance of payments. (b) Explain what is meant by entrepot trade.",
+      ["Correctly distinguishes balance of trade (goods only) from balance of payments (all financial transactions)","Correctly explains entrepot trade as importing goods specifically for re-export"], 8, "VP", null, "foreign_trade"),
+    TQ("Distinguish between FOB (Free on Board) and CIF (Cost, Insurance, Freight) terms of trade, stating clearly who is responsible for freight and insurance under each.",
+      ["Correctly explains FOB: seller's responsibility ends at loading; buyer arranges/pays freight and insurance onward","Correctly explains CIF: seller arranges and pays for freight and insurance all the way to the destination port","Clear, accurate distinction drawn"], 8, "VP", null, "purchase_sale"),
+    TQ("(a) State four qualities required of good money. (b) Explain the main functions of money.",
+      ["States four valid qualities (e.g. acceptability, durability, portability, divisibility, scarcity)","Explains the medium of exchange function","Explains the store of value function","Explains at least one other function (measure of value or standard for deferred payment)"], 10, null, null, "money_banks"),
+    TQ("Explain the principle of indemnity and the principle of insurable interest in insurance, using an example to illustrate each.",
+      ["Correctly explains indemnity as restoring the insured to their previous financial position, not more, with a valid example","Correctly explains insurable interest as requiring a genuine financial stake in the insured item, with a valid example"], 8, "VP", null, "insurance_comm"),
+    TQ("(a) Explain the function of the Stock Exchange. (b) Distinguish between a credit union and a commercial bank.",
+      ["Correctly explains the Stock Exchange as a marketplace for trading existing shares/securities between investors","Correctly distinguishes a credit union (member-owned, mutual benefit) from a commercial bank (profit-oriented)"], 8, null, null, "stock_credit"),
+    TQ("Explain the importance of seaports and communication services to Commerce, using specific examples.",
+      ["Explains seaports as gateways connecting a country to international trade, handling goods clearance","Explains communication services (post office, couriers) as enabling exchange of information/documents essential to coordinating trade","Gives valid supporting examples"], 8, null, null, "transport_comm"),
+    TQ("(a) Explain the marketing mix (the 4 Ps). (b) Distinguish between advertising and public relations.",
+      ["Correctly explains Product, Price, Place and Promotion as the marketing mix","Correctly distinguishes advertising (paid, product-focused promotion) from public relations (overall company image/reputation)"], 10, "VP", null, "marketing_comm"),
+    TQ("Explain three methods of consumer protection, stating why each is necessary.",
+      ["States and explains government legislation (e.g. Food and Drugs Act) as a protection method","States and explains price control as a protection method","States and explains consumer associations as a protection method","Clear explanation of why each is necessary"], 8, null, null, "legal_business"),
+    TQ("Distinguish between nationalisation and divestiture (privatisation), stating one advantage and one disadvantage of each.",
+      ["Correctly distinguishes nationalisation (government acquiring ownership) from divestiture (government selling ownership)","States a valid advantage and disadvantage of nationalisation","States a valid advantage and disadvantage of divestiture"], 8, "VP", null, "nationalisation"),
+    TQ("Explain the objectives of ECOWAS, and state one obstacle that can hinder economic integration among its member countries.",
+      ["Correctly explains ECOWAS's objective of promoting economic integration/cooperation among West African countries","States a valid obstacle (e.g. differing national interests, unequal development levels, infrastructural/political barriers)"], 6, null, null, "economic_groupings")
+  ],
+  finacc: [
+    TQ("(a) Distinguish between book-keeping and accounting. (b) State three users of accounting information, explaining why each would need it.",
+      ["Correctly distinguishes book-keeping (recording) from accounting (recording, classifying, summarising, interpreting)","States and explains a valid user (e.g. lenders assessing creditworthiness)","States and explains a second valid user (e.g. government assessing tax)","States and explains a third valid user (e.g. management for decision-making)"], 10, null, null, "intro_acc"),
+    TQ("(a) Explain the double entry principle, stating the rule for debit and credit entries. (b) Explain why a trial balance that balances does not guarantee there are no errors in the accounts.",
+      ["Correctly explains that every transaction is recorded as a debit in one account and a credit in another, of equal value","States that debits increase assets/expenses and decrease liabilities/income/capital (or the reverse for credits)","Explains that a trial balance only confirms total debits equal total credits, but cannot catch errors like a posting to the wrong account of the correct type"], 10, "VP", null, "double_entry"),
+    TQ("From the following figures, prepare a Trading and Profit and Loss Account: Sales ₦150,000; Cost of Goods Sold ₦90,000; Rent ₦12,000; Wages ₦18,000; Other expenses ₦8,000.",
+      ["Correctly calculates Gross Profit = Sales - COGS = ₦60,000","Correctly lists all expenses (Rent, Wages, Other expenses) totalling ₦38,000","Correctly calculates Net Profit = Gross Profit - Total Expenses = ₦22,000","Presents the account in a clear, properly labelled format"], 12, "VP", null, "final_accounts_sole"),
+    TQ("A machine costing ₦80,000 has an estimated residual value of ₦8,000 and a useful life of 6 years. (a) Calculate the annual depreciation using the straight line method. (b) If instead a 25% reducing balance rate were used, calculate the depreciation charge for Year 1 and Year 2.",
+      ["Correctly calculates straight line depreciation: (80,000-8,000)/6 = ₦12,000 per year","Correctly calculates Year 1 reducing balance depreciation: 25% × 80,000 = ₦20,000","Correctly calculates Year 2 reducing balance depreciation: 25% × (80,000-20,000) = ₦15,000","Shows clear, logical working throughout"], 12, "VP", null, "reserves_provisions"),
+    TQ("(a) Distinguish between direct costs and indirect costs (factory overheads) in a manufacturing account, giving one example of each. (b) Explain what is meant by Prime Cost.",
+      ["Correctly distinguishes direct costs (traceable to a specific unit, e.g. raw materials) from indirect costs (support production generally, e.g. factory rent)","Correctly explains Prime Cost as the total of all direct costs only, before overheads are added"], 8, null, null, "manufacturing_acc"),
+    TQ("A business had Opening Debtors of ₦25,000. During the period, Credit Sales were ₦110,000 and Receipts from Debtors were ₦95,000. (a) Prepare a Sales Ledger Control Account to find the Closing Debtors figure. (b) State one purpose of a control account.",
+      ["Correctly calculates Closing Debtors = 25,000+110,000-95,000 = ₦40,000","Presents this as a properly formatted control account (or clearly labelled calculation)","States a valid purpose (e.g. providing a summary check to help locate errors without checking every individual account)"], 10, "VP", null, "control_accounts"),
+    TQ("A trader's capital at the start of the year was ₦200,000, and at the end of the year was ₦260,000. During the year, drawings were ₦40,000, and no additional capital was introduced. Calculate the trader's profit for the year.",
+      ["Correctly applies Profit = Closing Capital - Opening Capital + Drawings - Additional Capital","Correctly calculates Profit = 260,000-200,000+40,000-0 = ₦100,000","Shows clear, logical working","Explains why drawings must be added back (they reduce capital but are not a business loss)"], 10, "VP", null, "single_entry"),
+    TQ("(a) Distinguish between a Receipts and Payments Account and an Income and Expenditure Account for a not-for-profit organisation. (b) Explain what is meant by the accumulated fund.",
+      ["Correctly distinguishes a Receipts and Payments Account (pure cash summary) from an Income and Expenditure Account (period-based, like profit and loss)","Correctly explains the accumulated fund as the not-for-profit equivalent of capital, built from accumulated surpluses"], 8, null, null, "notforprofit_acc"),
+    TQ("Explain the going concern concept, the accrual (matching) concept, and the prudence concept in accounting, stating why each matters for reliable financial reporting.",
+      ["Correctly explains the going concern concept (business assumed to continue operating)","Correctly explains the accrual concept (income/expenses recorded when earned/incurred, not necessarily when cash moves)","Correctly explains the prudence concept (avoid overstating profits/assets; recognise losses early, profits only when realised)","Explains why these concepts support reliable, comparable accounts"], 10, null, null, "acc_concepts"),
+    TQ("(a) Distinguish between a partner's capital account and current account. (b) Explain the purpose of a profit and loss appropriation account in a partnership.",
+      ["Correctly distinguishes the capital account (relatively fixed, original investment) from the current account (fluctuates with profit share, drawings, interest)","Correctly explains the appropriation account as showing how net profit is divided among partners after salaries/interest on capital, per the agreed profit-sharing ratio"], 8, "VP", null, "partnership_acc"),
+    TQ("(a) Distinguish between ordinary shares and preference shares. (b) Explain how loan capital (debentures) differs from share capital.",
+      ["Correctly distinguishes ordinary shares (voting rights, variable dividend) from preference shares (fixed dividend priority, usually no voting rights)","Correctly explains that debenture holders are creditors owed fixed interest, not owners sharing in profit, unlike shareholders"], 8, "VP", null, "company_acc"),
+    TQ("Explain the purpose of departmental accounts, and describe one precaution needed when recording inter-branch transactions.",
+      ["Correctly explains departmental accounts as separating trading results by department to see individual profit contributions","Describes a valid precaution (e.g. careful recording to avoid double-counting value transferred between branches)"], 6, null, null, "dept_branch_acc"),
+    TQ("(a) Distinguish between recurrent and capital government expenditure, giving one example of each. (b) State two sources of public revenue.",
+      ["Correctly distinguishes recurrent expenditure (regular running costs, e.g. salaries) from capital expenditure (long-term infrastructure investment, e.g. roads)","States two valid public revenue sources (e.g. taxation, licences/fees, resource revenue)"], 8, null, null, "pubsector_acc"),
+    TQ("(a) State the three basic steps of data processing. (b) Distinguish between manual and electronic data processing, stating one advantage of electronic processing in an accounting environment.",
+      ["States input, processing and output as the three steps","Correctly distinguishes manual processing (by hand) from electronic processing (using computers)","States a valid advantage of electronic processing (e.g. speed, fewer errors)"], 8, null, null, "data_processing")
   ]
 };
 
@@ -4759,7 +5016,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false };
+  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -5159,15 +5416,10 @@ async function submitSignup(){
   try{
     const u = document.getElementById("suUsername") ? document.getElementById("suUsername").value : state.usernameField;
     const p = document.getElementById("suPasskey") ? document.getElementById("suPasskey").value : state.passkeyField;
-    const email = document.getElementById("suEmail") ? document.getElementById("suEmail").value.trim() : "";
-    const phone = document.getElementById("suPhone") ? document.getElementById("suPhone").value.trim() : "";
     state.usernameField = u;
     state.authError = null;
     const result = await createProfile(u, p);
     if(result.error){ state.authError = result.error; render(); return; }
-    if(email || phone){
-      try{ await supabaseRPC("gce_update_contact_info", { p_username: result.username, p_email: email, p_phone: phone }); }catch(e){ /* non-fatal - checkout will just ask again if this silently failed */ }
-    }
     await loginSuccess(result.username);
   }catch(e){
     state.authError = "Something unexpected went wrong (" + (e && e.message ? e.message : "unknown error") + "). Please try again.";
@@ -5205,19 +5457,45 @@ async function loadAllProgress(){
   state.loaded = true;
 }
 async function loadEntitlements(){
-  if(state.guest){ state.entitlements = []; return; }
+  if(state.guest){ state.entitlements = []; state.entitlementDetails = {}; return; }
   try{
     const result = await supabaseRPC("gce_get_entitlements", { p_username: state.user });
-    state.entitlements = (result && result.subjects) ? result.subjects : [];
+    const subjects = (result && result.subjects) ? result.subjects : [];
+    // entitlementDetails keeps EVERY subject ever paid for, active or lapsed, with its
+    // expiry date - needed to show "renews in 3 days" or "expired, renew now" rather
+    // than a subject just silently disappearing the moment a month runs out.
+    state.entitlementDetails = {};
+    subjects.forEach(s=>{ state.entitlementDetails[s.subject_id] = { expiresAt: s.expires_at, active: s.active }; });
+    // entitlements stays exactly what it always was - the array of CURRENTLY ACTIVE
+    // subject ids - so every existing gating/dashboard check keeps working unchanged.
+    state.entitlements = subjects.filter(s=>s.active).map(s=>s.subject_id);
   }catch(e){
     console.error("Could not load entitlements", e);
-    state.entitlements = [];
+    state.entitlements = []; state.entitlementDetails = {};
   }
 }
 function isSubjectUnlocked(subjectId){
   return state.entitlements && state.entitlements.includes(subjectId);
 }
 window.isSubjectUnlocked = isSubjectUnlocked;
+/* Days remaining until a subject's access lapses (negative once it's already expired).
+   Centralised here so the dashboard, home page, and reminder banner all agree on the
+   exact same number for the exact same subject. */
+function daysUntilExpiry(subjectId){
+  const d = state.entitlementDetails && state.entitlementDetails[subjectId];
+  if(!d || !d.expiresAt) return null;
+  return Math.ceil((new Date(d.expiresAt).getTime() - Date.now()) / 86400000);
+}
+function expiredSubjectIds(){
+  if(!state.entitlementDetails) return [];
+  return Object.keys(state.entitlementDetails).filter(id=>!state.entitlementDetails[id].active);
+}
+/* Subjects due for a reminder: active, and expiring within 3 days (covers both the
+   3-day and 1-day warning windows with one check, since a student who saw the 3-day
+   warning yesterday should still see today's 1-day warning, not have it suppressed). */
+function subjectsNeedingRenewalReminder(){
+  return (state.entitlements||[]).filter(id=>{ const d = daysUntilExpiry(id); return d!==null && d<=3 && d>=0; });
+}
 async function saveProgress(subjectId){
   if(state.guest) return; // guest/preview mode never persists - avoids polluting the database with test data
   try{ await supabaseRPC("gce_save_progress", { p_username: state.user, p_subject: subjectId, p_data: state.progress[subjectId] }); }
@@ -5348,15 +5626,16 @@ function renderRewards(){
 function renderCheckoutSuccess(){
   const info = state.checkoutSuccess || { subjectIds: [], amount: 0 };
   const names = info.subjectIds.map(id=>{ const s = findSubject(id); return s ? s.name : id; });
+  const renewDate = new Date(Date.now() + 30*86400000).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'});
   return `
   <div class="welcome-wrap">
     <div style="font-size:64px;margin-bottom:8px;">✅</div>
     <h1 class="welcome-h1">Payment Successful!</h1>
-    <p class="welcome-p">₦${info.amount.toLocaleString()} received. You're now enrolled in:</p>
+    <p class="welcome-p">₦${info.amount.toLocaleString()} received for 1 month of access. You're now enrolled in:</p>
     <div class="disclaimer" style="text-align:left;max-width:420px;margin:0 auto 20px;">
       <ul class="bullets">${names.map(n=>`<li><b>${n}</b></li>`).join("")}</ul>
     </div>
-    <p class="welcome-p" style="font-size:13px;">A receipt has been sent to your email.</p>
+    <p class="welcome-p" style="font-size:13px;">Access renews around <b>${renewDate}</b> - you'll see a reminder on your dashboard a few days ahead, and a receipt has been sent to your email.</p>
     <div class="welcome-actions">
       <button class="stampbtn" onclick="dismissCheckoutSuccess()">OK, take me to my profile →</button>
     </div>
@@ -5379,6 +5658,7 @@ function renderPricing(){
 
   const cards = SUBJECTS.map(s=>{
     const already = enrolledIds.includes(s.id);
+    const wasExpired = !already && state.entitlementDetails && state.entitlementDetails[s.id] && !state.entitlementDetails[s.id].active;
     const compulsory = COMPULSORY_SUBJECTS.includes(s.id) && !already;
     const checked = already || pricingSelected.has(s.id);
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
@@ -5388,7 +5668,8 @@ function renderPricing(){
       <div class="pricing-card-emoji">${SUBJECT_EMOJI[s.id]||"📘"}</div>
       <div class="pricing-card-name">${s.name}</div>
       <div class="pricing-card-meta">${s.topics.length} topics · ${allSubjectQuestions(s).length} questions</div>
-      <div class="pricing-card-price">${already ? "✓ Already enrolled" : compulsory ? "Required · ₦"+SUBJECT_PRICE_NGN.toLocaleString() : "₦"+SUBJECT_PRICE_NGN.toLocaleString()}</div>
+      <div class="pricing-card-price">${already ? "✓ Active" : wasExpired ? "Renew · ₦"+SUBJECT_PRICE_NGN.toLocaleString() : compulsory ? "Required · ₦"+SUBJECT_PRICE_NGN.toLocaleString() : "₦"+SUBJECT_PRICE_NGN.toLocaleString()}</div>
+      ${wasExpired ? `<div style="font-size:10.5px;color:#DC2626;margin-top:2px;">Expired - progress saved</div>` : ""}
     </label>`;
   }).join("");
 
@@ -5408,7 +5689,7 @@ function renderPricing(){
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / Choose your subjects</div>
   <h2>Enroll in the subjects you're sitting for</h2>
   <p style="color:var(--ink-soft);max-width:62ch;margin-top:6px;">Every subject shows you a free taste before you pay - the first key idea in every topic, and a small slice of every practice set and readiness check. Tick what you need below; your dashboard only ever shows what you've actually enrolled in.</p>
-  <div class="disclaimer" style="margin-top:10px;">General Mathematics and English Language are required for every enrollment (WAEC's own compulsory pair), so they're automatically included below and can't be unchecked. Everything else is entirely your choice.</div>
+  <div class="disclaimer" style="margin-top:10px;">General Mathematics and English Language are required for every enrollment (WAEC's own compulsory pair), so they're automatically included below and can't be unchecked. Everything else is entirely your choice. <b>Each subject is ₦${SUBJECT_PRICE_NGN.toLocaleString()}/month</b> - access renews monthly per subject, and you'll see exactly when each one is due on your dashboard, with a reminder a few days ahead.</div>
   ${pendingBanner}
 
   <div class="pricing-grid">${cards}</div>
@@ -5416,7 +5697,7 @@ function renderPricing(){
   <div class="pricing-checkout-bar">
     <div>
       <div style="font-size:13px;color:var(--ink-soft);">${newlySelected.length} subject${newlySelected.length!==1?'s':''} selected</div>
-      <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--ink);">₦${total.toLocaleString()}</div>
+      <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--ink);">₦${total.toLocaleString()}<span style="font-size:14px;font-weight:500;color:var(--ink-soft);">/month</span></div>
     </div>
     <div style="flex:1;min-width:180px;">
       ${state.contactEmail ? `
@@ -5888,6 +6169,66 @@ function shuffleQuestionOptions(q){
   const newCorrect = order.indexOf(q.c);
   return {...q, o:newOptions, c:newCorrect};
 }
+
+/* On-demand, genuinely unlimited practice: calls out to Claude (via a small
+   serverless endpoint sharing the same API key the Study Buddy already uses)
+   to write a fresh batch of new questions for one specific topic, so a
+   motivated student can never truly "run out" of practice material on a
+   topic - the fixed local bank stays exactly as it is; this is a top-up layer
+   on top of it, clearly labelled as freshly AI-generated rather than the
+   verified past-paper-style content. */
+async function generateFreshQuestions(subjectId, topicId){
+  const subject = findSubject(subjectId);
+  const topic = findTopic(subjectId, topicId);
+  if(!subject || !topic) return;
+  state.generatingQuestions = true;
+  state.generateError = null;
+  render();
+  try{
+    const res = await fetch("/api/generate-questions", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        subjectName: subject.name,
+        topicName: topic.name,
+        objectives: topic.obj,
+        existingQuestions: topic.qs.map(q=>q.q),
+        count: 5
+      })
+    });
+    const result = await res.json();
+    state.generatingQuestions = false;
+    if(!result || !result.success || !result.questions || !result.questions.length){
+      state.generateError = "Couldn't generate fresh questions right now (" + (result&&result.error?result.error:"unknown issue") + "). Please try again in a moment.";
+      render();
+      return;
+    }
+    // Never trust validation to have happened server-side alone - re-check the shape
+    // of every question here too, so a stale/misconfigured deployment can't slip a
+    // broken question (bad option count, out-of-range answer) in front of a student.
+    const wellFormed = result.questions.filter(q=>
+      q && typeof q.q==="string" && Array.isArray(q.options) && q.options.length===4 &&
+      q.options.every(o=>typeof o==="string") && Number.isInteger(q.correctIndex) &&
+      q.correctIndex>=0 && q.correctIndex<=3 && typeof q.explanation==="string"
+    );
+    if(!wellFormed.length){
+      state.generateError = "The generated questions weren't quite right - please try again.";
+      render();
+      return;
+    }
+    const questions = shuffle(wellFormed.map((q,i)=>shuffleQuestionOptions({
+      q: q.q, o: q.options, c: q.correctIndex, e: q.explanation, d: q.difficulty||"Medium",
+      src: null, topicId, topicName: topic.name, qIndex: "ai-"+i
+    })));
+    state.quiz = { mode:"topic", subjectId, topicId, questions, index:0, picks:{}, revealed:{}, timedSeconds:null, aiGenerated:true };
+    go("quiz", {subjectId, topicId});
+  }catch(e){
+    state.generatingQuestions = false;
+    state.generateError = "Couldn't reach the question generator. Please check your connection and try again.";
+    render();
+  }
+}
+window.generateFreshQuestions = generateFreshQuestions;
 
 function startTopicPractice(subjectId, topicId){
   const topic = findTopic(subjectId, topicId);
@@ -6671,7 +7012,7 @@ function startWelcomeFactTicker(){
     if(!el){ clearInterval(welcomeFactInterval); welcomeFactInterval = null; return; }
     el.style.opacity = "0";
     setTimeout(()=>{ el.textContent = WELCOME_FACTS[idx]; el.style.opacity = "1"; }, 300);
-  }, 4500);
+  }, 10000);
 }
 
 function renderAuthError(){
@@ -6687,12 +7028,7 @@ function renderSignup(){
     <label class="auth-label">USERNAME</label>
     <input id="suUsername" class="auth-input" type="text" placeholder="e.g. tolu_reads" maxlength="20" autocomplete="off" value="${state.usernameField||""}" onkeydown="if(event.key==='Enter'){document.getElementById('suPasskey').focus();}">
     <label class="auth-label">CHOOSE A 4-DIGIT PASSKEY</label>
-    <input id="suPasskey" class="auth-input auth-pin" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="••••" maxlength="4" autocomplete="off" onkeydown="if(event.key==='Enter'){document.getElementById('suEmail').focus();}">
-    <label class="auth-label">EMAIL (recommended)</label>
-    <input id="suEmail" class="auth-input" type="email" placeholder="for payment receipts and confirmations" autocomplete="off" onkeydown="if(event.key==='Enter'){document.getElementById('suPhone').focus();}">
-    <label class="auth-label">PHONE NUMBER (recommended)</label>
-    <input id="suPhone" class="auth-input" type="tel" placeholder="for WhatsApp/SMS confirmations" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSignup();}">
-    <p style="font-size:11.5px;color:var(--ink-soft);margin:-10px 0 14px;">Adding these now means checkout later is just picking subjects and paying - no extra questions at the moment you're trying to pay.</p>
+    <input id="suPasskey" class="auth-input auth-pin" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="••••" maxlength="4" autocomplete="off" onkeydown="if(event.key==='Enter'){submitSignup();}">
     <button class="stampbtn auth-submit" onclick="submitSignup()">CREATE MY PROFILE</button>
     <div class="auth-switch">Already have a profile? <a onclick="go('login')">Log in instead</a></div>
     <div class="auth-switch"><a onclick="go('welcome')">← Back</a></div>
@@ -6717,14 +7053,63 @@ function renderLogin(){
   `;
 }
 
+/* Shown exactly once, the moment a student's Overall Readiness genuinely crosses
+   85% for the first time - big, deliberately over-the-top, because reaching a real
+   exam-readiness milestone across an entire subject combination is worth more than
+   a quiet checkmark. Tracked in localStorage per-student so it never repeats and
+   interrupts a workflow the student has already earned. */
+function checkReadinessCelebration(overallScore){
+  if(state.guest || overallScore < 85) return false;
+  const key = "gce_celebrated_85_" + state.user;
+  try{
+    if(localStorage.getItem(key)) return false;
+    localStorage.setItem(key, "1");
+    return true;
+  }catch(e){ return false; }
+}
+function renderReadinessCelebrationOverlay(){
+  const spans = Array.from({length:60}).map(()=>{
+    const left = Math.random()*100;
+    const delay = (Math.random()*1.2).toFixed(2);
+    const dur = (2.2+Math.random()*1.6).toFixed(2);
+    const colors = ["#FF4FA3","#7C3AED","#FFCB3D","#22C55E","#FF8A3D","#0EA5E9"];
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    const size = 8+Math.random()*8;
+    return `<span style="left:${left}%;width:${size}px;height:${size*1.6}px;background:${color};animation-delay:${delay}s;animation-duration:${dur}s;"></span>`;
+  }).join("");
+  return `
+  <div class="readiness-party-overlay" onclick="dismissReadinessCelebration()">
+    <div class="readiness-party-confetti">${spans}</div>
+    <div class="readiness-party-card" onclick="event.stopPropagation()">
+      <div style="font-size:70px;">🎉🏆🎉</div>
+      <h1 class="welcome-h1" style="font-size:32px;">YOU HIT 85% READY!</h1>
+      <p class="welcome-p" style="font-size:16px;color:var(--ink);">Genuinely, sincerely well done. That's not luck, that's weeks of showing up, topic by topic, question by question - and it shows. You are, right now, on track to walk into that exam hall and actually perform.</p>
+      <div class="disclaimer" style="background:#FEF3C7;border-color:#F59E0B;text-align:center;font-weight:600;">🎯 Now's exactly the wrong time to slack off. 85% is "ready", not "done" - keep your streak alive, keep tightening your weakest topics, and protect this position all the way to exam day.</div>
+      <div class="welcome-actions">
+        <button class="stampbtn" onclick="dismissReadinessCelebration()">I'm not stopping now →</button>
+      </div>
+    </div>
+  </div>`;
+}
+function dismissReadinessCelebration(){
+  state.showReadinessCelebration = false;
+  render();
+}
+window.dismissReadinessCelebration = dismissReadinessCelebration;
+
 function renderHome(){
   const enrolledSubjects = state.guest ? SUBJECTS : SUBJECTS.filter(s=>isSubjectUnlocked(s.id));
   const enrolledIds = enrolledSubjects.map(s=>s.id);
+  const expiredIds = state.guest ? [] : expiredSubjectIds();
+  const expiredSubjects = SUBJECTS.filter(s=>expiredIds.includes(s.id));
+  const reminderIds = state.guest ? [] : subjectsNeedingRenewalReminder();
 
   let cards = enrolledSubjects.map((s,i)=>{
     const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
     const label = readinessScoreLabel(r);
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
+    const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
+    const expiryNote = daysLeft!==null ? `<div style="font-size:11px;color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};margin-top:4px;">${daysLeft<=0?'Renews today':'Renews in '+daysLeft+' day'+(daysLeft!==1?'s':'')}</div>` : "";
     return `
     <div class="subject-card" style="border-top:7px solid ${color};">
       <div class="idx">SUBJECT ${String(i+1).padStart(2,'0')}</div>
@@ -6733,9 +7118,23 @@ function renderHome(){
       <div class="topcount">${s.topics.length} syllabus topics · ${allSubjectQuestions(s).length} practice questions</div>
       <div class="readiness-chip ${readinessClass(label)}">${labelFun(label)}</div>
       ${readinessScoreBar(r, true)}
+      ${expiryNote}
       <button class="enter-btn" onclick="go('subject',{subjectId:'${s.id}'})"><span>Open</span><span>→</span></button>
     </div>`;
   }).join("");
+
+  const renewalReminderBanner = reminderIds.length ? `
+    <div class="disclaimer" style="background:#FEF3C7;border-color:#F59E0B;">
+      <b>⏰ ${reminderIds.length} subject${reminderIds.length!==1?'s':''} renewing soon:</b>
+      ${reminderIds.map(id=>{ const s=findSubject(id); const d=daysUntilExpiry(id); return (s?s.name:id)+" ("+(d<=0?"today":"in "+d+" day"+(d!==1?"s":""))+")"; }).join(", ")}.
+      <a onclick="go('pricing')" style="color:var(--purple);text-decoration:underline;cursor:pointer;font-weight:700;">Renew now →</a>
+    </div>` : "";
+
+  const expiredBanner = expiredSubjects.length ? `
+    <div class="disclaimer" style="background:#FEE2E2;border-color:#EF4444;">
+      <b>🔒 ${expiredSubjects.length} subject${expiredSubjects.length!==1?'s':''} expired:</b> ${expiredSubjects.map(s=>s.name).join(", ")} - access paused until renewed. Your progress is saved and picks up right where you left off.
+      <a onclick="go('pricing')" style="color:var(--purple);text-decoration:underline;cursor:pointer;font-weight:700;">Renew now →</a>
+    </div>` : "";
 
   const enrollMoreBanner = !state.guest ? `
     <div class="section-block" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);border:2px dashed var(--purple);text-align:center;">
@@ -6746,13 +7145,19 @@ function renderHome(){
       <button class="stampbtn" onclick="go('pricing')">${enrolledSubjects.length ? "Browse more subjects →" : "Choose your subjects →"}</button>
     </div>` : "";
 
+  const overallData = enrolledSubjects.length ? computeOverallReadiness(state.progress, enrolledIds) : null;
+  if(overallData && checkReadinessCelebration(overallData.overall)){ state.showReadinessCelebration = true; }
+
   return `
+  ${state.showReadinessCelebration ? renderReadinessCelebrationOverlay() : ""}
   <div class="intro">
     <h2>Hey ${state.user}! ${enrolledSubjects.length || SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
   </div>
-  ${enrolledSubjects.length ? renderOverallReadinessHero(computeOverallReadiness(state.progress, enrolledIds), state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : ""}
+  ${overallData ? renderOverallReadinessHero(overallData, state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : ""}
   ${renderGamifiedHeader()}
+  ${renewalReminderBanner}
+  ${expiredBanner}
   <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format follows the official WAEC syllabus. Questions adapted from real past exam papers are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span>, with the answer independently re-checked. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
   <div class="subject-grid">${cards}</div>
   ${enrollMoreBanner}
@@ -7178,6 +7583,12 @@ function renderResults(){
       <button class="ghost-btn" onclick="go('topic',{subjectId:'${s.id}',topicId:'${t.id}'})">Back to topic guide</button>
       <button class="ghost-btn" onclick="go('subject',{subjectId:'${s.id}'})">Back to ${s.name}</button>
     </div>`}
+    <div class="section-block" style="background:linear-gradient(135deg,#F3E8FF,#E0F2FE);text-align:center;margin-top:16px;">
+      <h4 style="color:var(--purple-dark);">🔄 ALREADY SEEN THESE QUESTIONS A FEW TIMES?</h4>
+      <p style="color:var(--ink-soft);font-size:13px;max-width:52ch;margin:6px auto 14px;">You can practise this topic as many times as you want - there's no ceiling here. Generate a fresh batch of new AI questions on this exact topic whenever the current set starts feeling familiar.</p>
+      <button class="ghost-btn" id="genFreshBtn" onclick="generateFreshQuestions('${s.id}','${t.id}')" ${state.generatingQuestions?"disabled":""}>${state.generatingQuestions?"Generating…":"✨ Generate 5 fresh questions on this topic"}</button>
+      ${state.generateError ? `<div class="auth-error" style="margin-top:12px;">${state.generateError}</div>` : ""}
+    </div>
     `;
   }
 
@@ -7301,11 +7712,14 @@ function renderDashboard(){
     const mocks = state.progress[s.id].mocks; const lastMock = mocks.length ? mocks[mocks.length-1] : null;
     const lastMockText = lastMock ? Math.round(lastMock.score/lastMock.total*100)+"%" : "-";
     const barClass = r.score<50 ? "low" : (r.score>=85 ? "high" : "");
+    const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
+    const expiryDate = (!state.guest && state.entitlementDetails[s.id]) ? new Date(state.entitlementDetails[s.id].expiresAt).toLocaleDateString(undefined,{day:'numeric',month:'short'}) : null;
     return `<div class="dash-row">
       <span class="sname">${s.name}</span>
       <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${r.score}%"></div><div class="bar-target-line" style="left:85%;" title="85% target"></div></div>
       <span class="mono">${r.score}%</span>
       <span class="readiness-chip ${readinessClass(label)}">${labelFun(label)} ${lastMock?"· last check "+lastMockText:""}</span>
+      ${expiryDate ? `<span style="font-size:11px;color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};white-space:nowrap;">renews ${expiryDate}</span>` : ""}
     </div>`;
   }).join("") || `<div class="dash-row"><span class="sname" style="color:var(--ink-soft);">You haven't enrolled in any subjects yet.</span></div>`;
 
