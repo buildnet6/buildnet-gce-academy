@@ -5185,7 +5185,7 @@ const SUBJECT_PRICE_NGN = 2000;
 // their cart alongside it and cannot be unchecked, since real WAEC candidates need
 // them regardless and it gives the business a guaranteed floor per new enrollment.
 const COMPULSORY_SUBJECTS = ["math", "english"];
-const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK_TEST-0fce70805b61257616cb0efe3476871d-X";
+const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-c2f9860cfe93041c5a8de94d0744fae0-X";
 let pricingSelected = new Set();
 
 async function guardianAuth(mode){
@@ -6400,6 +6400,7 @@ function go(view, params, skipHistory){
   if(view==="pricing" && params.preselect){ state.pricingPreselect = params.preselect; }
   if(view!=="quiz" && view!=="results"){ clearInterval(timerHandle); }
   if(view==="theoryattempt" && params.theoryIndex !== undefined){ startTheoryAttempt(state.subjectId, params.theoryIndex); }
+  if(view==="topic" && state.subjectId && state.topicId){ pushLiveActivity(state.subjectId, state.topicId, "studying"); }
   render();
   window.scrollTo(0,0);
 }
@@ -6731,6 +6732,7 @@ function addTheoryImages(fileInput){
   const files = Array.from(fileInput.files || []);
   let remaining = files.length;
   if(remaining===0) return;
+  pushLiveActivity(theoryAttempt.subjectId, theoryAttempt.question.topicId||null, "uploading");
   files.forEach(file=>{
     const reader = new FileReader();
     reader.onload = function(e){
@@ -7180,6 +7182,11 @@ function renderGuardian(){
     </div>` : "";
 
   const childCards = children.map(c=>{
+    // Quick lookup for renewal date/status per subject - the guardian is usually
+    // the one paying, and needs to see exactly what's active and when it's due,
+    // same as the student sees on their own dashboard.
+    const entMap = {};
+    (c.entitlement_details||[]).forEach(e=>{ entMap[e.subject_id] = e; });
     // Cover every subject, not just ones the child has touched - a guardian needs to see gaps too.
     const allSubjectStats = SUBJECTS.map(subj=>{
       const sid = subj.id;
@@ -7192,7 +7199,7 @@ function renderGuardian(){
       const readiness = computeSubjectReadiness(subj, topics, childMocks);
       const enrolled = (c.entitled_subjects||[]).includes(sid);
       const hasActivity = attempted>0 || readiness.mocksTaken>0;
-      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness, enrolled, hasActivity};
+      return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness, enrolled, hasActivity, entitlement: entMap[sid]||null};
     });
     // The guardian's whole purpose is watching real progress and celebrating it - that
     // must never depend on payment status. Every subject with genuine activity gets its
@@ -7222,6 +7229,8 @@ function renderGuardian(){
       const secs = c.seconds_since_active ?? 99999;
       const modeLabel = c.current_mode === "mock" ? "a timed readiness check"
         : c.current_mode === "theory" ? "a theory/essay answer" + (topicName ? " on "+topicName : "")
+        : c.current_mode === "uploading" ? "uploading a handwritten answer" + (topicName ? " for "+topicName : "")
+        : c.current_mode === "studying" ? "the study guide" + (topicName ? " for "+topicName : "")
         : (topicName ? topicName : "a topic");
       if(secs < 300){
         return `<div class="live-activity-badge live-activity-on">🟢 Studying RIGHT NOW: <b>${subjName}</b> - ${modeLabel}</div>`;
@@ -7245,9 +7254,16 @@ function renderGuardian(){
       }
       const trend = subjectTrendLabel(s.sid, c.readinessTrend);
       const trendColors3 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
+      const renewalNote = (()=>{
+        if(!s.entitlement) return "";
+        const daysLeft = Math.ceil((new Date(s.entitlement.expires_at).getTime() - Date.now()) / 86400000);
+        if(!s.entitlement.active) return `<span style="color:#DC2626;font-weight:700;"> · EXPIRED (renewal needed)</span>`;
+        const dateStr = new Date(s.entitlement.expires_at).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+        return `<span style="color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};"> · renews ${dateStr}${daysLeft<=3?' (soon)':''}</span>`;
+      })();
       return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
         <div style="display:flex;justify-content:space-between;">
-          <span>${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':'<span style="color:#92400E;font-weight:600;font-size:11px;">· free preview</span>'} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
+          <span>${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':'<span style="color:#92400E;font-weight:600;font-size:11px;">· free preview</span>'} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}${renewalNote}</span>
           <b style="color:${barColor};">${r.score}% ready <span style="color:var(--ink-soft);font-weight:400;">(target 85%)</span></b>
         </div>
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
@@ -7309,7 +7325,9 @@ function renderGuardian(){
 }
 
 function renderFooter(){
-  return `<div class="footer-note">Verified past-paper items are adapted from real WAEC materials, with answers independently re-checked. Everything else is AI-generated, WAEC-style practice content. The study buddy is an AI assistant and can make mistakes - always cross-check against your own notes and the syllabus. Usernames and passkeys are a simple way to keep each student's own dashboard separate, not a secure login - never reuse a real password as your passkey.</div>`;
+  return `<div class="footer-note">Verified past-paper items are adapted from real WAEC materials, with answers independently re-checked. Everything else is AI-generated, WAEC-style practice content. The study buddy is an AI assistant and can make mistakes - always cross-check against your own notes and the syllabus. Usernames and passkeys are a simple way to keep each student's own dashboard separate, not a secure login - never reuse a real password as your passkey.
+  <div style="margin-top:10px;font-weight:600;">Need help? Contact Support: <a href="mailto:info@buildnetds.com" style="color:var(--purple);">info@buildnetds.com</a> · <a href="tel:+2348086579390" style="color:var(--purple);">08086579390</a></div>
+  </div>`;
 }
 
 function renderWelcome(){
