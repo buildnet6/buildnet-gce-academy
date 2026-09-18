@@ -5101,7 +5101,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{} };
+  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{}, daysInactive:null, breakfastMail:null };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -5221,7 +5221,25 @@ function startGuardianAutoRefresh(){
     if(!state.guardianAuthed || state.view !== "guardian"){ clearInterval(guardianAutoRefreshHandle); guardianAutoRefreshHandle = null; return; }
     try{
       const result = await supabaseRPC("gce_guardian_dashboard", { p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey });
-      if(result && result.success){ state.guardianData = result.children || []; if(state.view === "guardian") render(); }
+      if(result && result.success){
+        const children = result.children || [];
+        // Kept in step with guardianRefresh()'s own trend fetch - without this,
+        // this silent background poll would wipe out each child's trend data
+        // every 30 seconds, right after guardianRefresh() had just set it.
+        const trends = await Promise.all(children.map(c =>
+          supabaseRPC("gce_get_readiness_trend", { p_username: c.username, p_days_ago: 7 }).catch(()=>null)
+        ));
+        children.forEach((c,i)=>{ c.readinessTrend = (trends[i] && trends[i].trend) || {}; });
+        const inactivities = await Promise.all(children.map(c =>
+          supabaseRPC("gce_get_days_inactive", { p_username: c.username }).catch(()=>null)
+        ));
+        children.forEach((c,i)=>{
+          const r = inactivities[i];
+          c.daysInactive = (r && !r.never_studied) ? r.days_inactive : null;
+        });
+        state.guardianData = children;
+        if(state.view === "guardian") render();
+      }
     }catch(e){ /* silent - a missed background refresh isn't worth alarming the guardian over */ }
   }, 30000);
 }
@@ -5271,7 +5289,23 @@ async function guardianRefresh(){
   try{
     const result = await supabaseRPC("gce_guardian_dashboard", { p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey });
     if(result && result.error){ state.guardianError = result.error; }
-    else { state.guardianData = result.children || []; }
+    else {
+      state.guardianData = result.children || [];
+      // Fetched per child, in parallel - reuses the exact same trend RPC the
+      // student's own dashboard uses, so a guardian sees the identical
+      // improving/stagnant verdict their child would see for themselves.
+      const trends = await Promise.all(state.guardianData.map(c =>
+        supabaseRPC("gce_get_readiness_trend", { p_username: c.username, p_days_ago: 7 }).catch(()=>null)
+      ));
+      state.guardianData.forEach((c,i)=>{ c.readinessTrend = (trends[i] && trends[i].trend) || {}; });
+      const inactivities = await Promise.all(state.guardianData.map(c =>
+        supabaseRPC("gce_get_days_inactive", { p_username: c.username }).catch(()=>null)
+      ));
+      state.guardianData.forEach((c,i)=>{
+        const r = inactivities[i];
+        c.daysInactive = (r && !r.never_studied) ? r.days_inactive : null;
+      });
+    }
   }catch(e){
     state.guardianError = "Couldn't refresh (" + (e && e.message ? e.message : "network error") + ").";
   }
@@ -5492,6 +5526,8 @@ async function loginSuccess(username){
   await loadContactInfo();
   await loadGuardianMessages();
   await loadReadinessTrend();
+  await loadDaysInactive();
+  checkBreakfastMail(); // fire-and-forget - shows itself once loaded, never blocks reaching home
   saveLastUsername(username);
   go("home");
 }
@@ -5537,8 +5573,56 @@ async function loadReadinessTrend(){
    has no trend to report yet, and saying so plainly beats guessing. The +5/-5
    thresholds exist so ordinary day-to-day noise in accuracy doesn't get
    mislabelled as "declining" from a single rough quiz. */
-function subjectTrendLabel(subjectId){
-  const t = state.readinessTrend && state.readinessTrend[subjectId];
+async function loadDaysInactive(){
+  if(state.guest){ state.daysInactive = null; return; }
+  try{
+    const result = await supabaseRPC("gce_get_days_inactive", { p_username: state.user });
+    state.daysInactive = (result && !result.never_studied) ? result.days_inactive : null;
+  }catch(e){
+    state.daysInactive = null;
+  }
+}
+
+/* The "breakfast mail" - a warm, once-a-day delivery of yesterday's honest
+   progress, arriving the first time the student opens the app each day (never
+   more than once, tracked per-student per-date in localStorage - a delivery
+   that showed up three times wouldn't feel special, it'd feel like a glitch).
+   Deliberately loads in the background and only surfaces once we actually know
+   whether there's real news to deliver - a silent failure here should never
+   block the student from reaching their dashboard. */
+async function checkBreakfastMail(){
+  if(state.guest || !state.user) return;
+  const todayKey = "gce_breakfast_" + state.user + "_" + new Date().toISOString().slice(0,10);
+  try{
+    if(localStorage.getItem(todayKey)) return; // already delivered today
+  }catch(e){ return; }
+  try{
+    const result = await supabaseRPC("gce_get_daily_summary", { p_username: state.user });
+    if(!result || !result.success) return;
+    state.breakfastMail = {
+      studiedYesterday: result.studied_yesterday,
+      subjectsProgressed: result.subjects_progressed || []
+    };
+    try{ localStorage.setItem(todayKey, "1"); }catch(e){}
+    render();
+  }catch(e){ /* no delivery today - not worth surfacing an error over */ }
+}
+
+/* Deliberately escalating, not a single flat "you've been away" notice - a
+   student three days off practice and one three weeks off are in genuinely
+   different situations, and the visual weight should say so at a glance,
+   for the student and for a guardian glancing at the same number. Silent
+   (returns null) for 0-2 days, since that's completely normal studying
+   rhythm, not slacking. */
+function inactivityWarningLevel(days){
+  if(days==null || days < 3) return null;
+  if(days < 7)  return { level:"mild",   icon:"🟡", size:"18px", text: days+" days since you last studied", color:"#D97706" };
+  if(days < 14) return { level:"medium", icon:"🟠", size:"26px", text: days+" days since you last studied - momentum is slipping", color:"#EA580C" };
+  return           { level:"severe", icon:"🔴", size:"36px", text: days+" days since you last studied - time to get back in", color:"#DC2626" };
+}
+function subjectTrendLabel(subjectId, trendSource){
+  const source = trendSource || state.readinessTrend;
+  const t = source && source[subjectId];
   if(!t || !t.past) return { label:"new", text:"Not enough history yet", icon:"🆕" };
   const delta = t.latest.readiness_score - t.past.readiness_score;
   if(delta >= 5) return { label:"improving", text:"Improving (+"+delta+" pts this week)", icon:"📈" };
@@ -7159,13 +7243,15 @@ function renderGuardian(){
           </div>
         </div>`;
       }
+      const trend = subjectTrendLabel(s.sid, c.readinessTrend);
+      const trendColors3 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
       return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
         <div style="display:flex;justify-content:space-between;">
           <span>${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':'<span style="color:#92400E;font-weight:600;font-size:11px;">· free preview</span>'} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}</span>
           <b style="color:${barColor};">${r.score}% ready <span style="color:var(--ink-soft);font-weight:400;">(target 85%)</span></b>
         </div>
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
-        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label}</div>
+        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label} <span style="color:${trendColors3[trend.label]};font-weight:600;" title="${trend.text}">· ${trend.icon} ${trend.label}</span></div>
       </div>`;
     }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No activity or enrollment recorded yet.</span></div>`;
     // Deliberately not showing which subjects the student hasn't enrolled in - that's
@@ -7184,6 +7270,7 @@ function renderGuardian(){
           ${c.studied_today
             ? `<div style="font-size:13px;color:#166534;">✅ Studied today: <b>${(c.subjects_today||[]).map(sid=>{const s=findSubject(sid);return s?s.name:sid;}).join(", ")}</b></div>`
             : `<div style="font-size:13px;color:#92400E;">🕒 Hasn't opened a subject yet today.</div>`}
+          ${(()=>{ const inact = inactivityWarningLevel(c.daysInactive); return inact ? `<div style="font-size:${inact.level==='severe'?'14px':'12.5px'};font-weight:${inact.level==='severe'?700:600};color:${inact.color};margin-top:6px;">${inact.icon} ${inact.text}</div>` : ""; })()}
           ${weakest.length ? `<div style="font-size:12.5px;margin-top:8px;color:var(--ink-soft);">Needs attention: <b style="color:var(--ink);">${weakest.map(s=>s.name).join(", ")}</b></div>` : ""}
           ${strongest.length ? `<div style="font-size:12.5px;color:var(--ink-soft);">Doing well in: <b style="color:var(--ink);">${strongest.map(s=>s.name).join(", ")}</b></div>` : ""}
           ${untouched.length ? `<div style="font-size:12.5px;color:#92400E;">Never opened: <b>${untouched.map(s=>s.name).join(", ")}</b></div>` : ""}
@@ -7360,6 +7447,69 @@ function dismissReadinessCelebration(){
 }
 window.dismissReadinessCelebration = dismissReadinessCelebration;
 
+/* The "breakfast mail" - deliberately styled like a delivery arriving, not a
+   system notification. Content is genuinely honest either way: real progress
+   gets named and celebrated specifically (not just "great job"), and a quiet
+   day gets acknowledged plainly and warmly, never guilt-laden - the app's job
+   here is to feel like it's rooting for the student, not auditing them. */
+function renderBreakfastMailOverlay(){
+  const mail = state.breakfastMail;
+  if(!mail) return "";
+  const enrolledSubjects = state.guest ? [] : SUBJECTS.filter(s=>isSubjectUnlocked(s.id));
+  const overallData = enrolledSubjects.length ? computeOverallReadiness(state.progress, enrolledSubjects.map(s=>s.id)) : null;
+  const progressed = mail.subjectsProgressed || [];
+
+  const yesterdayBlock = mail.studiedYesterday ? `
+    <div class="disclaimer" style="background:#DCFCE7;border-color:#22C55E;text-align:left;">
+      <b>🎉 Yesterday's delivery run:</b>
+      <div style="margin-top:8px;display:grid;gap:6px;">
+        ${progressed.map(p=>{
+          const s = findSubject(p.subject_id);
+          const gained = p.readiness_yesterday - (p.readiness_before||0);
+          return `<div style="font-size:13.5px;">📦 <b>${s?s.name:p.subject_id}</b>: ${p.questions_yesterday} question${p.questions_yesterday!==1?'s':''} answered${gained>0?", readiness up "+gained+" pts":""}</div>`;
+        }).join("")}
+      </div>
+    </div>` : `
+    <div class="disclaimer" style="background:#FEF9C3;border-color:#EAB308;text-align:left;">
+      <b>📭 Quiet on the delivery route yesterday</b> - no practice was logged. Completely fine, everyone has off days - today's a clean page.
+    </div>`;
+
+  const soFarBlock = overallData ? `
+    <div class="disclaimer" style="text-align:left;">
+      <b>📊 Where you stand overall:</b> <span style="color:var(--purple);font-weight:700;">${overallData.overall}%</span> ready across your ${enrolledSubjects.length} subject${enrolledSubjects.length!==1?'s':''} (target: 85%).
+    </div>` : "";
+
+  // Honest recommendation: the single weakest-trending enrolled subject, named specifically.
+  let recommendation = "";
+  if(enrolledSubjects.length){
+    const ranked = enrolledSubjects.map(s=>({ s, r: computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks) })).sort((a,b)=>a.r.score-b.r.score);
+    const weakest = ranked[0];
+    if(weakest && weakest.r.score < 85){
+      recommendation = `<div class="disclaimer" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);text-align:left;"><b>🎯 Today's honest suggestion:</b> ${weakest.s.name} is your lowest-ready subject at ${weakest.r.score}% - even one topic today would move the needle.</div>`;
+    }
+  }
+
+  return `
+  <div class="readiness-party-overlay" onclick="dismissBreakfastMail()">
+    <div class="readiness-party-card" onclick="event.stopPropagation()" style="text-align:center;">
+      <div style="font-size:60px;">📬🥐</div>
+      <h1 class="welcome-h1" style="font-size:26px;">Special Delivery!</h1>
+      <p class="welcome-p" style="font-size:14px;">Your daily update just arrived - here's the honest breakdown, delivered fresh.</p>
+      ${yesterdayBlock}
+      ${soFarBlock}
+      ${recommendation}
+      <div class="welcome-actions">
+        <button class="stampbtn" onclick="dismissBreakfastMail()">Thanks - let's go →</button>
+      </div>
+    </div>
+  </div>`;
+}
+function dismissBreakfastMail(){
+  state.breakfastMail = null;
+  render();
+}
+window.dismissBreakfastMail = dismissBreakfastMail;
+
 function renderHome(){
   const enrolledSubjects = state.guest ? SUBJECTS : SUBJECTS.filter(s=>isSubjectUnlocked(s.id));
   const enrolledIds = enrolledSubjects.map(s=>s.id);
@@ -7373,6 +7523,9 @@ function renderHome(){
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
     const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
     const expiryNote = daysLeft!==null ? `<div style="font-size:11px;color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};margin-top:4px;">${daysLeft<=0?'Renews today':'Renews in '+daysLeft+' day'+(daysLeft!==1?'s':'')}</div>` : "";
+    const trend = state.guest ? null : subjectTrendLabel(s.id);
+    const trendColors = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
+    const trendNote = trend ? `<div style="font-size:11px;color:${trendColors[trend.label]};margin-top:3px;" title="Compares this week's readiness to last week's">${trend.icon} ${trend.text}</div>` : "";
     return `
     <div class="subject-card" style="border-top:7px solid ${color};">
       <div class="idx">SUBJECT ${String(i+1).padStart(2,'0')}</div>
@@ -7381,6 +7534,7 @@ function renderHome(){
       <div class="topcount">${s.topics.length} syllabus topics · ${allSubjectQuestions(s).length} practice questions</div>
       <div class="readiness-chip ${readinessClass(label)}">${labelFun(label)}</div>
       ${readinessScoreBar(r, true)}
+      ${trendNote}
       ${expiryNote}
       <button class="enter-btn" onclick="go('subject',{subjectId:'${s.id}'})"><span>Open</span><span>→</span></button>
     </div>`;
@@ -7411,6 +7565,18 @@ function renderHome(){
     </div>` : "";
   if(guardianMessages.some(m=>!m.read)){ markGuardianMessagesRead(); }
 
+  // Deliberately grows more visually insistent the longer the gap - a student
+  // three days off practice sees a small nudge; three weeks off sees something
+  // genuinely hard to scroll past. This is the app itself keeping watch,
+  // separate from and in addition to whatever a guardian sees.
+  const inactivity = state.guest ? null : inactivityWarningLevel(state.daysInactive);
+  const inactivityBanner = inactivity ? `
+    <div class="disclaimer" style="background:${inactivity.level==='severe'?'#FEE2E2':inactivity.level==='medium'?'#FFEDD5':'#FEF9C3'};border-color:${inactivity.color};text-align:center;padding:${inactivity.level==='severe'?'26px':'16px'} 20px;">
+      <div style="font-size:${inactivity.size};">${inactivity.icon}</div>
+      <b style="color:${inactivity.color};font-size:${inactivity.level==='severe'?'17px':'14px'};">${inactivity.text}</b>
+      ${inactivity.level==='severe' ? `<p style="color:var(--ink-soft);font-size:13px;max-width:48ch;margin:8px auto 0;">Nobody's grading you on this message - but your exam date isn't moving, and every day off is a day you'll need to make up later. Open any subject below and get back into it, even for ten minutes.</p>` : ""}
+    </div>` : "";
+
   const expiredBanner = expiredSubjects.length ? `
     <div class="disclaimer" style="background:#FEE2E2;border-color:#EF4444;">
       <b>🔒 ${expiredSubjects.length} subject${expiredSubjects.length!==1?'s':''} expired:</b> ${expiredSubjects.map(s=>s.name).join(", ")} - access paused until renewed. Your progress is saved and picks up right where you left off.
@@ -7431,6 +7597,7 @@ function renderHome(){
 
   return `
   ${state.showReadinessCelebration ? renderReadinessCelebrationOverlay() : ""}
+  ${renderBreakfastMailOverlay()}
   <div class="intro">
     <h2>Hey ${state.user}! ${enrolledSubjects.length || SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
@@ -7439,6 +7606,7 @@ function renderHome(){
   ${renderGamifiedHeader()}
   ${renewalReminderBanner}
   ${guardianMessagesBanner}
+  ${inactivityBanner}
   ${expiredBanner}
   <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format follows the official WAEC syllabus. Questions adapted from real past exam papers are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span>, with the answer independently re-checked. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
   <div class="subject-grid">${cards}</div>
@@ -8023,11 +8191,14 @@ function renderDashboard(){
     const barClass = r.score<50 ? "low" : (r.score>=85 ? "high" : "");
     const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
     const expiryDate = (!state.guest && state.entitlementDetails[s.id]) ? new Date(state.entitlementDetails[s.id].expiresAt).toLocaleDateString(undefined,{day:'numeric',month:'short'}) : null;
+    const trend = state.guest ? null : subjectTrendLabel(s.id);
+    const trendColors2 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
     return `<div class="dash-row">
       <span class="sname">${s.name}</span>
       <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${r.score}%"></div><div class="bar-target-line" style="left:85%;" title="85% target"></div></div>
       <span class="mono">${r.score}%</span>
       <span class="readiness-chip ${readinessClass(label)}">${labelFun(label)} ${lastMock?"· last check "+lastMockText:""}</span>
+      ${trend ? `<span style="font-size:11px;color:${trendColors2[trend.label]};white-space:nowrap;" title="${trend.text}">${trend.icon} ${trend.label}</span>` : ""}
       ${expiryDate ? `<span style="font-size:11px;color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};white-space:nowrap;">renews ${expiryDate}</span>` : ""}
     </div>`;
   }).join("") || `<div class="dash-row"><span class="sname" style="color:var(--ink-soft);">You haven't enrolled in any subjects yet.</span></div>`;
