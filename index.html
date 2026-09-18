@@ -5959,21 +5959,18 @@ function renderPricing(){
       <div style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--ink);">₦${total.toLocaleString()}<span style="font-size:14px;font-weight:500;color:var(--ink-soft);">/month</span></div>
     </div>
     <div style="flex:1;min-width:180px;">
-      ${state.contactEmail ? `
-        <div style="font-size:12.5px;color:var(--ink-soft);">Receipt to <b style="color:var(--ink);">${state.contactEmail}</b>${state.contactPhone?' · confirmation to <b style="color:var(--ink);">'+state.contactPhone+'</b>':''} <a onclick="state.editingContact=true;render();" style="color:var(--purple);text-decoration:underline;cursor:pointer;">change</a></div>
+      ${(state.contactEmail && state.contactPhone && !state.editingContact) ? `
+        <div style="font-size:12.5px;color:var(--ink-soft);">Receipt to <b style="color:var(--ink);">${state.contactEmail}</b> · confirmation to <b style="color:var(--ink);">${state.contactPhone}</b> <a onclick="state.editingContact=true;render();" style="color:var(--purple);text-decoration:underline;cursor:pointer;">change</a></div>
       ` : `
-        <input id="pricingEmail" type="email" placeholder="Your email (for payment receipt)" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;margin-bottom:8px;">
-        <input id="pricingPhone" type="tel" placeholder="Phone number (optional, for payment confirmation)" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
+        <input id="pricingEmail" type="email" placeholder="Your email (for payment receipt)" value="${state.contactEmail||''}" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;margin-bottom:8px;">
+        <input id="pricingPhone" type="tel" placeholder="Phone number (required, for payment + progress updates)" value="${state.contactPhone||''}" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
       `}
-      ${(state.contactEmail && state.editingContact) ? `
-        <input id="pricingEmail" type="email" placeholder="New email" value="${state.contactEmail}" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;margin-bottom:8px;margin-top:8px;">
-        <input id="pricingPhone" type="tel" placeholder="New phone number" value="${state.contactPhone||''}" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);font-size:14px;box-sizing:border-box;">
-      ` : ""}
     </div>
     <button class="stampbtn" ${newlySelected.length===0?"disabled":""} onclick="startCheckout()">
       ${newlySelected.length===0 ? "Select a subject to continue" : "Pay ₦"+total.toLocaleString()+" now →"}
     </button>
   </div>
+  <div class="welcome-note" style="margin-top:10px;">Both email and phone number are required - they're how we send your payment receipt, renewal reminders, and progress updates.</div>
   ${state.pricingError ? `<div class="auth-error" style="margin-top:14px;">${state.pricingError}</div>` : ""}
   <div class="welcome-note" style="margin-top:16px;">Payments are processed securely by Flutterwave. BuildNET Academy never sees or stores your card details. A payment receipt is sent automatically to your email.</div>
   `;
@@ -5996,16 +5993,17 @@ function startCheckout(){
   const newlySelected = [...pricingSelected].filter(id=>!enrolledIds.includes(id));
   if(!newlySelected.length){ return; }
 
-  // Use what's already on file unless the student is actively editing it or never
-  // provided any in the first place - this is the whole point of asking once at
-  // signup instead of every time: checkout itself should just be pick-and-pay.
-  const usingStoredContact = state.contactEmail && !state.editingContact;
+  // Use what's already on file only when BOTH are present - a student who saved
+  // an email before phone was required (or skipped it) must still be asked once
+  // more, not silently waved through with a blank phone number forever.
+  const usingStoredContact = state.contactEmail && state.contactPhone && !state.editingContact;
   const emailEl = document.getElementById("pricingEmail");
   const phoneEl = document.getElementById("pricingPhone");
   const email = usingStoredContact ? state.contactEmail : (emailEl ? emailEl.value.trim() : "");
-  const phone = usingStoredContact ? (state.contactPhone||"") : (phoneEl ? phoneEl.value.trim() : "");
+  const phone = usingStoredContact ? state.contactPhone : (phoneEl ? phoneEl.value.trim() : "");
 
   if(!email || !email.includes("@")){ state.pricingError = "Please enter a valid email address for your payment receipt."; render(); return; }
+  if(!phone || phone.replace(/\D/g,"").length < 10){ state.pricingError = "Please enter a valid phone number - we use this to send your payment confirmation and progress updates."; render(); return; }
 
   // If this came from the form (new or just-edited), save it for next time so
   // checkout stays a one-time ask, not a repeated one.
