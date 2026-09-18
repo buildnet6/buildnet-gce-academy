@@ -513,6 +513,39 @@ const SUBJECT_OVERVIEWS = {
 };
 
 const SUBJECT_EMOJI = { math:"🔢", english:"📖", literature:"🎭", economics:"💰", government:"🏛️", civic:"⚖️", crs:"🙏", chemistry:"🧪", physics:"⚛️", biology:"🧬", geography:"🌍", commerce:"🛒", finacc:"📊" };
+
+/* Real WAEC paper durations and total marks, researched per subject (2025/2026
+   timetables and syllabuses) - used to time both objective (mock) and essay
+   (theory) practice realistically, and to allocate a fair, mark-proportional
+   time limit to a single theory question practised on its own rather than as
+   part of a full multi-question paper. altPractical is only set for the three
+   sciences, where WAEC provides a private-candidate alternative to the hands-on
+   practical; that paper's actual question bank is a separate, not-yet-built
+   piece of work - this entry exists so the timing is ready when it is.  */
+const PAPER_TIMING = {
+  math:      { objMin:90,  objMarks:50,  essayMin:150, essayMarks:100 },
+  english:   { objMin:60,  objMarks:50,  essayMin:120, essayMarks:100 },
+  literature:{ objMin:60,  objMarks:50,  essayMin:75,  essayMarks:50  },
+  economics: { objMin:50,  objMarks:50,  essayMin:180, essayMarks:100 },
+  government:{ objMin:60,  objMarks:50,  essayMin:120, essayMarks:100 },
+  civic:     { objMin:60,  objMarks:50,  essayMin:120, essayMarks:100 },
+  crs:       { objMin:60,  objMarks:50,  essayMin:120, essayMarks:100 },
+  chemistry: { objMin:60,  objMarks:50,  essayMin:120, essayMarks:100, altPractical:{min:90,  marks:50} },
+  physics:   { objMin:75,  objMarks:50,  essayMin:90,  essayMarks:50,  altPractical:{min:165, marks:50} },
+  biology:   { objMin:50,  objMarks:50,  essayMin:100, essayMarks:60,  altPractical:{min:90,  marks:50} },
+  geography: { objMin:60,  objMarks:50,  essayMin:120, essayMarks:100, altPractical:{min:110, marks:0}  },
+  commerce:  { objMin:50,  objMarks:50,  essayMin:120, essayMarks:100 },
+  finacc:    { objMin:60,  objMarks:50,  essayMin:150, essayMarks:100 }
+};
+/* Fair share of the essay paper's time for ONE question practised alone, scaled
+   by that question's marks against the paper's total - a 10-mark question on a
+   100-mark, 120-minute paper gets 12 minutes, not the whole paper's clock. */
+function theoryTimeSeconds(subjectId, questionMarks){
+  const t = PAPER_TIMING[subjectId];
+  if(!t) return null;
+  const minutes = Math.max(4, Math.round((questionMarks / t.essayMarks) * t.essayMin));
+  return minutes * 60;
+}
 const SUBJECT_COLOR = { math:"#4D96FF", english:"#FF4FA3", literature:"#7C3AED", economics:"#22C55E", government:"#FF8A3D", civic:"#17C3B2", crs:"#FFCB3D", chemistry:"#06B6D4", physics:"#6366F1", biology:"#10B981", geography:"#0EA5E9", commerce:"#D97706", finacc:"#475569" };
 const READINESS_EMOJI = { "NOT STARTED":"🌱", "STARTED":"🚶", "DEVELOPING":"🔧", "COMPETENT":"👍", "STRONG":"🔥", "EXAM READY":"🌟" };
 function labelFun(label){ return (READINESS_EMOJI[label]||"") + " " + label; }
@@ -5068,7 +5101,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light" };
+  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{} };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -5204,6 +5237,33 @@ function guardianLogout(){
   render();
 }
 window.guardianLogout = guardianLogout;
+
+async function sendGuardianMessage(studentUsername){
+  const inputEl = document.getElementById("msgInput_"+studentUsername);
+  const message = inputEl ? inputEl.value.trim() : "";
+  if(!state.guardianMsgStatus) state.guardianMsgStatus = {};
+  if(!message){
+    state.guardianMsgStatus[studentUsername] = { ok:false, text:"Type a message first." };
+    render();
+    return;
+  }
+  try{
+    const result = await supabaseRPC("gce_guardian_send_message", {
+      p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey,
+      p_student_username: studentUsername, p_message: message
+    });
+    if(result && result.success){
+      state.guardianMsgStatus[studentUsername] = { ok:true, text:"✓ Sent - they'll see it next time they open the app." };
+      if(inputEl) inputEl.value = "";
+    } else {
+      state.guardianMsgStatus[studentUsername] = { ok:false, text: (result&&result.error) || "Couldn't send - please try again." };
+    }
+  }catch(e){
+    state.guardianMsgStatus[studentUsername] = { ok:false, text:"Couldn't reach the server - please try again." };
+  }
+  render();
+}
+window.sendGuardianMessage = sendGuardianMessage;
 
 async function guardianRefresh(){
   state.guardianBusy = true;
@@ -5430,6 +5490,8 @@ async function loginSuccess(username){
   await loadEntitlements();
   await loadStreak();
   await loadContactInfo();
+  await loadGuardianMessages();
+  await loadReadinessTrend();
   saveLastUsername(username);
   go("home");
 }
@@ -5441,6 +5503,47 @@ async function loadContactInfo(){
   }catch(e){
     state.contactEmail = ""; state.contactPhone = "";
   }
+}
+async function loadGuardianMessages(){
+  try{
+    const result = await supabaseRPC("gce_get_student_messages", { p_username: state.user });
+    state.guardianMessages = (result && result.messages) || [];
+    state.unreadMessageCount = (result && result.unread_count) || 0;
+  }catch(e){
+    state.guardianMessages = []; state.unreadMessageCount = 0;
+  }
+}
+async function markGuardianMessagesRead(){
+  if(!state.unreadMessageCount) return;
+  state.unreadMessageCount = 0;
+  (state.guardianMessages||[]).forEach(m=>m.read=true);
+  render();
+  try{ await supabaseRPC("gce_mark_messages_read", { p_username: state.user }); }catch(e){}
+}
+window.markGuardianMessagesRead = markGuardianMessagesRead;
+
+async function loadReadinessTrend(){
+  if(state.guest){ state.readinessTrend = {}; return; }
+  try{
+    const result = await supabaseRPC("gce_get_readiness_trend", { p_username: state.user, p_days_ago: 7 });
+    state.readinessTrend = (result && result.trend) || {};
+  }catch(e){
+    state.readinessTrend = {};
+  }
+}
+/* Turns raw snapshot history into the one-word verdict shown to the student and
+   their guardian. Deliberately requires a real week-old data point before ever
+   calling something "stagnant" - a brand-new subject with only today's number
+   has no trend to report yet, and saying so plainly beats guessing. The +5/-5
+   thresholds exist so ordinary day-to-day noise in accuracy doesn't get
+   mislabelled as "declining" from a single rough quiz. */
+function subjectTrendLabel(subjectId){
+  const t = state.readinessTrend && state.readinessTrend[subjectId];
+  if(!t || !t.past) return { label:"new", text:"Not enough history yet", icon:"🆕" };
+  const delta = t.latest.readiness_score - t.past.readiness_score;
+  if(delta >= 5) return { label:"improving", text:"Improving (+"+delta+" pts this week)", icon:"📈" };
+  if(delta <= -5) return { label:"declining", text:"Slipping ("+delta+" pts this week)", icon:"📉" };
+  return { label:"stagnant", text:"Stagnant (no real change this week)", icon:"➖" };
 }
 function logout(){
   state.user = null;
@@ -5552,6 +5655,26 @@ async function saveProgress(subjectId){
   if(state.guest) return; // guest/preview mode never persists - avoids polluting the database with test data
   try{ await supabaseRPC("gce_save_progress", { p_username: state.user, p_subject: subjectId, p_data: state.progress[subjectId] }); }
   catch(e){ console.error("Could not save progress", e); }
+  snapshotReadiness(subjectId);
+}
+/* Cheap, fire-and-forget: records today's readiness figures for this subject so
+   trend comparisons ("improving" vs "stagnant") and the daily summary have real
+   history to compare against. Safe to call every time progress saves - the RPC
+   upserts today's row, so repeated calls in one day just refresh the same entry
+   rather than creating duplicates. Never blocks the UI or surfaces an error to
+   the student - this is a background record-keeping detail, not something a
+   failure here should ever interrupt studying over. */
+function snapshotReadiness(subjectId){
+  if(state.guest) return;
+  const subject = findSubject(subjectId);
+  if(!subject) return;
+  const r = computeSubjectReadiness(subject, state.progress[subjectId].topics, state.progress[subjectId].mocks);
+  supabaseRPC("gce_snapshot_readiness", {
+    p_username: state.user, p_subject_id: subjectId,
+    p_topics_attempted: r.topicsAttempted, p_total_topics: r.totalTopics,
+    p_accuracy_pct: r.accuracyPct, p_readiness_score: r.score,
+    p_questions_attempted: r.totalAttempted
+  }).catch(()=>{});
 }
 /* ======================= GAMIFICATION ======================= */
 const LEVELS = [
@@ -6301,7 +6424,12 @@ function startMock(subjectId){
   const pool = shuffle(allSubjectQuestions(subject));
   const size = Math.min(15, pool.length);
   const questions = pool.slice(0, size).map(shuffleQuestionOptions);
-  const seconds = size * 75;
+  // Paced to this subject's REAL WAEC objective-paper timing (e.g. Physics allows
+  // 90 sec/question, Biology only 60) rather than one generic number for every
+  // subject - a mock should feel like the actual exam's pressure, not a guess.
+  const timing = PAPER_TIMING[subjectId];
+  const secPerQuestion = timing ? (timing.objMin / timing.objMarks) * 60 : 75;
+  const seconds = Math.round(size * secPerQuestion);
   state.quiz = { mode:"mock", subjectId, questions, index:0, picks:{}, revealed:{}, timedSeconds:seconds, secondsLeft:seconds };
   go("quiz", {subjectId});
   pushLiveActivity(subjectId, null, "mock");
@@ -6489,12 +6617,29 @@ window.handleChatKey = handleChatKey;
 /* ======================= THEORY & ESSAY AI GRADING ======================= */
 let theoryAttempt = null; // { subjectId, index, question, typedAnswer, images:[{data,mediaType}], grading:false, result:null, error:null }
 
+let theoryTimerHandle = null;
 function startTheoryAttempt(subjectId, index){
   const list = THEORY_QUESTIONS[subjectId] || [];
   const question = list[index];
   if(!question) return;
-  theoryAttempt = { subjectId, index, question, typedAnswer:"", images:[], grading:false, result:null, error:null };
+  const seconds = theoryTimeSeconds(subjectId, question.marks);
+  theoryAttempt = { subjectId, index, question, typedAnswer:"", images:[], grading:false, result:null, error:null, secondsLeft:seconds, timedOut:false };
   pushLiveActivity(subjectId, question.topicId||null, "theory");
+  if(theoryTimerHandle) clearInterval(theoryTimerHandle);
+  if(seconds!=null){
+    theoryTimerHandle = setInterval(()=>{
+      if(!theoryAttempt || theoryAttempt.grading || theoryAttempt.result){ clearInterval(theoryTimerHandle); theoryTimerHandle=null; return; }
+      theoryAttempt.secondsLeft--;
+      if(theoryAttempt.secondsLeft <= 0){
+        clearInterval(theoryTimerHandle); theoryTimerHandle=null;
+        theoryAttempt.timedOut = true;
+        submitTheoryAnswer(); // exactly like a real exam - time's up means submit whatever's written
+        return;
+      }
+      const el = document.getElementById("theoryTimerDisplay");
+      if(el){ const m=Math.floor(theoryAttempt.secondsLeft/60), sec=theoryAttempt.secondsLeft%60; el.textContent = m+":"+(sec<10?"0":"")+sec; }
+    }, 1000);
+  }
 }
 
 function addTheoryImages(fileInput){
@@ -6533,32 +6678,71 @@ function updateTheoryTyped(el){
 window.updateTheoryTyped = updateTheoryTyped;
 
 function buildGradingSystemPrompt(subjectName, q){
-  return "You are an experienced, fair and encouraging WAEC examiner grading a student's PRACTICE " + subjectName + " theory/essay answer. " +
+  const criteriaList = q.guide.map((c,i)=>(i+1)+". "+c).join("\n");
+  return "You are an experienced, fair and encouraging WAEC examiner grading a student's PRACTICE " + subjectName + " theory/essay answer, using the same style of marking scheme WAEC itself uses: marks allocated to specific, distinct points, not one holistic impression. " +
     "This is for self-study only, not an official result. " +
     "Question: " + q.q + " " +
     "Maximum marks: " + q.marks + ". " +
-    "Marking guide (key points an examiner would look for): " + q.guide.join("; ") + ". " +
-    "If the student's answer is provided as one or more images, carefully read the handwriting first. If any part is genuinely illegible, say so honestly in your NOTE rather than guessing or inventing content. " +
-    "Grade fairly against the marking guide: award credit for valid points even if phrased differently from the guide, and do not penalise imperfect handwriting itself, only the actual content. " +
-    "Respond in EXACTLY this format, with no extra commentary before or after:\n" +
-    "SCORE: <number>/" + q.marks + "\n" +
-    "STRENGTHS: <2-3 specific things the student did well>\n" +
-    "IMPROVE: <2-3 specific, actionable things to improve>\n" +
+    "There are " + q.guide.length + " distinct marking points an examiner would look for, listed below. Distribute the " + q.marks + " total marks across these points as WAEC would (points requiring more work or insight can fairly carry more marks than a simple one-line point) - decide a sensible mark allocation per point yourself, so the allocations sum to exactly " + q.marks + ", then grade the student's actual answer against each point using that allocation:\n" + criteriaList + "\n" +
+    "If the student's answer is provided as one or more images, carefully read the handwriting first. If any part is genuinely illegible, say so honestly rather than guessing or inventing content. " +
+    "Grade fairly: award credit for valid points even if phrased differently from the guide, and do not penalise imperfect handwriting itself, only the actual content. " +
+    "Respond in EXACTLY this format, with no extra commentary before or after. Repeat the CRITERION block once for EACH of the " + q.guide.length + " marking points, in the same order listed above:\n" +
+    "CRITERION: <the marking point, copied exactly as listed above>\n" +
+    "ALLOCATED: <marks you assigned this point, out of " + q.marks + " total>\n" +
+    "EARNED: <marks the student actually earned for this point>\n" +
+    "WHY: <one specific sentence on what they did right or wrong here, and exactly what would have earned the missing marks if any>\n" +
+    "---\n" +
+    "(repeat the block above once per marking point)\n" +
+    "SUMMARY_STRENGTHS: <2-3 specific things the student did well overall>\n" +
+    "SUMMARY_IMPROVE: <2-3 specific, actionable things to improve overall>\n" +
     "NOTE: <any handwriting legibility issues, or 'None'>";
 }
 
 function parseGradingResponse(text, maxMarks){
-  const scoreMatch = /SCORE:\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/i.exec(text);
-  const strengthsMatch = /STRENGTHS:\s*([\s\S]*?)(?=IMPROVE:|$)/i.exec(text);
-  const improveMatch = /IMPROVE:\s*([\s\S]*?)(?=NOTE:|$)/i.exec(text);
-  const noteMatch = /NOTE:\s*([\s\S]*)$/i.exec(text);
-  if(!scoreMatch){
-    return { raw:true, text: text };
+  const blocks = text.split(/^---\s*$/m).map(b=>b.trim()).filter(Boolean);
+  const criteria = [];
+  let summaryBlock = "";
+  blocks.forEach(block=>{
+    const critMatch = /CRITERION:\s*([\s\S]*?)\n\s*ALLOCATED:/i.exec(block);
+    const allocMatch = /ALLOCATED:\s*(\d+(?:\.\d+)?)/i.exec(block);
+    const earnedMatch = /EARNED:\s*(\d+(?:\.\d+)?)/i.exec(block);
+    const whyMatch = /WHY:\s*([\s\S]*?)(?=\n\s*CRITERION:|\n\s*SUMMARY_STRENGTHS:|$)/i.exec(block);
+    if(critMatch && allocMatch && earnedMatch){
+      criteria.push({
+        criterion: critMatch[1].trim(),
+        allocated: parseFloat(allocMatch[1]),
+        earned: parseFloat(earnedMatch[1]),
+        why: whyMatch ? whyMatch[1].trim() : ""
+      });
+    }
+    if(/SUMMARY_STRENGTHS:/i.test(block)) summaryBlock = block;
+  });
+
+  if(!criteria.length){
+    // Fall back to the older holistic format if the model didn't follow the
+    // structured one exactly - still show SOMETHING useful rather than nothing.
+    const scoreMatch = /SCORE:\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/i.exec(text);
+    if(!scoreMatch){ return { raw:true, text: text }; }
+    const strengthsMatch = /STRENGTHS:\s*([\s\S]*?)(?=IMPROVE:|$)/i.exec(text);
+    const improveMatch = /IMPROVE:\s*([\s\S]*?)(?=NOTE:|$)/i.exec(text);
+    const noteMatch = /NOTE:\s*([\s\S]*)$/i.exec(text);
+    return {
+      raw:false, structured:false,
+      score: scoreMatch[1], maxMarks: scoreMatch[2] || maxMarks,
+      strengths: strengthsMatch ? strengthsMatch[1].trim() : "",
+      improve: improveMatch ? improveMatch[1].trim() : "",
+      note: noteMatch ? noteMatch[1].trim() : "None"
+    };
   }
+
+  const totalEarned = criteria.reduce((sum,c)=>sum+c.earned, 0);
+  const strengthsMatch = /SUMMARY_STRENGTHS:\s*([\s\S]*?)(?=SUMMARY_IMPROVE:|$)/i.exec(summaryBlock||text);
+  const improveMatch = /SUMMARY_IMPROVE:\s*([\s\S]*?)(?=NOTE:|$)/i.exec(summaryBlock||text);
+  const noteMatch = /NOTE:\s*([\s\S]*)$/i.exec(summaryBlock||text);
   return {
-    raw:false,
-    score: scoreMatch[1],
-    maxMarks: scoreMatch[2] || maxMarks,
+    raw:false, structured:true,
+    criteria,
+    score: totalEarned, maxMarks: maxMarks,
     strengths: strengthsMatch ? strengthsMatch[1].trim() : "",
     improve: improveMatch ? improveMatch[1].trim() : "",
     note: noteMatch ? noteMatch[1].trim() : "None"
@@ -6619,10 +6803,7 @@ window.submitTheoryAnswer = submitTheoryAnswer;
 
 function retryTheoryAttempt(){
   if(!theoryAttempt) return;
-  theoryAttempt.result = null;
-  theoryAttempt.error = null;
-  theoryAttempt.typedAnswer = "";
-  theoryAttempt.images = [];
+  startTheoryAttempt(theoryAttempt.subjectId, theoryAttempt.index); // fresh full time allocation, exactly like a real re-sit
   render();
 }
 window.retryTheoryAttempt = retryTheoryAttempt;
@@ -7009,6 +7190,14 @@ function renderGuardian(){
         </div>
       </div>
       <div style="margin-top:14px;">${subjRows}</div>
+      <div class="disclaimer" style="margin-top:14px;background:#F3E8FF;border-color:var(--purple);">
+        <b>💌 Send ${c.username} a quick note</b> - let them know you're watching their progress. It shows the next time they open the app.
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <input id="msgInput_${c.username}" type="text" maxlength="300" placeholder="e.g. Proud of your progress in Math this week - keep going!" style="flex:1;min-width:220px;padding:10px 12px;border-radius:10px;border:2px solid var(--line);font-size:13.5px;box-sizing:border-box;">
+          <button class="stampbtn" style="padding:10px 18px;font-size:13px;" onclick="sendGuardianMessage('${c.username}')">Send</button>
+        </div>
+        ${state.guardianMsgStatus && state.guardianMsgStatus[c.username] ? `<div style="font-size:12px;margin-top:6px;color:${state.guardianMsgStatus[c.username].ok?'#166534':'#DC2626'};">${state.guardianMsgStatus[c.username].text}</div>` : ""}
+      </div>
     </div>`;
   }).join("");
 
@@ -7204,6 +7393,24 @@ function renderHome(){
       <a onclick="go('pricing')" style="color:var(--purple);text-decoration:underline;cursor:pointer;font-weight:700;">Renew now →</a>
     </div>` : "";
 
+  // A note from a guardian is deliberately shown warmly, not as a dry system alert -
+  // this is often the one piece of encouragement a student sees between study
+  // sessions, and it should read that way.
+  const guardianMessages = state.guest ? [] : (state.guardianMessages||[]);
+  const guardianMessagesBanner = guardianMessages.length ? `
+    <div class="disclaimer" style="background:linear-gradient(135deg,#F3E8FF,#FFE8F3);border-color:var(--purple);">
+      <b>💌 A note from your guardian${guardianMessages.length>1?'s':''}:</b>
+      <div style="margin-top:8px;display:grid;gap:8px;">
+        ${guardianMessages.slice(0,3).map(m=>`
+          <div style="background:#fff;border-radius:12px;padding:10px 14px;${m.read?'':'border-left:4px solid var(--purple);'}">
+            <div style="font-size:14px;color:var(--ink);">"${m.message}"</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">${new Date(m.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short'})}${m.read?'':' · <span style="color:var(--purple);font-weight:700;">new</span>'}</div>
+          </div>`).join("")}
+      </div>
+      ${guardianMessages.length>3 ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">+ ${guardianMessages.length-3} earlier message${guardianMessages.length-3!==1?'s':''}</div>` : ""}
+    </div>` : "";
+  if(guardianMessages.some(m=>!m.read)){ markGuardianMessagesRead(); }
+
   const expiredBanner = expiredSubjects.length ? `
     <div class="disclaimer" style="background:#FEE2E2;border-color:#EF4444;">
       <b>🔒 ${expiredSubjects.length} subject${expiredSubjects.length!==1?'s':''} expired:</b> ${expiredSubjects.map(s=>s.name).join(", ")} - access paused until renewed. Your progress is saved and picks up right where you left off.
@@ -7231,6 +7438,7 @@ function renderHome(){
   ${overallData ? renderOverallReadinessHero(overallData, state.user, {subtitle:"across your "+enrolledSubjects.length+" enrolled subject"+(enrolledSubjects.length>1?"s":"")}) : ""}
   ${renderGamifiedHeader()}
   ${renewalReminderBanner}
+  ${guardianMessagesBanner}
   ${expiredBanner}
   <div class="disclaimer"><b>About the content:</b> every subject's topic list and exam format follows the official WAEC syllabus. Questions adapted from real past exam papers are tagged <span class="mono">✓ VERIFIED PAST-PAPER STYLE</span>, with the answer independently re-checked. Everything else is AI-generated in a matching WAEC style - never treat it as an official past question.</div>
   <div class="subject-grid">${cards}</div>
@@ -7345,7 +7553,26 @@ function renderTheoryAttempt(){
 
   if(theoryAttempt.result){
     const r = theoryAttempt.result;
-    const resultHtml = r.raw ? `<div class="grade-section"><p>${r.text}</p></div>` : `
+    const topic = q.topicId ? findTopic(s.id, q.topicId) : null;
+    const weakCriteria = r.structured ? r.criteria.filter(c=>c.earned < c.allocated) : [];
+    const timedOutNote = theoryAttempt.timedOut ? `<div class="disclaimer" style="background:#FEF3C7;border-color:#F59E0B;">⏰ Time ran out, so this was submitted automatically with whatever you'd written - exactly what would happen in the real exam. Nothing was lost; grade it, learn from it, and try again with a fresh clock.</div>` : "";
+    const resultHtml = r.raw ? `<div class="grade-section"><p>${r.text}</p></div>` : r.structured ? `
+      <div class="grade-score-badge">${r.score}/${r.maxMarks}</div>
+      <div class="grade-section"><h4>MARK-BY-MARK BREAKDOWN</h4>
+        ${r.criteria.map(c=>{
+          const full = c.earned >= c.allocated;
+          const zero = c.earned <= 0;
+          const color = full ? "#16A34A" : zero ? "#DC2626" : "#D97706";
+          return `<div style="background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:8px;border-left:4px solid ${color};">
+            <div style="display:flex;justify-content:space-between;gap:10px;"><span style="font-size:13.5px;color:var(--ink);flex:1;">${c.criterion}</span><b style="color:${color};white-space:nowrap;">${c.earned}/${c.allocated}</b></div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px;">${c.why}</div>
+          </div>`;
+        }).join("")}
+      </div>
+      <div class="grade-section"><h4>WHAT YOU DID WELL</h4><p>${r.strengths}</p></div>
+      <div class="grade-section"><h4>WHAT TO IMPROVE</h4><p>${r.improve}</p></div>
+      ${r.note && r.note.toLowerCase()!=="none" ? `<div class="grade-note">📝 <b>Note:</b> ${r.note}</div>` : ""}
+    ` : `
       <div class="grade-score-badge">${r.score}/${r.maxMarks}</div>
       <div class="grade-section"><h4>WHAT YOU DID WELL</h4><p>${r.strengths}</p></div>
       <div class="grade-section"><h4>WHAT TO IMPROVE</h4><p>${r.improve}</p></div>
@@ -7353,10 +7580,17 @@ function renderTheoryAttempt(){
     `;
     return `
     <div class="crumbs"><button onclick="go('home')">Subjects</button> / <button onclick="go('subject',{subjectId:'${s.id}'})">${s.name}</button> / <button onclick="go('theorylist',{subjectId:'${s.id}'})">Theory &amp; Essay</button> / Result</div>
+    ${timedOutNote}
     <div class="theory-prompt-card"><div class="tp-marks">${q.marks} MARKS</div><p>${q.q}</p>${q.diagram?`<div class="q-diagram" style="background:#fff;margin-top:14px;">${q.diagram}<div class="q-diagram-note">Diagram - not drawn to scale</div></div>`:""}</div>
     <div class="grade-result">${resultHtml}</div>
+    ${(topic && weakCriteria.length) ? `
+    <div class="section-block" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);text-align:center;">
+      <h4 style="color:var(--purple-dark);">📚 CLOSE THE GAP ON WHAT YOU MISSED</h4>
+      <p style="color:var(--ink-soft);font-size:13px;max-width:52ch;margin:6px auto 14px;">${weakCriteria.length} marking point${weakCriteria.length!==1?'s':''} didn't get full marks. Review "${topic.name}" to fill in exactly what's missing, then come back and try this same question again - if you've genuinely closed the gap, your next score will show it.</p>
+      <button class="stampbtn" onclick="go('topic',{subjectId:'${s.id}',topicId:'${topic.id}'})">Review ${topic.name} →</button>
+    </div>` : ""}
     <div class="topic-actions">
-      <button class="primary-btn" onclick="retryTheoryAttempt()">Try again</button>
+      <button class="primary-btn" onclick="retryTheoryAttempt()">Try again (fresh timer)</button>
       <button class="ghost-btn" onclick="go('theorylist',{subjectId:'${s.id}'})">Back to Theory &amp; Essay list</button>
     </div>
     `;
@@ -7370,6 +7604,7 @@ function renderTheoryAttempt(){
 
   return `
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / <button onclick="go('subject',{subjectId:'${s.id}'})">${s.name}</button> / <button onclick="go('theorylist',{subjectId:'${s.id}'})">Theory &amp; Essay</button> / Answer</div>
+  ${theoryAttempt.secondsLeft!=null ? `<div class="timer" id="theoryTimerDisplay" style="float:right;">${Math.floor(theoryAttempt.secondsLeft/60)}:${(theoryAttempt.secondsLeft%60<10?"0":"")+(theoryAttempt.secondsLeft%60)}</div>` : ""}
   <div class="theory-prompt-card"><div class="tp-marks">${q.marks} MARKS</div><p>${q.q}</p>${q.diagram?`<div class="q-diagram" style="background:#fff;margin-top:14px;">${q.diagram}<div class="q-diagram-note">Diagram - not drawn to scale</div></div>`:""}</div>
   ${theoryAttempt.error ? `<div class="auth-error">${theoryAttempt.error}</div>` : ""}
   <div class="theory-answer-box">
