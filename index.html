@@ -5560,6 +5560,10 @@ function startGuardianAutoRefresh(){
           const r = inactivities[i];
           c.daysInactive = (r && !r.never_studied) ? r.days_inactive : null;
         });
+        const examDatesResults = await Promise.all(children.map(c =>
+          supabaseRPC("gce_get_exam_dates", { p_username: c.username }).catch(()=>null)
+        ));
+        children.forEach((c,i)=>{ c.examDates = (examDatesResults[i] && examDatesResults[i].exam_dates) || {}; });
         state.guardianData = children;
         if(state.view === "guardian") render();
       }
@@ -5660,6 +5664,15 @@ async function guardianRefresh(){
       state.guardianData.forEach((c,i)=>{
         const r = inactivities[i];
         c.daysInactive = (r && !r.never_studied) ? r.days_inactive : null;
+      });
+      // Read-only here deliberately - the student picks their own exam dates on
+      // their own dashboard; the guardian sees the rendered result (date and
+      // countdown), not an editable control, since it isn't the guardian's date to set.
+      const examDatesResults = await Promise.all(state.guardianData.map(c =>
+        supabaseRPC("gce_get_exam_dates", { p_username: c.username }).catch(()=>null)
+      ));
+      state.guardianData.forEach((c,i)=>{
+        c.examDates = (examDatesResults[i] && examDatesResults[i].exam_dates) || {};
       });
     }
   }catch(e){
@@ -7803,9 +7816,16 @@ function renderGuardian(){
       const label = readinessScoreLabel(r);
       const barColor = r.score>=85 ? "var(--green)" : r.score>=70 ? "#F59E0B" : "#EF4444";
       if(s.attempted===0 && r.mocksTaken===0){
+        const dateStr0 = c.examDates && c.examDates[s.sid];
+        const examNote0 = dateStr0 ? (()=>{
+          const days = Math.round((new Date(dateStr0+"T00:00:00") - new Date(new Date().toDateString())) / 86400000);
+          const color = days<0 ? "#DC2626" : days<=7 ? "#DC2626" : days<=30 ? "#D97706" : "#16A34A";
+          const formatted = new Date(dateStr0+"T00:00:00").toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+          return ` <span style="color:${color};font-weight:700;">· 📅 exam ${formatted} (${days<0?Math.abs(days)+"d ago":days===0?"today":days+"d left"})</span>`;
+        })() : (s.enrolled ? ` <span style="color:var(--ink-soft);font-style:italic;">· no exam date set yet</span>` : "");
         return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
           <div style="display:flex;justify-content:space-between;">
-            <span style="color:var(--ink-soft);">${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':''}</span>
+            <span style="color:var(--ink-soft);">${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':''}${examNote0}</span>
             <b style="color:var(--ink-soft);font-weight:600;">⚪ Not started yet · 0% ready</b>
           </div>
         </div>`;
@@ -7819,13 +7839,24 @@ function renderGuardian(){
         const dateStr = new Date(s.entitlement.expires_at).toLocaleDateString(undefined,{day:'numeric',month:'short'});
         return `<span style="color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};"> · renews ${dateStr}${daysLeft<=3?' (soon)':''}</span>`;
       })();
+      // Read-only for the guardian - shows exactly what the student picked on
+      // their own dashboard, using the same day-count and colour convention
+      // as the student's own Exam Countdown panel so the two never disagree.
+      const examNote = (()=>{
+        const dateStr = c.examDates && c.examDates[s.sid];
+        if(!dateStr) return `<span style="color:var(--ink-soft);font-style:italic;"> · no exam date set yet</span>`;
+        const days = Math.round((new Date(dateStr+"T00:00:00") - new Date(new Date().toDateString())) / 86400000);
+        const color = days<0 ? "#DC2626" : days<=7 ? "#DC2626" : days<=30 ? "#D97706" : "#16A34A";
+        const formatted = new Date(dateStr+"T00:00:00").toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+        return `<span style="color:${color};font-weight:700;"> · 📅 exam ${formatted} (${days<0?Math.abs(days)+"d ago":days===0?"today":days+"d left"})</span>`;
+      })();
       return `<div class="admin-stat-row" style="flex-direction:column;align-items:stretch;gap:6px;">
         <div style="display:flex;justify-content:space-between;">
           <span>${s.name} ${s.enrolled?'<span style="color:var(--purple);font-weight:600;font-size:11px;">· enrolled</span>':'<span style="color:#92400E;font-weight:600;font-size:11px;">· free preview</span>'} ${s.touchedToday?'<span style="color:var(--purple);font-weight:700;">• today</span>':''}${renewalNote}</span>
           <b style="color:${barColor};">${r.score}% ready <span style="color:var(--ink-soft);font-weight:400;">(target 85%)</span></b>
         </div>
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
-        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label} <span style="color:${trendColors3[trend.label]};font-weight:600;" title="${trend.text}">· ${trend.icon} ${trend.label}</span></div>
+        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label} <span style="color:${trendColors3[trend.label]};font-weight:600;" title="${trend.text}">· ${trend.icon} ${trend.label}</span>${examNote}</div>
       </div>`;
     }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No activity or enrollment recorded yet.</span></div>`;
     // Deliberately not showing which subjects the student hasn't enrolled in - that's
@@ -7843,7 +7874,7 @@ function renderGuardian(){
               <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);">${c.username}</div>
               <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">Joined ${new Date(c.joined).toLocaleDateString()}</div>
             </div>
-            <a onclick="confirmUnlinkChild('${c.username}')" style="font-size:11.5px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;white-space:nowrap;flex-shrink:0;">Unlink</a>
+            <button onclick="confirmUnlinkChild('${c.username}')" style="flex-shrink:0;white-space:nowrap;background:#fff;border:2px solid #16A34A;color:#16A34A;border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#FEE2E2';this.style.borderColor='#DC2626';this.style.color='#DC2626';" onmouseout="this.style.background='#fff';this.style.borderColor='#16A34A';this.style.color='#16A34A';">🔗 Linked · tap to unlink</button>
           </div>
           ${liveActivityBlock}
           ${c.studied_today
