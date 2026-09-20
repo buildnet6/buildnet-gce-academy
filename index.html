@@ -5101,7 +5101,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{}, daysInactive:null, breakfastMail:null };
+  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{}, daysInactive:null, breakfastMail:null, emailingReport:false, emailReportStatus:null };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -6892,6 +6892,44 @@ function retryTheoryAttempt(){
 }
 window.retryTheoryAttempt = retryTheoryAttempt;
 
+/* Sends the ACTUAL graded breakdown to the student's own stored email - not a
+   summary, the same mark-by-mark detail they see on screen, so it's something
+   worth keeping and re-reading later without relying on the app itself to
+   store it forever. */
+async function emailGradedReport(){
+  if(!theoryAttempt || !theoryAttempt.result || !theoryAttempt.result.structured || !state.contactEmail) return;
+  const s = findSubject(theoryAttempt.subjectId);
+  const r = theoryAttempt.result;
+  state.emailingReport = true;
+  state.emailReportStatus = null;
+  render();
+  try{
+    const res = await fetch("/api/send-report-email", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        toEmail: state.contactEmail,
+        studentName: state.user,
+        subjectName: s ? s.name : theoryAttempt.subjectId,
+        questionText: theoryAttempt.question.q,
+        marks: r.score, maxMarks: r.maxMarks,
+        criteria: r.criteria, strengths: r.strengths, improve: r.improve
+      })
+    });
+    const result = await res.json();
+    state.emailingReport = false;
+    state.emailReportStatus = (result && result.success)
+      ? { ok:true, message: "✅ Sent to "+state.contactEmail+" - check your inbox shortly." }
+      : { ok:false, message: "Couldn't send the email right now. Please try again in a moment." };
+    render();
+  }catch(e){
+    state.emailingReport = false;
+    state.emailReportStatus = { ok:false, message: "Couldn't reach the email service. Please try again in a moment." };
+    render();
+  }
+}
+window.emailGradedReport = emailGradedReport;
+
 /* ======================= RENDER FUNCTIONS ======================= */
 function render(){
   const app = document.getElementById("app");
@@ -7778,7 +7816,9 @@ function renderTheoryAttempt(){
     <div class="topic-actions">
       <button class="primary-btn" onclick="retryTheoryAttempt()">Try again (fresh timer)</button>
       <button class="ghost-btn" onclick="go('theorylist',{subjectId:'${s.id}'})">Back to Theory &amp; Essay list</button>
+      ${(r.structured && state.contactEmail) ? `<button class="ghost-btn" id="emailReportBtn" onclick="emailGradedReport()" ${state.emailingReport?"disabled":""}>${state.emailingReport?"Sending…":"✉️ Email me this report"}</button>` : ""}
     </div>
+    ${state.emailReportStatus ? `<div class="${state.emailReportStatus.ok?'ai-grading-disclaimer':'auth-error'}" style="margin-top:12px;">${state.emailReportStatus.message}</div>` : ""}
     `;
   }
 
