@@ -3883,13 +3883,15 @@ const SUBJECTS = [
         obj:["Explain the use of chain and prismatic compass surveying","Distinguish open from closed traverse"],
         exp:[
           {t:"Chain and prismatic compass surveying", b:"CHAIN SURVEYING measures distances directly along the ground using a graduated chain or tape, suited to small, relatively flat areas. PRISMATIC COMPASS surveying measures both distance and the BEARING (direction) between points, useful over larger or more irregular areas where straight-line chain measurement alone isn't practical."},
+          {t:"Plane table surveying - drawing the map on-site", b:"PLANE TABLE SURVEYING uses a flat board mounted on a tripod, set up directly at the survey location, on which the map is drawn in the field as measurements are taken, rather than calculated afterward from recorded numbers. This makes errors easier to spot immediately, right there on the board, though it depends more on good weather and is less practical over very large areas than chain or compass methods."},
           {t:"Open vs closed traverse, and avoiding obstacles", b:"A TRAVERSE is a connected series of survey lines. A CLOSED traverse returns to its starting point, forming a loop, useful for surveying an enclosed area like a field's boundary. An OPEN traverse does not return to the start, tracing a route from one point to a different end point, like surveying a road. When an obstacle (a building, a pond) blocks a straight survey line, surveyors offset around it using right-angled diversions, then continue the original line beyond the obstacle."}
         ],
-        err:["Assuming chain surveying alone captures direction, when it only measures distance","Confusing an open traverse (start and end differ) with a closed traverse (returns to start)"],
+        err:["Assuming chain surveying alone captures direction, when it only measures distance","Confusing an open traverse (start and end differ) with a closed traverse (returns to start)","Assuming plane table surveying works identically to chain/compass surveying, when its distinctive feature is drawing the map ON-SITE rather than calculating it afterward"],
         qs:[
           Q("A survey method that measures distances directly along the ground using a graduated chain is called",["chain surveying","prismatic compass surveying","aerial surveying","satellite surveying"],0,"Chain surveying uses a physical chain/tape to measure ground distance.","Easy"),
           Q("A traverse that returns to its starting point, forming a closed loop, is called a",["closed traverse","open traverse","linear traverse","radial traverse"],0,"A closed traverse forms a complete loop back to its start.","Medium"),
-          Q("Prismatic compass surveying, unlike simple chain surveying, additionally measures",["bearing (direction) between points","only distance","only height","only area"],0,"The prismatic compass adds bearing measurement to distance measurement.","Medium",VP)
+          Q("Prismatic compass surveying, unlike simple chain surveying, additionally measures",["bearing (direction) between points","only distance","only height","only area"],0,"The prismatic compass adds bearing measurement to distance measurement.","Medium",VP),
+          Q("The distinctive feature of plane table surveying is that",["the map is drawn directly in the field as measurements are taken","it can only be used indoors","it measures bearing but never distance","it requires no equipment at all"],0,"Plane table surveying uniquely produces the map on-site, not calculated afterward.","Hard",VP)
         ]
       },
       { id:"stats_maps", name:"Statistical Maps and Diagrams",
@@ -3897,14 +3899,16 @@ const SUBJECTS = [
         obj:["Identify appropriate statistical diagrams for different types of data","Interpret bar graphs, line graphs, pie charts and choropleth (density) maps"],
         exp:[
           {t:"Choosing the right diagram", b:"BAR GRAPHS compare separate categories (e.g. rainfall by month). LINE GRAPHS show a trend over continuous time (e.g. temperature change through the year). PIE CHARTS show how a whole is divided into proportional parts (e.g. land use percentages). PROPORTIONAL CIRCLES use circle size to represent a quantity, and are placed directly on a map to show where larger or smaller values occur geographically."},
+          {t:"Pictograms - the most immediately readable diagram type", b:"A PICTOGRAM uses repeated small icons (e.g. a tiny cocoa-pod symbol) where each icon represents a fixed quantity (e.g. one symbol = 1,000 tonnes), letting a viewer estimate a value just by counting symbols, without needing to read a single number. Pictograms are especially useful for a general audience since they need almost no explanation, though they're less precise than a properly scaled bar graph for exact comparisons."},
           {t:"Density and isopleth maps", b:"A DENSITY (choropleth) MAP shades different areas according to how much of something they contain (e.g. darker shading for higher population density), letting patterns across a whole region be seen at a glance. An ISOPLETH MAP uses lines connecting points of EQUAL VALUE (similar to contour lines for height, but for other data like rainfall or temperature), showing how a variable changes continuously across space."}
         ],
-        err:["Using a pie chart for data that isn't parts of one whole (e.g. comparing separate countries' populations)","Confusing a density/choropleth map (shaded areas) with an isopleth map (connecting lines of equal value)"],
+        err:["Using a pie chart for data that isn't parts of one whole (e.g. comparing separate countries' populations)","Confusing a density/choropleth map (shaded areas) with an isopleth map (connecting lines of equal value)","Assuming a pictogram is exactly as precise as a bar graph, when each icon only represents a rounded, fixed quantity"],
         qs:[
           Q("A diagram best suited to showing how a whole quantity is divided into proportional parts is a",["pie chart","line graph","bar graph","isopleth map"],0,"Pie charts show proportional division of a whole.","Easy"),
           Q("A diagram best suited to showing a continuous trend over time, such as monthly temperature, is a",["line graph","pie chart","proportional circle","dot map"],0,"Line graphs are ideal for showing continuous trends over time.","Easy"),
           Q("A map that shades different areas according to the density of a variable (e.g. population) is called a",["density (choropleth) map","isopleth map","dot map","proportional circle map"],0,"Density/choropleth maps use shading intensity to represent quantity by area.","Medium"),
-          Q("A map using lines to connect points of equal value (e.g. equal rainfall) is called a(n)",["isopleth map","choropleth map","dot map","bar map"],0,"Isopleth maps connect points sharing the same value.","Medium",VP)
+          Q("A map using lines to connect points of equal value (e.g. equal rainfall) is called a(n)",["isopleth map","choropleth map","dot map","bar map"],0,"Isopleth maps connect points sharing the same value.","Medium",VP),
+          Q("A diagram using repeated small icons, where each icon represents a fixed quantity, is called a",["pictogram","isopleth map","bar graph","choropleth map"],0,"Pictograms use repeated icons, each standing for a set amount.","Medium",VP)
         ]
       },
       { id:"earth_latlong", name:"The Earth, Latitude, Longitude and Time",
@@ -3912,15 +3916,17 @@ const SUBJECTS = [
         obj:["Explain latitude and longitude as a coordinate system","Calculate time differences between places using longitude"],
         exp:[
           {t:"Latitude and longitude", b:"LATITUDE lines run east-west, measuring position NORTH or SOUTH of the Equator (0°) up to 90° at the poles. LONGITUDE lines run north-south (pole to pole), measuring position EAST or WEST of the Prime Meridian (0°, through Greenwich) up to 180°. Together, a latitude and longitude pinpoint any exact location on Earth."},
-          {t:"Calculating time from longitude", b:"Since the Earth rotates 360° in 24 hours, it turns 15° every hour (360÷24=15). This means every 15° of longitude difference equals exactly 1 hour of time difference. Places EAST of a reference point have a LATER time (ahead); places WEST have an EARLIER time (behind). A place 45°E of Greenwich is 45÷15 = 3 hours ahead of Greenwich time."}
+          {t:"Calculating time from longitude", b:"Since the Earth rotates 360° in 24 hours, it turns 15° every hour (360÷24=15). This means every 15° of longitude difference equals exactly 1 hour of time difference. Places EAST of a reference point have a LATER time (ahead); places WEST have an EARLIER time (behind). A place 45°E of Greenwich is 45÷15 = 3 hours ahead of Greenwich time."},
+          {t:"The International Date Line - where the calendar itself flips", b:"The INTERNATIONAL DATE LINE runs roughly along the 180° meridian, the exact opposite side of the Earth from Greenwich. Crossing it going EAST means subtracting a whole day; crossing it going WEST means adding a whole day, this is the specific line where the CALENDAR DATE changes, not just the clock time. Without this agreed line, travellers circling the globe would find their calendar out of sync with everyone else's by a full day, purely from crossing enough time zones."}
         ],
-        err:["Confusing latitude (measures north-south position) with longitude (measures east-west position)","Getting east/west backwards when deciding whether to ADD or SUBTRACT time"],
+        err:["Confusing latitude (measures north-south position) with longitude (measures east-west position)","Getting east/west backwards when deciding whether to ADD or SUBTRACT time","Confusing an ordinary time-zone boundary with the International Date Line, which specifically changes the calendar DATE, not just the clock time"],
         qs:[
           Q("Lines of latitude measure position",["north or south of the Equator","east or west of the Prime Meridian","only at the poles","only along the Equator itself"],0,"Latitude measures north-south position from the Equator.","Easy"),
           Q("Lines of longitude measure position",["east or west of the Prime Meridian","north or south of the Equator","only in the Southern Hemisphere","the height above sea level"],0,"Longitude measures east-west position from the Prime Meridian.","Easy"),
           Q("Every 15° of longitude difference corresponds to a time difference of",["1 hour","15 minutes","1 minute","4 hours"],0,"360° ÷ 24 hours = 15° per hour.","Medium",VP),
           Q("If it is 12 noon in London (0° longitude), the time at a location 45°E is",["3:00 pm","9:00 am","12 noon","6:00 pm"],0,"45° ÷ 15 = 3 hours ahead (east is later): 12 noon + 3 = 3:00 pm.","Hard",VP),
-          Q("A place located west of Greenwich will generally have a time that is",["earlier than Greenwich time","later than Greenwich time","identical to Greenwich time always","impossible to determine"],0,"Places west of Greenwich are behind (earlier than) Greenwich time.","Medium")
+          Q("A place located west of Greenwich will generally have a time that is",["earlier than Greenwich time","later than Greenwich time","identical to Greenwich time always","impossible to determine"],0,"Places west of Greenwich are behind (earlier than) Greenwich time.","Medium"),
+          Q("The International Date Line is significant specifically because crossing it",["changes the calendar date, not just the clock time","only changes the clock time, never the date","has no real effect on time or date","only applies to air travel, not ships"],0,"The Date Line is where crossing shifts the calendar date itself.","Hard",VP)
         ]
       },
       { id:"rocks_geo", name:"Rocks",
@@ -3928,14 +3934,16 @@ const SUBJECTS = [
         obj:["Classify rocks into igneous, sedimentary and metamorphic types","Explain the formation and characteristics of each rock type"],
         exp:[
           {t:"Igneous rocks", b:"IGNEOUS rocks form when molten magma or lava cools and solidifies. Cooling slowly underground produces large crystals (e.g. granite); cooling quickly at the surface (from lava) produces small or no visible crystals (e.g. basalt)."},
-          {t:"Sedimentary and metamorphic rocks", b:"SEDIMENTARY rocks form from compressed and cemented layers of sediment (sand, mud, shell fragments) built up over long periods, often showing visible LAYERING, and are the main type where fossils are found (e.g. sandstone, limestone). METAMORPHIC rocks form when existing rock (of any type) is transformed by intense heat and/or pressure without fully melting, e.g. limestone becomes marble, and shale becomes slate."}
+          {t:"Sedimentary and metamorphic rocks", b:"SEDIMENTARY rocks form from compressed and cemented layers of sediment (sand, mud, shell fragments) built up over long periods, often showing visible LAYERING, and are the main type where fossils are found (e.g. sandstone, limestone). METAMORPHIC rocks form when existing rock (of any type) is transformed by intense heat and/or pressure without fully melting, e.g. limestone becomes marble, and shale becomes slate."},
+          {t:"The rock cycle - how one type becomes another", b:"The ROCK CYCLE describes how all three rock types are genuinely connected, not separate, permanent categories: igneous rock can weather and erode into sediment that becomes sedimentary rock; any rock type can be transformed by heat and pressure into metamorphic rock; and any rock, if pushed deep enough to melt completely, becomes magma that cools into new igneous rock. Nothing in this cycle happens quickly, it unfolds over geological time, but the key exam point is that rock TYPE is not fixed forever, given enough time and the right conditions, any rock can eventually become any other type."}
         ],
-        err:["Assuming all rocks form the same way, rather than through three genuinely distinct processes","Forgetting that metamorphic rocks form WITHOUT fully melting, unlike igneous rocks which form FROM melted material"],
+        err:["Assuming all rocks form the same way, rather than through three genuinely distinct processes","Forgetting that metamorphic rocks form WITHOUT fully melting, unlike igneous rocks which form FROM melted material","Assuming a rock's type is permanent, rather than part of an ongoing rock cycle given enough geological time"],
         qs:[
           Q("Rocks formed from the cooling and solidifying of molten magma or lava are called",["igneous rocks","sedimentary rocks","metamorphic rocks","organic rocks"],0,"Igneous rocks form from cooled magma/lava.","Easy"),
           Q("Rocks formed from compressed and cemented layers of sediment, often containing fossils, are called",["sedimentary rocks","igneous rocks","metamorphic rocks","volcanic rocks"],0,"Sedimentary rocks form from compacted sediment layers and commonly contain fossils.","Easy"),
           Q("Marble is formed when limestone undergoes",["metamorphism under heat and pressure","melting and re-solidifying as an igneous rock","compression into a sedimentary rock","no change at all"],0,"Marble is the metamorphic form of limestone.","Medium",VP),
-          Q("Igneous rock that cools slowly underground typically develops",["large, visible crystals","no crystals at all","visible layering","fossils"],0,"Slow cooling underground allows large crystals to form, as in granite.","Medium")
+          Q("Igneous rock that cools slowly underground typically develops",["large, visible crystals","no crystals at all","visible layering","fossils"],0,"Slow cooling underground allows large crystals to form, as in granite.","Medium"),
+          Q("According to the rock cycle, a rock's type is",["not permanent - given enough time and the right conditions, it can transform into a different type","fixed forever once formed","only ever igneous, regardless of process","determined solely by its colour"],0,"The rock cycle shows rock types can transform into one another over geological time.","Hard",VP)
         ]
       },
       { id:"landforms", name:"Major Landforms",
@@ -5101,7 +5109,7 @@ let state = { view:"welcome", subjectId:null, topicId:null, quiz:null, progress:
   user:null, guest:false, authError:null, usernameField:"", passkeyField:"", remediation:null, reviewOpen:false, navStack:[],
   adminAuthed:false, adminSecret:"", adminSecretField:"", adminError:null, adminBusy:false, adminAnalytics:null, adminUsers:null, adminTrends:null, adminWeakTopics:null, adminShowChangeForm:false, adminChangeMsg:null,
   guardianAuthed:false, guardianUsername:"", guardianPasskey:"", guardianError:null, guardianBusy:false, guardianData:null, guardianShowLinkForm:false, guardianLinkMsg:null, guardianAuthMode:"login",
-  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{}, daysInactive:null, breakfastMail:null, emailingReport:false, emailReportStatus:null };
+  studentStreak:0, entitlements:[], entitlementDetails:{}, welcomeTeaserPicked:null, contactEmail:"", contactPhone:"", editingContact:false, showReadinessCelebration:false, generatingQuestions:false, generateError:null, theme:"light", guardianMessages:[], unreadMessageCount:0, guardianMsgStatus:{}, readinessTrend:{}, daysInactive:null, breakfastMail:null, emailingReport:false, emailReportStatus:null, confirmUnlinkUsername:null };
 let timerHandle = null;
 let chatSessions = {}; // key `${subjectId}:${topicId}` -> {messages:[], busy:false}
 
@@ -5282,6 +5290,39 @@ async function sendGuardianMessage(studentUsername){
   render();
 }
 window.sendGuardianMessage = sendGuardianMessage;
+
+function confirmUnlinkChild(username){
+  state.confirmUnlinkUsername = username;
+  render();
+}
+window.confirmUnlinkChild = confirmUnlinkChild;
+function cancelUnlinkChild(){
+  state.confirmUnlinkUsername = null;
+  render();
+}
+window.cancelUnlinkChild = cancelUnlinkChild;
+async function unlinkChild(username){
+  state.guardianBusy = true;
+  render();
+  try{
+    const result = await supabaseRPC("gce_guardian_unlink_child", {
+      p_guardian_username: state.guardianUsername, p_guardian_passkey: state.guardianPasskey, p_student_username: username
+    });
+    if(result && result.success){
+      state.confirmUnlinkUsername = null;
+      await guardianRefresh();
+    } else {
+      state.guardianError = (result && result.error) || "Couldn't unlink right now.";
+      state.guardianBusy = false;
+      render();
+    }
+  }catch(e){
+    state.guardianError = "Couldn't reach the server. Please try again.";
+    state.guardianBusy = false;
+    render();
+  }
+}
+window.unlinkChild = unlinkChild;
 
 async function guardianRefresh(){
   state.guardianBusy = true;
@@ -7316,8 +7357,13 @@ function renderGuardian(){
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
         <div style="flex-shrink:0;">${weekRingSVG(c.last_7_days, c.studied_today, c.username)}</div>
         <div style="flex:1;min-width:200px;">
-          <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);">${c.username}</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">Joined ${new Date(c.joined).toLocaleDateString()}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <div>
+              <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--ink);">${c.username}</div>
+              <div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">Joined ${new Date(c.joined).toLocaleDateString()}</div>
+            </div>
+            <a onclick="confirmUnlinkChild('${c.username}')" style="font-size:11.5px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;white-space:nowrap;flex-shrink:0;">Unlink</a>
+          </div>
           ${liveActivityBlock}
           ${c.studied_today
             ? `<div style="font-size:13px;color:#166534;">✅ Studied today: <b>${(c.subjects_today||[]).map(sid=>{const s=findSubject(sid);return s?s.name:sid;}).join(", ")}</b></div>`
@@ -7352,6 +7398,14 @@ function renderGuardian(){
         <button class="ghost-btn" onclick="guardianLogout()">Log out</button>
       </div>
     </div>
+    ${state.confirmUnlinkUsername ? `
+    <div class="disclaimer" style="background:#FEE2E2;border-color:#EF4444;">
+      <b>⚠️ Unlink ${state.confirmUnlinkUsername}?</b> You'll stop seeing their progress, activity, and renewal status. Their own account, progress, and subject access are completely unaffected - you (or another guardian) can re-link anytime using their username and passkey.
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="primary-btn" style="background:#DC2626;" onclick="unlinkChild('${state.confirmUnlinkUsername}')" ${state.guardianBusy?"disabled":""}>${state.guardianBusy?"Unlinking...":"Yes, unlink"}</button>
+        <button class="ghost-btn" onclick="cancelUnlinkChild()">Cancel</button>
+      </div>
+    </div>` : ""}
     ${state.guardianError ? `<div class="auth-error">${state.guardianError}</div>` : ""}
     ${linkForm}
     ${children.length ? childCards : `
