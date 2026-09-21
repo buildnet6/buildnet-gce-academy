@@ -7518,31 +7518,26 @@ function wrapCanvasText(ctx, text, maxWidth){
   return lines;
 }
 
-/* Renders the graded report onto an offscreen canvas and downloads it as a
-   PNG - genuinely different from the email version (that's an HTML email;
-   this is a flat image a student can save to their phone's gallery, print,
-   or check later without needing to be online or logged in at all). Works
-   for both ordinary Theory & Essay results and Alternative to Practical
-   results, since both share the exact same structured result shape. */
-function downloadGradedReportImage(format){
-  format = format === "jpeg" ? "jpeg" : "png";
-  if(!theoryAttempt || !theoryAttempt.result || !theoryAttempt.result.structured) return;
-  const s = findSubject(theoryAttempt.subjectId);
-  const r = theoryAttempt.result;
-  const subjectName = s ? s.name : theoryAttempt.subjectId;
+/* Builds the graded-report canvas from a plain config object rather than
+   reading theoryAttempt/handwritingAttempt directly - Theory & Essay,
+   Alternative to Practical, and Handwriting Coaching all produce the exact
+   same { score, maxMarks, criteria, strengths, improve } result shape, so
+   one shared drawing routine serves all three; only the header labels and
+   prompt text genuinely differ between them. Used by both the download
+   button and the share button, so the two can never drift out of sync. */
+function buildGradedReportCanvas(config){
+  const r = config.result;
   const W = 800;
   const PAD = 40;
   const contentW = W - PAD*2;
 
-  // First pass on a scratch canvas purely to measure how tall the real canvas
-  // needs to be - text-heavy content has no fixed height ahead of time.
   const measure = document.createElement("canvas").getContext("2d");
   let y = 0;
-  y += 90; // header block
+  y += 90;
   measure.font = "italic 15px Arial";
-  y += wrapCanvasText(measure, theoryAttempt.question.q, contentW).length * 22 + 20;
-  y += 70; // score badge
-  y += 30; // "MARK-BY-MARK BREAKDOWN" heading
+  y += wrapCanvasText(measure, config.questionText, contentW).length * 22 + 20;
+  y += 70;
+  y += 30;
   r.criteria.forEach(c=>{
     measure.font = "bold 14px Arial";
     y += 22;
@@ -7552,7 +7547,7 @@ function downloadGradedReportImage(format){
   measure.font = "13px Arial";
   y += 30 + wrapCanvasText(measure, r.strengths, contentW).length * 18;
   y += 30 + wrapCanvasText(measure, r.improve, contentW).length * 18;
-  y += 60; // footer
+  y += 60;
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -7569,17 +7564,17 @@ function downloadGradedReportImage(format){
   ctx.fillText("🎓 BuildNET Academy", W/2, cy + 26);
   ctx.font = "12px Arial";
   ctx.fillStyle = "#7C7591";
-  ctx.fillText("GRADED " + (theoryAttempt.bank==="altpractical" ? "ALTERNATIVE TO PRACTICAL" : "THEORY & ESSAY") + " REPORT", W/2, cy + 46);
+  ctx.fillText(config.headerLabel, W/2, cy + 46);
   ctx.textAlign = "left";
   cy += 90;
 
   ctx.font = "13px Arial";
   ctx.fillStyle = "#7C7591";
-  ctx.fillText(subjectName, PAD, cy);
+  ctx.fillText(config.subLabel, PAD, cy);
   cy += 18;
   ctx.font = "italic 15px Arial";
   ctx.fillStyle = "#2B2350";
-  wrapCanvasText(ctx, theoryAttempt.question.q, contentW).forEach(line=>{ ctx.fillText(line, PAD, cy); cy += 22; });
+  wrapCanvasText(ctx, config.questionText, contentW).forEach(line=>{ ctx.fillText(line, PAD, cy); cy += 22; });
   cy += 10;
 
   ctx.textAlign = "center";
@@ -7643,20 +7638,88 @@ function downloadGradedReportImage(format){
   ctx.fillStyle = "#7C7591";
   ctx.fillText(state.user + " · " + new Date().toLocaleDateString(), W/2, cy);
 
-  // JPEG has no transparency channel, so it needs an opaque background painted
-  // in first or corners can render black in some viewers - PNG already has one
-  // (the #FAFAFF fill above), so this only matters for the jpeg path.
+  return canvas;
+}
+
+/* Config builders - one per source of a graded result, each pulling out just
+   the handful of fields buildGradedReportCanvas actually needs. Keeping this
+   mapping in one small place means a future fourth graded-result type only
+   needs one new function here, not changes to the drawing or export logic. */
+function theoryReportConfig(){
+  if(!theoryAttempt || !theoryAttempt.result || !theoryAttempt.result.structured) return null;
+  const s = findSubject(theoryAttempt.subjectId);
+  return {
+    result: theoryAttempt.result,
+    headerLabel: "GRADED " + (theoryAttempt.bank==="altpractical" ? "ALTERNATIVE TO PRACTICAL" : "THEORY & ESSAY") + " REPORT",
+    subLabel: s ? s.name : theoryAttempt.subjectId,
+    questionText: theoryAttempt.question.q,
+    filenamePrefix: "buildnet-" + theoryAttempt.subjectId + "-graded-report"
+  };
+}
+function handwritingReportConfig(){
+  if(!handwritingAttempt || !handwritingAttempt.result || !handwritingAttempt.result.structured) return null;
+  return {
+    result: handwritingAttempt.result,
+    headerLabel: "HANDWRITING COACHING REPORT",
+    subLabel: "Level " + handwritingAttempt.prompt.level + " passage",
+    questionText: handwritingAttempt.prompt.text,
+    filenamePrefix: "buildnet-handwriting-graded-report"
+  };
+}
+
+/* Downloads as either PNG or JPEG - genuinely different code paths (JPEG has
+   no transparency channel, so it needs an opaque background painted in
+   first or corners can render black in some viewers; PNG already has one
+   from the fill in buildGradedReportCanvas). Auto-detects which attempt is
+   currently active so the same function and the same buttons work for
+   Theory & Essay, Alternative to Practical, and Handwriting Coaching alike. */
+function downloadGradedReportImage(format){
+  format = format === "jpeg" ? "jpeg" : "png";
+  const config = theoryReportConfig() || handwritingReportConfig();
+  if(!config) return;
+  const canvas = buildGradedReportCanvas(config);
+  const ctx = canvas.getContext("2d");
   if(format === "jpeg"){
     ctx.globalCompositeOperation = "destination-over";
     ctx.fillStyle = "#FAFAFF";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
   const link = document.createElement("a");
-  link.download = "buildnet-" + theoryAttempt.subjectId + "-graded-report." + (format==="jpeg"?"jpg":"png");
+  link.download = config.filenamePrefix + "." + (format==="jpeg"?"jpg":"png");
   link.href = canvas.toDataURL(format==="jpeg"?"image/jpeg":"image/png", format==="jpeg"?0.92:undefined);
   link.click();
 }
 window.downloadGradedReportImage = downloadGradedReportImage;
+
+/* Genuine sharing (native OS share sheet - WhatsApp, Mail, Save to Files,
+   whatever the device offers) rather than just a download, using the exact
+   same navigator.share + File pattern already proven in shareReadiness().
+   Shares as JPEG specifically - smaller, and the most universally accepted
+   format across messaging apps a student might actually share this through. */
+async function shareGradedReportImage(){
+  const config = theoryReportConfig() || handwritingReportConfig();
+  if(!config) return;
+  try{
+    const canvas = buildGradedReportCanvas(config);
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = "#FAFAFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.92));
+    if(!blob) return;
+    const file = new File([blob], config.filenamePrefix + ".jpg", { type:"image/jpeg" });
+    if(typeof navigator!=="undefined" && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({ files:[file], title:"My BuildNET Academy graded report", text: config.subLabel + " - " + config.result.score + "/" + config.result.maxMarks });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = config.filenamePrefix + ".jpg";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }catch(e){ console.error("Could not share graded report", e); }
+}
+window.shareGradedReportImage = shareGradedReportImage;
 
 /* ======================= RENDER FUNCTIONS ======================= */
 function render(){
@@ -8713,6 +8776,11 @@ function renderHandwritingAttempt(){
     <div class="topic-actions">
       <button class="primary-btn" onclick="retryHandwritingAttempt()">Try again</button>
       <button class="ghost-btn" onclick="go('handwritingcoaching')">Back to Handwriting Coaching</button>
+      ${r.structured ? `
+        <button class="ghost-btn" onclick="downloadGradedReportImage('png')">📥 Download PNG</button>
+        <button class="ghost-btn" onclick="downloadGradedReportImage('jpeg')">📥 Download JPEG</button>
+        <button class="ghost-btn" onclick="shareGradedReportImage()">📤 Share</button>
+      ` : ""}
     </div>
     `;
   }
@@ -8804,7 +8872,11 @@ function renderTheoryAttempt(){
       <button class="primary-btn" onclick="retryTheoryAttempt()">Try again (fresh timer)</button>
       <button class="ghost-btn" onclick="go('${listView}',{subjectId:'${s.id}'})">Back to ${sectionLabel} list</button>
       ${(r.structured && state.contactEmail) ? `<button class="ghost-btn" id="emailReportBtn" onclick="emailGradedReport()" ${state.emailingReport?"disabled":""}>${state.emailingReport?"Sending…":"✉️ Email me this report"}</button>` : ""}
-      ${r.structured ? `<button class="ghost-btn" onclick="downloadGradedReportImage()">📥 Download as image</button>` : ""}
+      ${r.structured ? `
+        <button class="ghost-btn" onclick="downloadGradedReportImage('png')">📥 Download PNG</button>
+        <button class="ghost-btn" onclick="downloadGradedReportImage('jpeg')">📥 Download JPEG</button>
+        <button class="ghost-btn" onclick="shareGradedReportImage()">📤 Share</button>
+      ` : ""}
     </div>
     ${state.emailReportStatus ? `<div class="${state.emailReportStatus.ok?'ai-grading-disclaimer':'auth-error'}" style="margin-top:12px;">${state.emailReportStatus.message}</div>` : ""}
     `;
