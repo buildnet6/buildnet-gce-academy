@@ -5974,6 +5974,37 @@ function daysUntilExam(subjectId){
 }
 window.daysUntilExam = daysUntilExam;
 
+/* Shared by the student's own dashboard/breakfast-mail AND the guardian's
+   view of a child - same inputs shape, same verdict either way, so a
+   guardian never sees a different priority call than the student would see
+   for themselves. "Urgent" is deliberately narrow: a real exam within 14
+   days that genuinely isn't exam-ready yet - a subject already at 85%+
+   isn't urgent just because the date is close, and a subject with no date
+   set can't be urgent at all. touchedSubjectIds is whatever the caller
+   considers "recently studied" (today's activity, or yesterday's, depending
+   on context) - comparing that against the urgent subject is what actually
+   flags a mismatch. */
+function computePriorityAlert(examDatesObj, subjectsList, progressObj, touchedSubjectIds){
+  const candidates = subjectsList.map(s=>{
+    const dateStr = examDatesObj && examDatesObj[s.id];
+    if(!dateStr) return null;
+    const examDate = new Date(dateStr + "T00:00:00");
+    const today = new Date(); today.setHours(0,0,0,0);
+    const days = Math.round((examDate - today) / 86400000);
+    if(days < 0 || days > 14) return null;
+    const subjProgress = progressObj[s.id] || { topics:{}, mocks:[] };
+    const r = computeSubjectReadiness(s, subjProgress.topics||{}, subjProgress.mocks||[]);
+    if(r.score >= 85) return null;
+    return { subject:s, days, score:r.score };
+  }).filter(Boolean).sort((a,b)=>a.days-b.days);
+
+  if(!candidates.length) return null;
+  const urgent = candidates[0];
+  const wasTouched = (touchedSubjectIds||[]).includes(urgent.subject.id);
+  return { subject: urgent.subject, days: urgent.days, score: urgent.score, wasTouched };
+}
+window.computePriorityAlert = computePriorityAlert;
+
 async function loadDaysInactive(){
   if(state.guest){ state.daysInactive = null; return; }
   try{
@@ -7170,24 +7201,31 @@ async function submitHandwritingAnswer(){
   render();
   try{
     const sys = buildHandwritingGradingPrompt(handwritingAttempt.prompt.text);
-    const content = [{ type:"text", text: sys }];
+    const contentBlocks = [];
     handwritingAttempt.images.forEach(img=>{
-      content.push({ type:"image", source:{ type:"base64", media_type: img.mediaType, data: img.data } });
+      contentBlocks.push({ type:"image", source:{ type:"base64", media_type: img.mediaType, data: img.data } });
     });
+    contentBlocks.push({ type:"text", text: "Here is a photo of my handwritten copy. Please grade it." });
     const res = await fetch("/api/chat", {
       method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ messages:[{ role:"user", content }] })
+      body: JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:900,
+        system: sys,
+        messages:[{ role:"user", content: contentBlocks }]
+      })
     });
     const data = await res.json();
-    const textBlock = (data.content||[]).find(b=>b.type==="text");
-    const raw = textBlock ? textBlock.text : "";
+    const textBlocks = (data.content || []).filter(b=>b.type==="text").map(b=>b.text);
+    const raw = textBlocks.join("\n").trim();
+    if(!raw){ throw new Error("empty response"); }
     handwritingAttempt.result = parseHandwritingGradingResponse(raw);
     handwritingAttempt.grading = false;
     render();
     saveHandwritingProgress();
   }catch(e){
     handwritingAttempt.grading = false;
-    handwritingAttempt.error = "Couldn't reach the grading service. Please try again in a moment.";
+    handwritingAttempt.error = "Something went wrong grading your handwriting - please check your connection and try again.";
     render();
   }
 }
@@ -7458,6 +7496,167 @@ async function emailGradedReport(){
   }
 }
 window.emailGradedReport = emailGradedReport;
+
+/* Wraps a string to fit within maxWidth on a canvas 2D context, returning an
+   array of lines. Canvas draws text as single unbroken lines by default, so
+   any genuinely long feedback sentence needs this before it can be drawn
+   without running off the edge of the image. */
+function wrapCanvasText(ctx, text, maxWidth){
+  const words = String(text||"").split(/\s+/);
+  const lines = [];
+  let current = "";
+  words.forEach(word=>{
+    const test = current ? current + " " + word : word;
+    if(ctx.measureText(test).width > maxWidth && current){
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  });
+  if(current) lines.push(current);
+  return lines;
+}
+
+/* Renders the graded report onto an offscreen canvas and downloads it as a
+   PNG - genuinely different from the email version (that's an HTML email;
+   this is a flat image a student can save to their phone's gallery, print,
+   or check later without needing to be online or logged in at all). Works
+   for both ordinary Theory & Essay results and Alternative to Practical
+   results, since both share the exact same structured result shape. */
+function downloadGradedReportImage(format){
+  format = format === "jpeg" ? "jpeg" : "png";
+  if(!theoryAttempt || !theoryAttempt.result || !theoryAttempt.result.structured) return;
+  const s = findSubject(theoryAttempt.subjectId);
+  const r = theoryAttempt.result;
+  const subjectName = s ? s.name : theoryAttempt.subjectId;
+  const W = 800;
+  const PAD = 40;
+  const contentW = W - PAD*2;
+
+  // First pass on a scratch canvas purely to measure how tall the real canvas
+  // needs to be - text-heavy content has no fixed height ahead of time.
+  const measure = document.createElement("canvas").getContext("2d");
+  let y = 0;
+  y += 90; // header block
+  measure.font = "italic 15px Arial";
+  y += wrapCanvasText(measure, theoryAttempt.question.q, contentW).length * 22 + 20;
+  y += 70; // score badge
+  y += 30; // "MARK-BY-MARK BREAKDOWN" heading
+  r.criteria.forEach(c=>{
+    measure.font = "bold 14px Arial";
+    y += 22;
+    measure.font = "13px Arial";
+    y += wrapCanvasText(measure, c.why, contentW-20).length * 18 + 16;
+  });
+  measure.font = "13px Arial";
+  y += 30 + wrapCanvasText(measure, r.strengths, contentW).length * 18;
+  y += 30 + wrapCanvasText(measure, r.improve, contentW).length * 18;
+  y += 60; // footer
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = Math.max(500, y + PAD);
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#FAFAFF";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let cy = PAD;
+  ctx.fillStyle = "#2B2350";
+  ctx.font = "bold 22px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("🎓 BuildNET Academy", W/2, cy + 26);
+  ctx.font = "12px Arial";
+  ctx.fillStyle = "#7C7591";
+  ctx.fillText("GRADED " + (theoryAttempt.bank==="altpractical" ? "ALTERNATIVE TO PRACTICAL" : "THEORY & ESSAY") + " REPORT", W/2, cy + 46);
+  ctx.textAlign = "left";
+  cy += 90;
+
+  ctx.font = "13px Arial";
+  ctx.fillStyle = "#7C7591";
+  ctx.fillText(subjectName, PAD, cy);
+  cy += 18;
+  ctx.font = "italic 15px Arial";
+  ctx.fillStyle = "#2B2350";
+  wrapCanvasText(ctx, theoryAttempt.question.q, contentW).forEach(line=>{ ctx.fillText(line, PAD, cy); cy += 22; });
+  cy += 10;
+
+  ctx.textAlign = "center";
+  ctx.font = "bold 42px Arial";
+  ctx.fillStyle = "#7C3AED";
+  ctx.fillText(r.score + "/" + r.maxMarks, W/2, cy + 40);
+  ctx.textAlign = "left";
+  cy += 80;
+
+  ctx.font = "bold 13px Arial";
+  ctx.fillStyle = "#7C3AED";
+  ctx.fillText("MARK-BY-MARK BREAKDOWN", PAD, cy);
+  cy += 26;
+
+  r.criteria.forEach(c=>{
+    const full = c.earned >= c.allocated, zero = c.earned <= 0;
+    const color = full ? "#16A34A" : zero ? "#DC2626" : "#D97706";
+    const boxTop = cy - 16;
+    ctx.font = "13px Arial";
+    const whyLines = wrapCanvasText(ctx, c.why, contentW-20);
+    const boxHeight = 22 + whyLines.length*18 + 14;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(PAD, boxTop, contentW, boxHeight);
+    ctx.fillStyle = color;
+    ctx.fillRect(PAD, boxTop, 4, boxHeight);
+    ctx.font = "bold 14px Arial";
+    ctx.fillStyle = "#2B2350";
+    ctx.fillText(c.criterion, PAD+16, cy);
+    ctx.textAlign = "right";
+    ctx.fillStyle = color;
+    ctx.fillText(c.earned + "/" + c.allocated, W-PAD-10, cy);
+    ctx.textAlign = "left";
+    cy += 22;
+    ctx.font = "13px Arial";
+    ctx.fillStyle = "#7C7591";
+    whyLines.forEach(line=>{ ctx.fillText(line, PAD+16, cy); cy += 18; });
+    cy += 16;
+  });
+
+  cy += 10;
+  ctx.font = "bold 12px Arial";
+  ctx.fillStyle = "#16A34A";
+  ctx.fillText("WHAT YOU DID WELL", PAD, cy);
+  cy += 20;
+  ctx.font = "13px Arial";
+  ctx.fillStyle = "#2B2350";
+  wrapCanvasText(ctx, r.strengths, contentW).forEach(line=>{ ctx.fillText(line, PAD, cy); cy += 18; });
+
+  cy += 20;
+  ctx.font = "bold 12px Arial";
+  ctx.fillStyle = "#D97706";
+  ctx.fillText("WHAT TO IMPROVE", PAD, cy);
+  cy += 20;
+  ctx.font = "13px Arial";
+  ctx.fillStyle = "#2B2350";
+  wrapCanvasText(ctx, r.improve, contentW).forEach(line=>{ ctx.fillText(line, PAD, cy); cy += 18; });
+
+  cy += 30;
+  ctx.textAlign = "center";
+  ctx.font = "11px Arial";
+  ctx.fillStyle = "#7C7591";
+  ctx.fillText(state.user + " · " + new Date().toLocaleDateString(), W/2, cy);
+
+  // JPEG has no transparency channel, so it needs an opaque background painted
+  // in first or corners can render black in some viewers - PNG already has one
+  // (the #FAFAFF fill above), so this only matters for the jpeg path.
+  if(format === "jpeg"){
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = "#FAFAFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  const link = document.createElement("a");
+  link.download = "buildnet-" + theoryAttempt.subjectId + "-graded-report." + (format==="jpeg"?"jpg":"png");
+  link.href = canvas.toDataURL(format==="jpeg"?"image/jpeg":"image/png", format==="jpeg"?0.92:undefined);
+  link.click();
+}
+window.downloadGradedReportImage = downloadGradedReportImage;
 
 /* ======================= RENDER FUNCTIONS ======================= */
 function render(){
@@ -7877,6 +8076,16 @@ function renderGuardian(){
             <button onclick="confirmUnlinkChild('${c.username}')" style="flex-shrink:0;white-space:nowrap;background:#fff;border:2px solid #16A34A;color:#16A34A;border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#FEE2E2';this.style.borderColor='#DC2626';this.style.color='#DC2626';" onmouseout="this.style.background='#fff';this.style.borderColor='#16A34A';this.style.color='#16A34A';">🔗 Linked · tap to unlink</button>
           </div>
           ${liveActivityBlock}
+          ${(()=>{
+            // Same verdict the child would see on their own dashboard - a
+            // guardian glancing at this should never be told something
+            // different from what the student themselves is being shown.
+            const childEnrolled = SUBJECTS.filter(es=>(c.entitled_subjects||[]).includes(es.id));
+            const childProgressMap = {}; childEnrolled.forEach(es=>{ childProgressMap[es.id] = c.progress[es.id] || {topics:{},mocks:[]}; });
+            const alert = computePriorityAlert(c.examDates, childEnrolled, childProgressMap, c.subjects_today||[]);
+            if(!alert || alert.wasTouched) return "";
+            return `<div style="font-size:13px;font-weight:700;color:#DC2626;background:#FEE2E2;border-radius:10px;padding:8px 12px;margin-bottom:8px;">🚨 ${alert.subject.name} exam in ${alert.days} day${alert.days!==1?'s':''}, only ${alert.score}% ready, and hasn't been touched today - worth a nudge.</div>`;
+          })()}
           ${c.studied_today
             ? `<div style="font-size:13px;color:#166534;">✅ Studied today: <b>${(c.subjects_today||[]).map(sid=>{const s=findSubject(sid);return s?s.name:sid;}).join(", ")}</b></div>`
             : (c.seconds_since_active!=null && c.seconds_since_active < 300)
@@ -8101,13 +8310,29 @@ function renderBreakfastMailOverlay(){
       <b>📊 Where you stand overall:</b> <span style="color:var(--purple);font-weight:700;">${overallData.overall}%</span> ready across your ${enrolledSubjects.length} subject${enrolledSubjects.length!==1?'s':''} (target: 85%).
     </div>` : "";
 
-  // Honest recommendation: the single weakest-trending enrolled subject, named specifically.
+  // Deadline-aware honest recommendation: a real exam within 14 days that
+  // isn't ready yet outranks a generic "weakest subject" nudge - and if
+  // yesterday's actual practice went somewhere ELSE while that clock is
+  // running, the mail says so plainly rather than staying vague about it.
   let recommendation = "";
   if(enrolledSubjects.length){
-    const ranked = enrolledSubjects.map(s=>({ s, r: computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks) })).sort((a,b)=>a.r.score-b.r.score);
-    const weakest = ranked[0];
-    if(weakest && weakest.r.score < 85){
-      recommendation = `<div class="disclaimer" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);text-align:left;"><b>🎯 Today's honest suggestion:</b> ${weakest.s.name} is your lowest-ready subject at ${weakest.r.score}% - even one topic today would move the needle.</div>`;
+    const progressMap = {}; enrolledSubjects.forEach(s=>{ progressMap[s.id] = state.progress[s.id]; });
+    const yesterdaySubjectIds = progressed.map(p=>p.subject_id);
+    const alert = computePriorityAlert(state.examDates, enrolledSubjects, progressMap, yesterdaySubjectIds);
+    if(alert && !alert.wasTouched){
+      const otherSubjectNames = yesterdaySubjectIds.filter(id=>id!==alert.subject.id).map(id=>{const s=findSubject(id);return s?s.name:id;});
+      recommendation = `<div class="disclaimer" style="background:#FEE2E2;border-color:#EF4444;text-align:left;">
+        <b>🚨 ${alert.subject.name} needs you first:</b> the exam is in ${alert.days} day${alert.days!==1?'s':''} and you're at ${alert.score}% ready.
+        ${otherSubjectNames.length ? ` Yesterday's practice went to ${otherSubjectNames.join(", ")} instead - those aren't due as soon, so today, ${alert.subject.name} should come first.` : " No practice was logged on it yet - today's the day to start."}
+      </div>`;
+    } else if(alert && alert.wasTouched){
+      recommendation = `<div class="disclaimer" style="background:#DCFCE7;border-color:#22C55E;text-align:left;"><b>✅ On track:</b> ${alert.subject.name}'s exam is in ${alert.days} day${alert.days!==1?'s':''} and you're already putting time into it - keep that up, it's the right call.</div>`;
+    } else {
+      const ranked = enrolledSubjects.map(s=>({ s, r: computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks) })).sort((a,b)=>a.r.score-b.r.score);
+      const weakest = ranked[0];
+      if(weakest && weakest.r.score < 85){
+        recommendation = `<div class="disclaimer" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);text-align:left;"><b>🎯 Today's honest suggestion:</b> ${weakest.s.name} is your lowest-ready subject at ${weakest.r.score}% - even one topic today would move the needle.</div>`;
+      }
     }
   }
 
@@ -8220,12 +8445,21 @@ function renderHome(){
       const color = SUBJECT_COLOR[s.id] || "#7C3AED";
       const urgencyColor = days==null ? "var(--ink-soft)" : days<0 ? "#DC2626" : days<=7 ? "#DC2626" : days<=30 ? "#D97706" : "#16A34A";
       const dateVal = state.examDates[s.id] || "";
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;">
-        <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
-        <span style="flex:1;min-width:120px;font-weight:600;font-size:13.5px;">${s.name}</span>
-        <span style="font-size:12px;color:var(--ink-soft);">${score}% ready</span>
-        <input type="date" value="${dateVal}" onchange="setExamDate('${s.id}', this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid var(--line);font-size:12.5px;">
-        ${days!=null ? `<b style="color:${urgencyColor};font-size:12.5px;white-space:nowrap;">${days<0?Math.abs(days)+" days ago":days===0?"Today!":days+" day"+(days!==1?"s":"")+" left"}</b>` : `<span style="font-size:11.5px;color:var(--ink-soft);font-style:italic;">set your exam date →</span>`}
+      // Two explicit lines rather than one flex row of many nowrap items -
+      // a single wide row either overflows past the edge or truncates the
+      // date/countdown when squeezed (flex-shrink can't shrink text that's
+      // set to nowrap), so this deliberately breaks at a sensible point
+      // instead of leaving that to chance on narrower screens.
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--line);overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+          <span style="flex:1;min-width:0;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</span>
+          <span style="font-size:12px;color:var(--ink-soft);flex-shrink:0;">${score}% ready</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:6px;flex-wrap:wrap;">
+          <input type="date" value="${dateVal}" onchange="setExamDate('${s.id}', this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid var(--line);font-size:12.5px;max-width:150px;">
+          ${days!=null ? `<b style="color:${urgencyColor};font-size:12.5px;white-space:nowrap;">${days<0?Math.abs(days)+" days ago":days===0?"Today!":days+" day"+(days!==1?"s":"")+" left"}</b>` : `<span style="font-size:11.5px;color:var(--ink-soft);font-style:italic;white-space:nowrap;">set your exam date →</span>`}
+        </div>
       </div>`;
     }).join("");
     const nextExam = rows.find(r=>r.days!=null && r.days>=0);
@@ -8291,6 +8525,20 @@ function renderSubjectView(){
   const mocks = state.progress[s.id].mocks;
   const lastMock = mocks.length ? mocks[mocks.length-1] : null;
 
+  // Fires right where it matters - the moment the student opens a subject
+  // that isn't the one genuinely racing against the clock. Shown here, not
+  // just in a once-a-day mail, because "what they're studying right now" is
+  // exactly this screen.
+  const priorityNudge = (!state.guest && isSubjectUnlocked(s.id)) ? (()=>{
+    const enrolledSubjects = SUBJECTS.filter(es=>isSubjectUnlocked(es.id));
+    const progressMap = {}; enrolledSubjects.forEach(es=>{ progressMap[es.id] = state.progress[es.id]; });
+    const alert = computePriorityAlert(state.examDates, enrolledSubjects, progressMap, []);
+    if(!alert || alert.subject.id === s.id) return "";
+    return `<div class="disclaimer" style="background:#FEE2E2;border-color:#EF4444;">
+      <b>🚨 Before you continue here:</b> ${alert.subject.name}'s exam is in ${alert.days} day${alert.days!==1?'s':''} and you're only ${alert.score}% ready on it. This subject can wait a little longer - <a onclick="go('subject',{subjectId:'${alert.subject.id}'})" style="color:#DC2626;text-decoration:underline;cursor:pointer;font-weight:700;">switch to ${alert.subject.name} instead →</a>
+    </div>`;
+  })() : "";
+
   const toc = s.topics.map(t=>{
     const st = topicStat(s.id, t.id);
     const acc = st.attempted ? Math.round((st.correct/st.attempted)*100) : null;
@@ -8340,6 +8588,7 @@ function renderSubjectView(){
 
   return `
   <div class="crumbs"><button onclick="go('home')">Subjects</button> / ${s.name}</div>
+  ${priorityNudge}
   <div class="subject-head">
     <div><h2>${SUBJECT_EMOJI[s.id]||"📘"} ${s.name}</h2><div class="readiness-chip ${readinessClass(label)}" style="margin-top:8px;">${labelFun(label)}</div></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -8555,6 +8804,7 @@ function renderTheoryAttempt(){
       <button class="primary-btn" onclick="retryTheoryAttempt()">Try again (fresh timer)</button>
       <button class="ghost-btn" onclick="go('${listView}',{subjectId:'${s.id}'})">Back to ${sectionLabel} list</button>
       ${(r.structured && state.contactEmail) ? `<button class="ghost-btn" id="emailReportBtn" onclick="emailGradedReport()" ${state.emailingReport?"disabled":""}>${state.emailingReport?"Sending…":"✉️ Email me this report"}</button>` : ""}
+      ${r.structured ? `<button class="ghost-btn" onclick="downloadGradedReportImage()">📥 Download as image</button>` : ""}
     </div>
     ${state.emailReportStatus ? `<div class="${state.emailReportStatus.ok?'ai-grading-disclaimer':'auth-error'}" style="margin-top:12px;">${state.emailReportStatus.message}</div>` : ""}
     `;
