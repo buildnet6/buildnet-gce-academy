@@ -53,6 +53,16 @@
   @keyframes pulseDot{ 0%,100%{opacity:0.35;} 50%{opacity:1;} }
   @keyframes confettiFall{ to{ transform:translateY(160px) rotate(360deg); opacity:0; } }
   @keyframes partyConfettiFall{ to{ transform:translateY(110vh) rotate(720deg); opacity:0.2; } }
+  /* Deliberately obvious, not a subtle hint - this is for an exam within 3
+     days, exactly the situation where "easy to miss" is the whole problem.
+     A brief stronger flash (imminentFlash) restarts once an hour on top of
+     the constant gentle throb, so a student who's been sitting on the page
+     for a while still gets a fresh, unmistakable nudge without needing
+     browser notification permissions. */
+  @keyframes imminentThrob{ 0%,100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(220,38,38,0.5); } 50%{ transform:scale(1.015); box-shadow:0 0 0 10px rgba(220,38,38,0); } }
+  @keyframes imminentFlash{ 0%,100%{ background:#FEE2E2; } 50%{ background:#FECACA; } }
+  .imminent-exam-banner{ animation:imminentThrob 1.8s ease-in-out infinite; }
+  .imminent-exam-banner.flash-pulse{ animation:imminentThrob 1.8s ease-in-out infinite, imminentFlash 0.6s ease-in-out 4; }
   .readiness-party-overlay{position:fixed;inset:0;background:rgba(43,35,80,0.72);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;animation:viewIn .3s ease both;overflow:hidden;}
   .readiness-party-confetti{position:absolute;inset:0;pointer-events:none;}
   .readiness-party-confetti span{position:absolute;top:-20px;border-radius:3px;animation:partyConfettiFall linear forwards;}
@@ -5898,6 +5908,7 @@ async function loginSuccess(username){
   await loadDaysInactive();
   await loadExamDates();
   checkBreakfastMail(); // fire-and-forget - shows itself once loaded, never blocks reaching home
+  startImminentExamFlashLoop();
   saveLastUsername(username);
   go("home");
 }
@@ -5984,6 +5995,13 @@ window.daysUntilExam = daysUntilExam;
    considers "recently studied" (today's activity, or yesterday's, depending
    on context) - comparing that against the urgent subject is what actually
    flags a mismatch. */
+/* An exam within 3 days is urgent regardless of readiness score - final
+   review matters even at 93%, and excluding "already strong" subjects here
+   was the exact bug that let a student with a Government exam tomorrow get
+   told about Mathematics progress instead. Only exams further out (4-14
+   days) still use the readiness threshold, since a genuinely distant,
+   already-strong subject doesn't need to crowd out a weaker one. */
+const IMMINENT_EXAM_DAYS = 3;
 function computePriorityAlert(examDatesObj, subjectsList, progressObj, touchedSubjectIds){
   const candidates = subjectsList.map(s=>{
     const dateStr = examDatesObj && examDatesObj[s.id];
@@ -5994,14 +6012,20 @@ function computePriorityAlert(examDatesObj, subjectsList, progressObj, touchedSu
     if(days < 0 || days > 14) return null;
     const subjProgress = progressObj[s.id] || { topics:{}, mocks:[] };
     const r = computeSubjectReadiness(s, subjProgress.topics||{}, subjProgress.mocks||[]);
-    if(r.score >= 85) return null;
-    return { subject:s, days, score:r.score };
-  }).filter(Boolean).sort((a,b)=>a.days-b.days);
+    const imminent = days <= IMMINENT_EXAM_DAYS;
+    if(!imminent && r.score >= 85) return null;
+    return { subject:s, days, score:r.score, imminent };
+  }).filter(Boolean).sort((a,b)=>{
+    // Imminent exams always outrank non-imminent ones regardless of day-count
+    // ordering, then sort by soonest within each group.
+    if(a.imminent !== b.imminent) return a.imminent ? -1 : 1;
+    return a.days - b.days;
+  });
 
   if(!candidates.length) return null;
   const urgent = candidates[0];
   const wasTouched = (touchedSubjectIds||[]).includes(urgent.subject.id);
-  return { subject: urgent.subject, days: urgent.days, score: urgent.score, wasTouched };
+  return { subject: urgent.subject, days: urgent.days, score: urgent.score, imminent: urgent.imminent, wasTouched };
 }
 window.computePriorityAlert = computePriorityAlert;
 
@@ -8247,6 +8271,24 @@ const WELCOME_FACTS = [
   "Chemistry's carbon atom alone forms more known compounds than almost every other element combined. Show-off.",
 ];
 let welcomeFactInterval = null;
+let imminentFlashInterval = null;
+/* The gentle throb (CSS, infinite) already runs continuously the whole time
+   the banner is visible - this adds the specific "every hour" emphasis on
+   top of that, restarting the sharper flash animation once every 60 minutes
+   so a student who's been on the page a while still gets a fresh, distinct
+   nudge, not just the same steady pulse fading into the background. */
+function startImminentExamFlashLoop(){
+  if(imminentFlashInterval) clearInterval(imminentFlashInterval);
+  imminentFlashInterval = setInterval(()=>{
+    const el = document.getElementById("imminentExamBanner");
+    if(!el) return; // no imminent exam right now, or not on the home page - nothing to flash
+    el.classList.remove("flash-pulse");
+    void el.offsetWidth; // forces a reflow so the browser treats the re-added class as a fresh animation, not a no-op
+    el.classList.add("flash-pulse");
+  }, 3600000);
+}
+window.startImminentExamFlashLoop = startImminentExamFlashLoop;
+
 function startWelcomeFactTicker(){
   if(welcomeFactInterval) clearInterval(welcomeFactInterval);
   let idx = 0;
@@ -8427,6 +8469,24 @@ function renderHome(){
   const expiredSubjects = SUBJECTS.filter(s=>expiredIds.includes(s.id));
   const reminderIds = state.guest ? [] : subjectsNeedingRenewalReminder();
 
+  // Deliberately placed before everything else on the page, including the
+  // readiness hero - an exam within 3 days is genuinely the single most
+  // important thing on this screen, and it should read that way. The throb
+  // is a continuous CSS loop (no JS timer needed for "constant"); the
+  // stronger flash restarts once an hour via startImminentExamFlashLoop(),
+  // for a student who's been sitting on this page a while.
+  const imminentBanner = (!state.guest && enrolledSubjects.length) ? (()=>{
+    const progressMap = {}; enrolledSubjects.forEach(es=>{ progressMap[es.id] = state.progress[es.id]; });
+    const alert = computePriorityAlert(state.examDates, enrolledSubjects, progressMap, []);
+    if(!alert || !alert.imminent) return "";
+    const dayWord = alert.days===0 ? "TODAY" : alert.days===1 ? "TOMORROW" : "in "+alert.days+" days";
+    return `<div class="imminent-exam-banner" id="imminentExamBanner" style="background:#FEE2E2;border:3px solid #DC2626;border-radius:18px;padding:18px 22px;margin-bottom:20px;text-align:center;">
+      <div style="font-size:13px;font-weight:800;color:#DC2626;letter-spacing:0.5px;">🚨 ${alert.subject.name.toUpperCase()} EXAM ${dayWord} 🚨</div>
+      <div style="font-size:13.5px;color:#7F1D1D;margin-top:4px;">You're at ${alert.score}% ready. Whatever else you were about to study, this comes first today.</div>
+      <button class="stampbtn" style="background:linear-gradient(135deg,#DC2626,#EF4444);margin-top:10px;" onclick="go('subject',{subjectId:'${alert.subject.id}'})">Study ${alert.subject.name} now →</button>
+    </div>`;
+  })() : "";
+
   let cards = enrolledSubjects.map((s,i)=>{
     const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
     const label = readinessScoreLabel(r);
@@ -8513,13 +8573,13 @@ function renderHome(){
       // date/countdown when squeezed (flex-shrink can't shrink text that's
       // set to nowrap), so this deliberately breaks at a sensible point
       // instead of leaving that to chance on narrower screens.
-      return `<div style="padding:10px 0;border-bottom:1px solid var(--line);overflow:hidden;">
-        <div style="display:flex;align-items:center;gap:10px;">
+      return `<div style="padding:10px 4px 10px 0;border-bottom:1px solid var(--line);overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding-right:4px;">
           <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
           <span style="flex:1;min-width:0;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</span>
           <span style="font-size:12px;color:var(--ink-soft);flex-shrink:0;">${score}% ready</span>
         </div>
-        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:6px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:6px;flex-wrap:wrap;padding-right:8px;">
           <input type="date" value="${dateVal}" onchange="setExamDate('${s.id}', this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid var(--line);font-size:12.5px;max-width:150px;">
           ${days!=null ? `<b style="color:${urgencyColor};font-size:12.5px;white-space:nowrap;">${days<0?Math.abs(days)+" days ago":days===0?"Today!":days+" day"+(days!==1?"s":"")+" left"}</b>` : `<span style="font-size:11.5px;color:var(--ink-soft);font-style:italic;white-space:nowrap;">set your exam date →</span>`}
         </div>
@@ -8562,6 +8622,7 @@ function renderHome(){
   return `
   ${state.showReadinessCelebration ? renderReadinessCelebrationOverlay() : ""}
   ${renderBreakfastMailOverlay()}
+  ${imminentBanner}
   <div class="intro">
     <h2>Hey ${state.user}! ${enrolledSubjects.length || SUBJECTS.length} subjects. One desk. 🎉</h2>
     <p>Every topic opens with a fun, real-life scenario before any jargon, then gives you plain-language explanations, practice questions, and an AI study buddy you can ask anything. Move at your own pace, then take a timed readiness check when you feel ready.</p>
