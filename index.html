@@ -41,7 +41,7 @@
     background-attachment:fixed;
     color:var(--ink); font-family:var(--font-body); line-height:1.55; -webkit-font-smoothing:antialiased;
   }
-  #app{max-width:980px;margin:0 auto;padding:22px 20px 90px;}
+  #app{max-width:980px;margin:0 auto;padding:22px 24px 90px;}
   h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;margin:0;color:var(--ink);}
   .mono{font-family:var(--font-body);font-weight:700;letter-spacing:0.3px;}
   a{color:inherit;} button{font-family:inherit;cursor:pointer;}
@@ -242,7 +242,7 @@
   .bar-target-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,0.35);z-index:2;}
 
   /* ---------- READINESS SCORE (per-subject benchmark) ---------- */
-  .readiness-score-wrap{margin-top:10px;}
+  .readiness-score-wrap{margin-top:10px;padding-right:2px;box-sizing:border-box;}
   .overall-readiness-hero{border-radius:28px;padding:32px 28px;text-align:center;margin:20px 0;box-shadow:0 8px 24px rgba(43,35,80,0.10);}
   .orh-label{font-size:13px;font-weight:800;letter-spacing:1.5px;color:var(--ink-soft);margin-bottom:6px;}
   .orh-number{font-family:var(--font-display);font-size:68px;font-weight:800;line-height:1;margin:4px 0;}
@@ -250,7 +250,7 @@
   .orh-meaning{font-size:14px;color:var(--ink);max-width:56ch;margin:0 auto;line-height:1.5;}
   @media (max-width:600px){ .orh-number{font-size:52px;} }
   .readiness-score-wrap.compact{margin-top:8px;margin-bottom:10px;}
-  .readiness-score-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  .readiness-score-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;padding-right:2px;}
   .readiness-score-num{font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink);}
   .readiness-score-wrap.compact .readiness-score-num{font-size:15px;}
   .readiness-score-target{font-size:10.5px;color:var(--ink-soft);font-weight:600;}
@@ -6011,7 +6011,7 @@ function computePriorityAlert(examDatesObj, subjectsList, progressObj, touchedSu
     const days = Math.round((examDate - today) / 86400000);
     if(days < 0 || days > 14) return null;
     const subjProgress = progressObj[s.id] || { topics:{}, mocks:[] };
-    const r = computeSubjectReadiness(s, subjProgress.topics||{}, subjProgress.mocks||[]);
+    const r = computeSubjectReadiness(s, subjProgress.topics||{}, subjProgress.mocks||[], subjProgress.theoryAttempted||[]);
     const imminent = days <= IMMINENT_EXAM_DAYS;
     if(!imminent && r.score >= 85) return null;
     return { subject:s, days, score:r.score, imminent };
@@ -6197,6 +6197,22 @@ function expiredSubjectIds(){
 function subjectsNeedingRenewalReminder(){
   return (state.entitlements||[]).filter(id=>{ const d = daysUntilExpiry(id); return d!==null && d<=3 && d>=0; });
 }
+/* Deliberately scoped to bank==="theory" only - Alternative to Practical is a
+   genuinely separate skill (and only exists for 3 subjects), not the "Essay"
+   half of the standard Objective/Essay pair readiness is now measured
+   against. Records the index the FIRST time a question is genuinely
+   submitted for grading; a later retry of the same question doesn't need to
+   be recorded again, it's already counted toward essay coverage. */
+function recordTheoryAttempted(subjectId, bank, index){
+  if(bank !== "theory" || state.guest) return;
+  if(!state.progress[subjectId]) return;
+  if(!state.progress[subjectId].theoryAttempted) state.progress[subjectId].theoryAttempted = [];
+  if(!state.progress[subjectId].theoryAttempted.includes(index)){
+    state.progress[subjectId].theoryAttempted.push(index);
+    saveProgress(subjectId);
+  }
+}
+
 async function saveProgress(subjectId){
   if(state.guest) return; // guest/preview mode never persists - avoids polluting the database with test data
   try{ await supabaseRPC("gce_save_progress", { p_username: state.user, p_subject: subjectId, p_data: state.progress[subjectId] }); }
@@ -6214,7 +6230,7 @@ function snapshotReadiness(subjectId){
   if(state.guest) return;
   const subject = findSubject(subjectId);
   if(!subject) return;
-  const r = computeSubjectReadiness(subject, state.progress[subjectId].topics, state.progress[subjectId].mocks);
+  const r = computeSubjectReadiness(subject, state.progress[subjectId].topics, state.progress[subjectId].mocks, state.progress[subjectId].theoryAttempted);
   supabaseRPC("gce_snapshot_readiness", {
     p_username: state.user, p_subject_id: subjectId,
     p_topics_attempted: r.topicsAttempted, p_total_topics: r.totalTopics,
@@ -6656,15 +6672,47 @@ function subjectAggregate(subjectId){
    dashboard and the guardian dashboard, from each side's own copy of the
    same underlying data, so the two always show one identical number - never
    two different "readiness" claims about the same student. */
-function computeSubjectReadiness(subject, topicsData, mocksArr){
+/* Readiness now genuinely requires BOTH Objective and Essay testing, not just
+   one propping up the other. WAEC sets separate standards for each paper -
+   strong MCQ practice says nothing about whether a student can structure a
+   full written answer under the specific demands essay questions make, and
+   vice versa. So objectiveCoveragePct and essayCoveragePct are each computed
+   independently, then GATED via Math.min() rather than averaged - a student
+   with 100% objective coverage and 0% essay coverage gets 0% combined
+   coverage, honestly, not a comfortable-looking 50%. That combined,
+   gated figure is what feeds the overall score, exactly so a high number
+   can never quietly hide an untested paper type underneath it.
+   theoryAttemptedArr: indices into THEORY_QUESTIONS[subject.id] the student
+   has genuinely submitted for grading at least once - defaults to an empty
+   array for any caller that hasn't been updated yet or any student with no
+   history, which correctly reads as "no essay coverage yet", not a crash. */
+function computeSubjectReadiness(subject, topicsData, mocksArr, theoryAttemptedArr){
   topicsData = topicsData || {};
   mocksArr = mocksArr || [];
+  theoryAttemptedArr = theoryAttemptedArr || [];
   const totalTopics = subject.topics.length;
   const topicsAttempted = subject.topics.filter(t=>{
     const st = topicsData[t.id];
     return st && st.attempted > 0;
   }).length;
-  const coveragePct = totalTopics ? Math.round(100*topicsAttempted/totalTopics) : 0;
+  const objectiveCoveragePct = totalTopics ? Math.round(100*topicsAttempted/totalTopics) : 0;
+
+  // Essay coverage is measured by BREADTH ACROSS TOPICS, exactly like
+  // objective coverage above - not by raw question count. A student who
+  // answers 3 theory questions that all happen to sit on the same 2 topics
+  // has covered 2 topics, not "3 questions worth" of the subject, and
+  // counting it as the latter would let real topic gaps hide behind a
+  // healthy-looking number. Topics with zero theory questions available at
+  // all are excluded from the denominator - there's genuinely nothing to
+  // test there, so they can't count against the student.
+  const theoryBank = THEORY_QUESTIONS[subject.id] || [];
+  const topicsWithEssayAvailable = new Set(theoryBank.map(q=>q.topicId).filter(Boolean));
+  const attemptedTopicIds = new Set(theoryAttemptedArr.map(idx=>theoryBank[idx] && theoryBank[idx].topicId).filter(Boolean));
+  const topicsWithEssayCovered = [...attemptedTopicIds].filter(id=>topicsWithEssayAvailable.has(id)).length;
+  const totalTheoryQuestions = theoryBank.length;
+  const theoryAttemptedCount = theoryAttemptedArr.length;
+  const essayCoveragePct = topicsWithEssayAvailable.size ? Math.round(100*topicsWithEssayCovered/topicsWithEssayAvailable.size) : 100;
+  const coveragePct = Math.min(objectiveCoveragePct, essayCoveragePct);
 
   let attempted=0, correct=0;
   subject.topics.forEach(t=>{
@@ -6676,8 +6724,19 @@ function computeSubjectReadiness(subject, topicsData, mocksArr){
   const mocksTaken = mocksArr.length;
   const mockPct = mocksTaken ? Math.round(mocksArr.reduce((sum,m)=>sum+(m.score/m.total*100),0)/mocksTaken) : 0;
 
-  const score = Math.round(0.35*coveragePct + 0.35*accuracyPct + 0.30*mockPct);
-  return { score, coveragePct, accuracyPct, mockPct, topicsAttempted, totalTopics, mocksTaken, totalAttempted: attempted, correct };
+  // Coverage is a GATE on the whole score, not just one weighted ingredient
+  // averaged in alongside accuracy and mock performance. A student who has
+  // genuinely never attempted an essay question on most topics cannot be
+  // "mostly ready" no matter how well they've scored on the objective
+  // questions they HAVE tried - the WAEC exam itself requires performing on
+  // BOTH papers, so quality of performance (accuracy + mock) only counts for
+  // as much of the syllabus as has genuinely been tested both ways. Full
+  // coverage of both means the score reflects true quality, uncapped; zero
+  // coverage of either means the score is genuinely zero, regardless of how
+  // well the untested-breadth material went.
+  const qualityScore = 0.55*accuracyPct + 0.45*mockPct;
+  const score = Math.round((coveragePct/100) * qualityScore);
+  return { score, coveragePct, objectiveCoveragePct, essayCoveragePct, accuracyPct, mockPct, qualityScore: Math.round(qualityScore), topicsAttempted, totalTopics, theoryAttemptedCount, totalTheoryQuestions, topicsWithEssayCovered, topicsWithEssayAvailable: topicsWithEssayAvailable.size, mocksTaken, totalAttempted: attempted, correct };
 }
 
 /* The single, honest headline number: a student's or guardian's OVERALL readiness
@@ -6695,7 +6754,7 @@ function computeOverallReadiness(progressData, subjectIds){
   const activeSubjects = (subjectIds && subjectIds.length) ? SUBJECTS.filter(s=>subjectIds.includes(s.id)) : SUBJECTS;
   const perSubject = activeSubjects.map(s=>({
     id: s.id, name: s.name,
-    readiness: computeSubjectReadiness(s, (progressData[s.id]||{}).topics||{}, (progressData[s.id]||{}).mocks||[])
+    readiness: computeSubjectReadiness(s, (progressData[s.id]||{}).topics||{}, (progressData[s.id]||{}).mocks||[], (progressData[s.id]||{}).theoryAttempted||[])
   }));
   const overall = perSubject.length ? Math.round(perSubject.reduce((sum,p)=>sum+p.readiness.score,0)/perSubject.length) : 0;
   return { overall, target: 85, meetsTarget: overall>=85, perSubject };
@@ -7466,6 +7525,7 @@ async function submitTheoryAnswer(){
     const reply = textBlocks.join("\n").trim();
     if(!reply){ throw new Error("empty response"); }
     theoryAttempt.result = parseGradingResponse(reply, theoryAttempt.question.marks);
+    recordTheoryAttempted(theoryAttempt.subjectId, theoryAttempt.bank, theoryAttempt.index);
   }catch(err){
     theoryAttempt.error = "Something went wrong grading your answer - please check your connection and try again.";
   }
@@ -7875,9 +7935,10 @@ function renderAdmin(){
         ${SUBJECTS.map(s=>{
           const topics = (u.progress[s.id]&&u.progress[s.id].topics)||{};
           const mocks = (u.progress[s.id]&&u.progress[s.id].mocks)||[];
+          const theoryDone = (u.progress[s.id]&&u.progress[s.id].theoryAttempted)||[];
           const attempted = Object.values(topics).reduce((sum,t)=>sum+(t.attempted||0),0);
           if(!attempted && !mocks.length) return "";
-          const r = computeSubjectReadiness(s, topics, mocks);
+          const r = computeSubjectReadiness(s, topics, mocks, theoryDone);
           return `<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">${s.name}</div>${readinessScoreBar(r, true)}</div>`;
         }).join("") || `<div style="color:var(--ink-soft);font-size:13px;">No practice activity recorded for this student yet.</div>`}
       </div>
@@ -8048,10 +8109,11 @@ function renderGuardian(){
       const childSubjProgress = c.progress[sid] || {};
       const topics = childSubjProgress.topics || {};
       const childMocks = childSubjProgress.mocks || [];
+      const childTheoryDone = childSubjProgress.theoryAttempted || [];
       let attempted=0, correct=0;
       Object.values(topics).forEach(t=>{ attempted+=(t.attempted||0); correct+=(t.correct||0); });
       const pct = attempted ? Math.round(100*correct/attempted) : null;
-      const readiness = computeSubjectReadiness(subj, topics, childMocks);
+      const readiness = computeSubjectReadiness(subj, topics, childMocks, childTheoryDone);
       const enrolled = (c.entitled_subjects||[]).includes(sid);
       const hasActivity = attempted>0 || readiness.mocksTaken>0;
       return {sid, name: subj.name, attempted, correct, pct, touchedToday: (c.subjects_today||[]).includes(sid), readiness, enrolled, hasActivity, entitlement: entMap[sid]||null};
@@ -8433,7 +8495,7 @@ function renderBreakfastMailOverlay(){
     } else if(alert && alert.wasTouched){
       recommendation = `<div class="disclaimer" style="background:#DCFCE7;border-color:#22C55E;text-align:left;"><b>✅ On track:</b> ${alert.subject.name}'s exam is in ${alert.days} day${alert.days!==1?'s':''} and you're already putting time into it - keep that up, it's the right call.</div>`;
     } else {
-      const ranked = enrolledSubjects.map(s=>({ s, r: computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks) })).sort((a,b)=>a.r.score-b.r.score);
+      const ranked = enrolledSubjects.map(s=>({ s, r: computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks, state.progress[s.id].theoryAttempted) })).sort((a,b)=>a.r.score-b.r.score);
       const weakest = ranked[0];
       if(weakest && weakest.r.score < 85){
         recommendation = `<div class="disclaimer" style="background:linear-gradient(135deg,#F3E8FF,#FCE7F3);text-align:left;"><b>🎯 Today's honest suggestion:</b> ${weakest.s.name} is your lowest-ready subject at ${weakest.r.score}% - even one topic today would move the needle.</div>`;
@@ -8488,7 +8550,7 @@ function renderHome(){
   })() : "";
 
   let cards = enrolledSubjects.map((s,i)=>{
-    const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+    const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks, state.progress[s.id].theoryAttempted);
     const label = readinessScoreLabel(r);
     const color = SUBJECT_COLOR[s.id] || "#7C3AED";
     const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
@@ -8556,7 +8618,7 @@ function renderHome(){
   const examCountdownPanel = (!state.guest && enrolledSubjects.length) ? (()=>{
     const rows = enrolledSubjects.map(s=>{
       const days = daysUntilExam(s.id);
-      const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+      const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks, state.progress[s.id].theoryAttempted);
       return { s, days, score: r.score };
     }).sort((a,b)=>{
       if(a.days==null && b.days==null) return 0;
@@ -8643,7 +8705,7 @@ function renderHome(){
 
 function renderSubjectView(){
   const s = findSubject(state.subjectId);
-  const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+  const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks, state.progress[s.id].theoryAttempted);
   const label = readinessScoreLabel(r);
   const pool = allSubjectQuestions(s);
   const mocks = state.progress[s.id].mocks;
@@ -9363,7 +9425,7 @@ function renderDashboard(){
   const enrolledIds = enrolledSubjects.map(s=>s.id);
   const overallData = computeOverallReadiness(state.progress, enrolledIds);
   const rows = enrolledSubjects.map(s=>{
-    const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks);
+    const r = computeSubjectReadiness(s, state.progress[s.id].topics, state.progress[s.id].mocks, state.progress[s.id].theoryAttempted);
     const label = readinessScoreLabel(r);
     const mocks = state.progress[s.id].mocks; const lastMock = mocks.length ? mocks[mocks.length-1] : null;
     const lastMockText = lastMock ? Math.round(lastMock.score/lastMock.total*100)+"%" : "-";
