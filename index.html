@@ -6724,19 +6724,18 @@ function computeSubjectReadiness(subject, topicsData, mocksArr, theoryAttemptedA
   const mocksTaken = mocksArr.length;
   const mockPct = mocksTaken ? Math.round(mocksArr.reduce((sum,m)=>sum+(m.score/m.total*100),0)/mocksTaken) : 0;
 
-  // Coverage is a GATE on the whole score, not just one weighted ingredient
-  // averaged in alongside accuracy and mock performance. A student who has
-  // genuinely never attempted an essay question on most topics cannot be
-  // "mostly ready" no matter how well they've scored on the objective
-  // questions they HAVE tried - the WAEC exam itself requires performing on
-  // BOTH papers, so quality of performance (accuracy + mock) only counts for
-  // as much of the syllabus as has genuinely been tested both ways. Full
-  // coverage of both means the score reflects true quality, uncapped; zero
-  // coverage of either means the score is genuinely zero, regardless of how
-  // well the untested-breadth material went.
-  const qualityScore = 0.55*accuracyPct + 0.45*mockPct;
-  const score = Math.round((coveragePct/100) * qualityScore);
-  return { score, coveragePct, objectiveCoveragePct, essayCoveragePct, accuracyPct, mockPct, qualityScore: Math.round(qualityScore), topicsAttempted, totalTopics, theoryAttemptedCount, totalTheoryQuestions, topicsWithEssayCovered, topicsWithEssayAvailable: topicsWithEssayAvailable.size, mocksTaken, totalAttempted: attempted, correct };
+  // Coverage (the WEAKER of objective vs essay - see coveragePct above) now
+  // carries most of the weight, so neglecting either one genuinely caps how
+  // high the score can go - a student with zero essay attempts cannot reach
+  // a high score no matter how well their objective practice has gone. But
+  // this stays ADDITIVE, not multiplicative: real accuracy and mock
+  // performance still count for something even when coverage is low, so the
+  // score degrades to "clearly not ready yet" rather than collapsing to a
+  // flat, confusing zero for students who have genuinely done real work in
+  // one dimension. Full coverage of both still requires strong accuracy and
+  // mock performance to reach a high score - coverage alone isn't enough.
+  const score = Math.round(0.55*coveragePct + 0.25*accuracyPct + 0.20*mockPct);
+  return { score, coveragePct, objectiveCoveragePct, essayCoveragePct, accuracyPct, mockPct, topicsAttempted, totalTopics, theoryAttemptedCount, totalTheoryQuestions, topicsWithEssayCovered, topicsWithEssayAvailable: topicsWithEssayAvailable.size, mocksTaken, totalAttempted: attempted, correct };
 }
 
 /* The single, honest headline number: a student's or guardian's OVERALL readiness
