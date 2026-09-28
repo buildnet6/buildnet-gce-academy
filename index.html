@@ -5907,6 +5907,7 @@ async function loginSuccess(username){
   await loadReadinessTrend();
   await loadDaysInactive();
   await loadExamDates();
+  await loadChatSessions();
   checkBreakfastMail(); // fire-and-forget - shows itself once loaded, never blocks reaching home
   startImminentExamFlashLoop();
   saveLastUsername(username);
@@ -5976,6 +5977,28 @@ async function setExamDate(subjectId, dateStr){
   catch(e){ /* local state already updated optimistically; a rare failed save just means it re-prompts next visit */ }
 }
 window.setExamDate = setExamDate;
+/* Study Buddy chat history - persisted per (subject, topic) so a student's
+   conversation survives a refresh, a logout, or coming back days later on a
+   different device, instead of vanishing the moment chatSessions resets. */
+async function loadChatSessions(){
+  if(state.guest){ return; }
+  try{
+    const result = await supabaseRPC("gce_get_chat_messages", { p_username: state.user });
+    const saved = (result && result.chat_sessions) || {};
+    Object.keys(saved).forEach(k=>{
+      chatSessions[k] = { messages: Array.isArray(saved[k]) ? saved[k] : [], busy:false };
+    });
+  }catch(e){
+    console.error("Could not load chat history", e);
+  }
+}
+async function saveChatMessages(subjectId, topicId){
+  if(state.guest) return;
+  const session = getChatSession(subjectId, topicId);
+  try{
+    await supabaseRPC("gce_save_chat_messages", { p_username: state.user, p_subject_id: subjectId, p_topic_id: topicId, p_messages: session.messages });
+  }catch(e){ /* local state already has it; a rare failed save just means it re-syncs next successful call */ }
+}
 function daysUntilExam(subjectId){
   const dateStr = state.examDates && state.examDates[subjectId];
   if(!dateStr) return null;
@@ -6076,7 +6099,20 @@ function inactivityWarningLevel(days){
   if(days < 14) return { level:"medium", icon:"🟠", size:"26px", text: days+" days since you last studied - momentum is slipping", color:"#EA580C" };
   return           { level:"severe", icon:"🔴", size:"36px", text: days+" days since you last studied - time to get back in", color:"#DC2626" };
 }
-function subjectTrendLabel(subjectId, trendSource){
+function subjectTrendLabel(subjectId, trendSource, examDatesSource){
+  // Once the actual WAEC exam date for a subject has passed, a drop-off in
+  // recent practice is not "slipping" - the exam is behind them, there's
+  // nothing left to be ready FOR on the old timeline. Labelling that as
+  // "declining" falsely suggests a candidate is getting worse when really
+  // they've simply moved on; "Exam Done" tells the true story and still
+  // nudges continued practice (e.g. for a resit, or general reinforcement).
+  const examDates = examDatesSource || state.examDates;
+  const examDateStr = examDates && examDates[subjectId];
+  if(examDateStr){
+    const examDate = new Date(examDateStr + "T00:00:00");
+    const today = new Date(); today.setHours(0,0,0,0);
+    if(examDate < today) return { label:"examdone", text:"Exam done. Keep practising", icon:"✅" };
+  }
   const source = trendSource || state.readinessTrend;
   const t = source && source[subjectId];
   if(!t || !t.past) return { label:"new", text:"Not enough history yet", icon:"🆕" };
@@ -7209,6 +7245,7 @@ async function sendChat(presetText){
   if(inputEl) inputEl.value = "";
   render();
   scrollChatToBottom();
+  saveChatMessages(sid, tid); // fire-and-forget - the question itself should survive even if the reply never comes
   try{
     const subject = findSubject(sid), topic = findTopic(sid, tid);
     const sys = buildSystemPrompt(subject, topic);
@@ -7228,6 +7265,7 @@ async function sendChat(presetText){
   session.busy = false;
   render();
   scrollChatToBottom();
+  saveChatMessages(sid, tid);
 }
 window.sendChat = sendChat;
 function scrollChatToBottom(){
@@ -8177,8 +8215,8 @@ function renderGuardian(){
           </div>
         </div>`;
       }
-      const trend = subjectTrendLabel(s.sid, c.readinessTrend);
-      const trendColors3 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
+      const trend = subjectTrendLabel(s.sid, c.readinessTrend, c.examDates);
+      const trendColors3 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)", examdone:"#16A34A"};
       const renewalNote = (()=>{
         if(!s.entitlement) return "";
         const daysLeft = Math.ceil((new Date(s.entitlement.expires_at).getTime() - Date.now()) / 86400000);
@@ -8203,7 +8241,7 @@ function renderGuardian(){
           <b style="color:${barColor};">${r.score}% ready <span style="color:var(--ink-soft);font-weight:400;">(target 85%)</span></b>
         </div>
         <div class="bar-track" style="height:8px;"><div class="bar-fill" style="width:${r.score}%;background:${barColor};"></div><div class="bar-target-line" style="left:85%;"></div></div>
-        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label} <span style="color:${trendColors3[trend.label]};font-weight:600;" title="${trend.text}">· ${trend.icon} ${trend.label}</span>${examNote}</div>
+        <div style="font-size:11px;color:var(--ink-soft);">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'none taken'} · Label: ${label} <span style="color:${trendColors3[trend.label]};font-weight:600;" title="${trend.text}">· ${trend.icon} ${trend.label==='examdone'?'Exam done':trend.label}</span>${examNote}</div>
       </div>`;
     }).join("") || `<div class="admin-stat-row"><span style="color:var(--ink-soft);">No activity or enrollment recorded yet.</span></div>`;
     // Deliberately not showing which subjects the student hasn't enrolled in - that's
@@ -8555,7 +8593,7 @@ function renderHome(){
     const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
     const expiryNote = daysLeft!==null ? `<div style="font-size:11px;color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};margin-top:4px;">${daysLeft<=0?'Renews today':'Renews in '+daysLeft+' day'+(daysLeft!==1?'s':'')}</div>` : "";
     const trend = state.guest ? null : subjectTrendLabel(s.id);
-    const trendColors = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
+    const trendColors = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)", examdone:"#16A34A"};
     const trendNote = trend ? `<div style="font-size:11px;color:${trendColors[trend.label]};margin-top:3px;" title="Compares this week's readiness to last week's">${trend.icon} ${trend.text}</div>` : "";
     return `
     <div class="subject-card" style="border-top:7px solid ${color};">
@@ -9432,13 +9470,14 @@ function renderDashboard(){
     const daysLeft = state.guest ? null : daysUntilExpiry(s.id);
     const expiryDate = (!state.guest && state.entitlementDetails[s.id]) ? new Date(state.entitlementDetails[s.id].expiresAt).toLocaleDateString(undefined,{day:'numeric',month:'short'}) : null;
     const trend = state.guest ? null : subjectTrendLabel(s.id);
-    const trendColors2 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)"};
+    const trendColors2 = {improving:"#16A34A", declining:"#DC2626", stagnant:"#D97706", new:"var(--ink-soft)", examdone:"#16A34A"};
+    const trendLabelWords = { examdone:"Exam done" };
     return `<div class="dash-row">
       <span class="sname">${s.name}</span>
       <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${r.score}%"></div><div class="bar-target-line" style="left:85%;" title="85% target"></div></div>
       <span class="mono">${r.score}%</span>
       <span class="readiness-chip ${readinessClass(label)}">${labelFun(label)} ${lastMock?"· last check "+lastMockText:""}</span>
-      ${trend ? `<span style="font-size:11px;color:${trendColors2[trend.label]};white-space:nowrap;" title="${trend.text}">${trend.icon} ${trend.label}</span>` : ""}
+      ${trend ? `<span style="font-size:11px;color:${trendColors2[trend.label]};white-space:nowrap;" title="${trend.text}">${trend.icon} ${trendLabelWords[trend.label] || trend.label}</span>` : ""}
       ${expiryDate ? `<span style="font-size:11px;color:${daysLeft<=3?'#DC2626':'var(--ink-soft)'};font-weight:${daysLeft<=3?700:400};white-space:nowrap;">renews ${expiryDate}</span>` : ""}
     </div>`;
   }).join("") || `<div class="dash-row"><span class="sname" style="color:var(--ink-soft);">You haven't enrolled in any subjects yet.</span></div>`;
