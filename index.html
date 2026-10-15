@@ -259,6 +259,9 @@
   .readiness-score-fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.22,1,.36,1);}
   .readiness-score-target-line{position:absolute;top:-2px;bottom:-2px;width:2px;background:rgba(0,0,0,0.4);z-index:2;}
   .readiness-score-breakdown{font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.4;}
+  .readiness-gaps{font-size:11.5px;color:var(--ink-soft);margin-top:8px;padding-right:4px;line-height:1.45;overflow-wrap:anywhere;}
+  .readiness-gaps b{color:var(--ink);}
+  .readiness-gaps div{margin-top:2px;}
 
   .recommend{border:none;border-radius:18px;padding:16px 18px;margin-top:22px;font-size:14px;background:linear-gradient(135deg,#FFF3D6,#FFE0EF);}
   .recommend b{font-size:11px;display:block;margin-bottom:8px;color:var(--orange);font-weight:800;letter-spacing:0.3px;}
@@ -6750,6 +6753,13 @@ function computeSubjectReadiness(subject, topicsData, mocksArr, theoryAttemptedA
   const essayCoveragePct = topicsWithEssayAvailable.size ? Math.round(100*topicsWithEssayCovered/topicsWithEssayAvailable.size) : 100;
   const coveragePct = Math.min(objectiveCoveragePct, essayCoveragePct);
 
+  // The exact topics still holding the score back, by name, so the student
+  // (and a guardian) can see where practice would actually move the number
+  // instead of guessing. Essay gaps keep the order of the question bank.
+  const topicNameOf = id => { const t = subject.topics.find(x=>x.id===id); return t ? t.name : id; };
+  const objectiveGaps = subject.topics.filter(t=>!(topicsData[t.id] && topicsData[t.id].attempted > 0)).map(t=>t.name);
+  const essayGaps = [...topicsWithEssayAvailable].filter(id=>!attemptedTopicIds.has(id)).map(topicNameOf);
+
   let attempted=0, correct=0;
   subject.topics.forEach(t=>{
     const st = topicsData[t.id];
@@ -6771,7 +6781,7 @@ function computeSubjectReadiness(subject, topicsData, mocksArr, theoryAttemptedA
   // one dimension. Full coverage of both still requires strong accuracy and
   // mock performance to reach a high score - coverage alone isn't enough.
   const score = Math.round(0.55*coveragePct + 0.25*accuracyPct + 0.20*mockPct);
-  return { score, coveragePct, objectiveCoveragePct, essayCoveragePct, accuracyPct, mockPct, topicsAttempted, totalTopics, theoryAttemptedCount, totalTheoryQuestions, topicsWithEssayCovered, topicsWithEssayAvailable: topicsWithEssayAvailable.size, mocksTaken, totalAttempted: attempted, correct };
+  return { score, objectiveGaps, essayGaps, coveragePct, objectiveCoveragePct, essayCoveragePct, accuracyPct, mockPct, topicsAttempted, totalTopics, theoryAttemptedCount, totalTheoryQuestions, topicsWithEssayCovered, topicsWithEssayAvailable: topicsWithEssayAvailable.size, mocksTaken, totalAttempted: attempted, correct };
 }
 
 /* The single, honest headline number: a student's or guardian's OVERALL readiness
@@ -6802,6 +6812,26 @@ function readinessScoreLabel(r){
   if(r.score < 85) return "STRONG";
   return "EXAM READY";
 }
+/* "What is holding this score back" - names the specific topics not yet
+   covered by Objective practice and by Essay practice, since coverage is the
+   heaviest part of the score and repeating already-covered topics cannot
+   move it. Shorter list on the small home cards, longer on full views. */
+function readinessGapsLine(r, compact){
+  const limit = compact ? 3 : 6;
+  const fmt = arr => {
+    const shown = arr.slice(0, limit).map(escapeHtml).join(", ");
+    return shown + (arr.length > limit ? " +" + (arr.length - limit) + " more" : "");
+  };
+  const obj = r.objectiveGaps || [], ess = r.essayGaps || [];
+  if(!obj.length && !ess.length){
+    return compact ? "" : `<div class="readiness-gaps">✅ Every topic is covered for Objective and Essay. From here, accuracy and mock scores decide your number.</div>`;
+  }
+  return `<div class="readiness-gaps">
+    <b>To raise this score:</b>
+    ${ess.length ? `<div>✍️ Try essay questions on: ${fmt(ess)}</div>` : ""}
+    ${obj.length ? `<div>📘 Practise objective questions on: ${fmt(obj)}</div>` : ""}
+  </div>`;
+}
 function readinessScoreBar(r, compact){
   const pct = Math.min(100, r.score);
   const barColor = r.score>=85 ? "var(--green)" : r.score>=70 ? "#F59E0B" : "#EF4444";
@@ -6816,6 +6846,7 @@ function readinessScoreBar(r, compact){
       <div class="readiness-score-target-line" style="left:85%;"></div>
     </div>
     ${!compact ? `<div class="readiness-score-breakdown">Coverage ${r.coveragePct}% (${r.topicsAttempted}/${r.totalTopics} topics) · Accuracy ${r.accuracyPct}% · Mock avg ${r.mocksTaken?r.mockPct+'%':'no mocks yet'}</div>` : ""}
+    ${readinessGapsLine(r, compact)}
   </div>`;
 }
 
